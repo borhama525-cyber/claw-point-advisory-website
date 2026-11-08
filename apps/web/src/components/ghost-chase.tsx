@@ -74,8 +74,8 @@ const NUDGES: Nudge[] = [
 	{ line: 'Want to work together? Join the network!', label: 'Join the network', go: 'network' },
 ];
 
-const SIDE_BODY = 'M24,74 C26,62 46,58 66,59 C80,60 92,58 100,52 C102,45 104,39 106,34 C107,30 110,30 111,33 C112,36 113,39 114,41 C116,38 118,35 120,33 C122,31 124,33 124,36 C125,42 125,48 124,53 C128,59 126,67 118,70 C110,73 102,78 96,82 C80,87 54,87 40,83 C30,81 23,79 24,74 Z';
-const SIDE_TAIL = 'M28,72 C14,70 9,58 15,48 C19,41 15,35 10,37';
+const SIDE_BODY = 'M32,80 C28,68 38,58 54,57 C68,56 80,57 89,59 C89,54 90,49 91,44 C90,37 90,30 91,23 C95,27 98,31 100,35 C103,34 106,34 109,35 C111,31 114,27 118,24 C118,31 117,37 115,42 C119,47 120,54 116,59 C112,64 105,66 99,66 C99,73 97,80 93,86 C77,92 51,92 41,88 C35,86 32,84 32,80 Z';
+const SIDE_TAIL = 'M34,76 C20,74 14,62 19,52 C23,45 19,38 14,40';
 
 type Mode = 'float' | 'walk' | 'nap' | 'bully' | 'visit' | 'hiss' | 'party' | 'pounce';
 type Pose = 'head' | 'leap' | 'walk' | 'loaf' | 'sit' | 'puff';
@@ -307,7 +307,7 @@ export function GhostChase() {
 			k.style.transform = `translate3d(${kp.x.toFixed(1)}px,${(kp.y + bob).toFixed(1)}px,0) rotate(${(kp.tilt + kp.spin + (mode === 'pounce' && jump.phase === 'leap' ? Math.max(-30, Math.min(30, Math.atan2(kp.vy, Math.abs(kp.vx) || 1) * 57)) * kp.face : 0)).toFixed(2)}deg) scale(${(sq.x * flip).toFixed(3)},${sq.y.toFixed(3)})`;
 			// Walking legs and a swishing tail.
 			const step = s * 12;
-			legs.current?.querySelectorAll('line').forEach((l, i) => { const a = Math.sin(step + (i % 2 ? Math.PI : 0) + (i > 1 ? Math.PI / 2 : 0)) * 6; l.setAttribute('x2', String(Number(l.dataset.x) + a)); });
+			legs.current?.querySelectorAll('line').forEach((l, i) => { const a = Math.sin(step + (i % 2 ? Math.PI : 0) + (i > 1 ? Math.PI / 2 : 0)) * 5; l.setAttribute('x2', String(Number(l.dataset.x) + a)); });
 			tail.current?.setAttribute('transform', `rotate(${(Math.sin(s * (pose === 'loaf' ? 1.2 : 2.4)) * (pose === 'loaf' ? 3 : 10)).toFixed(1)} 30 72)`);
 			zzz.current?.classList.toggle('show', napping);
 			// Bubbles follow their speakers and fade on their own.
@@ -356,12 +356,12 @@ export function GhostChase() {
 					<g className="gc-pose gc-pose-walk">
 						<ellipse className="gc-shadow" cx="72" cy="107" rx="42" ry="5" />
 						<path ref={tail} d={SIDE_TAIL} fill="none" stroke={BODY} strokeWidth="7" strokeLinecap="round" />
-						<g ref={legs} stroke={BODY} strokeWidth="7" strokeLinecap="round">
-							<line data-x="44" x1="44" y1="78" x2="44" y2="105" /><line data-x="52" x1="52" y1="78" x2="52" y2="105" />
-							<line data-x="86" x1="86" y1="76" x2="86" y2="105" /><line data-x="94" x1="94" y1="76" x2="94" y2="105" />
+						<g ref={legs} stroke={BODY} strokeWidth="9" strokeLinecap="round">
+							<line data-x="42" x1="42" y1="82" x2="42" y2="104" /><line data-x="51" x1="51" y1="84" x2="51" y2="104" />
+							<line data-x="82" x1="82" y1="82" x2="82" y2="104" /><line data-x="90" x1="90" y1="80" x2="90" y2="104" />
 						</g>
 						<path d={SIDE_BODY} fill={BODY} stroke={BODY} strokeWidth="1.4" strokeLinejoin="round" />
-						<path className="gc-eye" d="M113.5,48 C115.5,44 120.5,44 122.5,47 C120.5,50 115.5,51 113.5,48 Z" /><ellipse cx="118" cy="47.5" rx=".9" ry="2.4" fill="#0d0d0d" />
+						<path className="gc-eye" d="M104.5,48 C106.5,44 111.5,44 113.5,47 C111.5,50 106.5,51 104.5,48 Z" /><ellipse cx="109" cy="47.5" rx=".9" ry="2.4" fill="#0d0d0d" />
 					</g>
 					<g className="gc-pose gc-pose-loaf">
 						<ellipse className="gc-shadow" cx="70" cy="108" rx="52" ry="5" />
