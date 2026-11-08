@@ -53,7 +53,7 @@ if ($form === 'deal') {
 		'Deal type' => $type, 'Borrower' => $name, 'Email' => $email, 'Phone' => field('phone', 40),
 		'Property type' => oneLine(field('property_type', 40)),
 		'Property' => oneLine(field('address') . ', ' . field('city', 120) . ', ' . field('state', 2) . ' ' . field('zip', 10)),
-		'Target close date' => field('close_date', 20), 'Purchase price' => money(field('purchase_price')), 'Seller finance' => money(field('seller_finance')),
+		'Target close date' => preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', field('close_date', 20), $d) ? "{$d[2]}/{$d[3]}/{$d[1]}" : field('close_date', 20), 'Purchase price' => money(field('purchase_price')), 'Seller finance' => money(field('seller_finance')),
 		'B–C price / ARV' => money(field('resale_price')), 'Primary loan' => money(field('primary_loan')), 'Requested funding' => money(field('requested_funding')), 'Needs a primary lender' => field('needs_lender', 3) === 'Yes' ? 'Yes, please provide one' : '',
 		'Description' => field('description', 5000),
 		'Referred by' => oneLine(field('referrer_first_name', 100) . ' ' . field('referrer_last_name', 100)), 'Referrer email' => oneLine(field('referrer_email', 200)), 'Referrer phone' => field('referrer_phone', 40),

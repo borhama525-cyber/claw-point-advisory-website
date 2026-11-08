@@ -25,6 +25,19 @@ function Money({ name, value, required, error, label }: { name: string; value?: 
 	return <Field label={label} name={name} required={required} error={error}><span className="dr-money"><i>$</i><input id={`dr-${name}`} name={name} inputMode="numeric" required={required} value={raw} onChange={e => setRaw(grouped(Number(e.target.value.replace(/[^0-9]/g, '')) || undefined))} aria-invalid={Boolean(error)} /></span></Field>;
 }
 
+/** US-format date (MM/DD/YYYY) whatever the visitor's computer region; sends YYYY-MM-DD as `name`. */
+function UsDate({ name, required }: { name: string; required?: boolean }) {
+	const [text, setText] = useState('');
+	const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(text);
+	const iso = m ? `${m[3]}-${m[1]}-${m[2]}` : '';
+	const mask = (raw: string) => { const d = raw.replace(/\D/g, '').slice(0, 8); return [d.slice(0, 2), d.slice(2, 4), d.slice(4)].filter(Boolean).join('/'); };
+	return <>
+		<input id={`dr-${name}`} inputMode="numeric" autoComplete="off" placeholder="MM/DD/YYYY" required={required} value={text} onChange={ev => setText(mask(ev.target.value))}
+			pattern="(0[1-9]|1[0-2])/(0[1-9]|[12][0-9]|3[01])/20[0-9]{2}" title="Use MM/DD/YYYY, for example 12/01/2026" maxLength={10} />
+		<input type="hidden" name={name} value={iso} />
+	</>;
+}
+
 const fileSize = (n: number) => (n > 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
 
 /** A drag-and-drop upload box around a real file input, so browser validation and form data work as usual. */
@@ -99,7 +112,7 @@ export function DealRequestDialog({ open, onOpenChange, method, title, prefill, 
 					<div className="dr-row dr-row-3"><Field label="City" name="city" required error={e.city}><input id="dr-city" name="city" autoComplete="address-level2" required maxLength={120} /></Field>
 					<Field label="State" name="state" required error={e.state}><select id="dr-state" name="state" autoComplete="address-level1" required defaultValue="" onChange={ev => { setUsState(ev.target.value); setEscrowMode(SEPARATE_ESCROW_STATES.includes(ev.target.value) ? (escrowMode === 'same' ? 'have' : escrowMode) : 'same'); }}><option value="" disabled>Select</option>{STATES.map(s => <option key={s}>{s}</option>)}</select></Field>
 					<Field label="ZIP" name="zip" required error={e.zip}><input id="dr-zip" name="zip" autoComplete="postal-code" inputMode="numeric" required pattern="\d{5}(-\d{4})?" maxLength={10} /></Field></div>
-					<Field label="Target close date" name="close_date" required error={e.close_date}><input id="dr-close_date" name="close_date" type="date" required /></Field>
+					<Field label="Target close date" name="close_date" required error={e.close_date}><UsDate name="close_date" required /></Field>
 					{isEmd ? <div className="dr-row"><Money label="Purchase price" name="purchase_price" value={prefill.purchase_price} required error={e.purchase_price} />
 					<Money label="EMD amount" name="requested_funding" value={prefill.requested_funding} required error={e.requested_funding} /></div> : <>
 					<div className="dr-row"><Money label="Purchase price" name="purchase_price" value={prefill.purchase_price} required error={e.purchase_price} />
