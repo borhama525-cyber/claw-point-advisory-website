@@ -960,9 +960,12 @@ h1 em,h2 em{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-
 @media(max-width:600px){.gc-toggle{left:12px;bottom:14px;width:36px;height:36px}}
 /* Kitty poses, speech bubbles and naps */
 .gc-kitty svg .gc-pose{opacity:0;transition:opacity .22s ease}
-.gc-kitty svg[data-pose=head] .gc-pose-head,.gc-kitty svg[data-pose=walk] .gc-pose-walk,.gc-kitty svg[data-pose=sit] .gc-pose-sit,.gc-kitty svg[data-pose=loaf] .gc-pose-loaf,.gc-kitty svg[data-pose=puff] .gc-pose-puff{opacity:1}
-.gc-kitty .gc-shadow{fill:#0d2117;opacity:.16}
-.gc-kitty .gc-pose-head .gc-shadow{opacity:0}
+.gc-kitty svg[data-pose=head] .gc-pose-head,.gc-kitty svg[data-pose=leap] .gc-pose-leap,.gc-kitty svg[data-pose=walk] .gc-pose-walk,.gc-kitty svg[data-pose=sit] .gc-pose-sit,.gc-kitty svg[data-pose=loaf] .gc-pose-loaf,.gc-kitty svg[data-pose=puff] .gc-pose-puff{opacity:1}
+.gc-kitty .gc-shadow{fill:#dcc64a;opacity:.45}
+.gc-kitty .gc-pose-head .gc-shadow,.gc-kitty .gc-pose-leap .gc-shadow{opacity:0}
+.gc-kitty .gc-eye{fill:#dcc64a}
+.gc-kitty svg[data-pose=head] .gc-eye{animation:gc-blink 4.5s infinite;transform-box:fill-box;transform-origin:center}
+@keyframes gc-blink{0%,94%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
 .gc-kitty svg[data-pose=puff]{animation:gc-shake .12s linear infinite}
 @keyframes gc-shake{0%,100%{transform:translateX(0)}50%{transform:translateX(2px)}}
 .gc-kitty svg[data-pose=loaf] .gc-pose-loaf{animation:gc-snore 2.6s ease-in-out infinite;transform-origin:50% 100%}
