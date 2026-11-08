@@ -61,7 +61,7 @@ if ($form === 'deal') {
 	$name = oneLine(field('name', 200));
 	$subject = 'New website enquiry: ' . ($name !== '' ? $name : $email);
 	$intro = 'A new enquiry was sent from the website’s contact form.';
-	$rows = ['Name' => $name, 'Email' => $email, 'Phone' => field('phone', 60), 'Message' => field('message', 5000)];
+	$rows = ['Topic' => oneLine(field('topic', 80)), 'Name' => $name, 'Email' => $email, 'Phone' => field('phone', 60), 'Message' => field('message', 5000)];
 } elseif ($form === 'newsletter') {
 	$subject = "New newsletter sign-up: {$email}";
 	$intro = 'Someone signed up for updates on the website.';
