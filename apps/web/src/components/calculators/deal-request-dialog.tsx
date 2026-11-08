@@ -66,13 +66,25 @@ export function DealRequestDialog({ open, onOpenChange, method, title, prefill, 
 					{method === 'stack' ? <Money label="Seller finance amount" name="seller_finance" value={prefill.seller_finance} required error={e.seller_finance} /> : <Money label={method === 'echo' || method === 'double-close' ? 'B–C sale price' : 'Estimated value or ARV'} name="resale_price" value={prefill.resale_price} error={e.resale_price} />}</div>
 					<div className="dr-row"><Money label="Primary loan amount (if you have one)" name="primary_loan" value={prefill.primary_loan} error={e.primary_loan} />
 					<Money label={method === 'emd' ? 'EMD amount' : 'Requested funding'} name="requested_funding" value={prefill.requested_funding} required error={e.requested_funding} /></div>
-					<label className="check-label dr-lender"><input type="checkbox" name="needs_lender" value="Yes" checked={needsLender} onChange={ev => setNeedsLender(ev.target.checked)} /> I need a primary lender: please provide one for this deal.</label>
+					{!docs.some(d => d.lender) && <label className="check-label dr-lender"><input type="checkbox" name="needs_lender" value="Yes" checked={needsLender} onChange={ev => setNeedsLender(ev.target.checked)} /> I need a primary lender: please provide one for this deal.</label>}
 					<h3>Required documents</h3>
 					<p className="dr-hint dr-docs-intro"><FileCheck2 size={16} /> Attach each document marked <strong>Required</strong>. Your request can’t be sent without them.</p>
-					<div className="dr-docs">{docs.map(d => { const req = !(d.lender && needsLender); return <Field key={d.key} label={d.label} name={`doc_${d.key}`} required={req} error={e[`doc_${d.key}`]} className={`dr-doc ${req ? 'is-required' : 'is-waived'}`}>
-						<small className="dr-doc-hint">{req ? d.hint : 'Not needed: we’ll provide your primary lender.'}</small>
-						<input id={`dr-doc_${d.key}`} name={`doc_${d.key}`} type="file" required={req} accept={ACCEPT} />
-					</Field>; })}</div>
+					<div className="dr-docs">{docs.map(d => {
+						const req = !(d.lender && needsLender);
+						return <div key={d.key} className={`dr-field dr-doc ${req ? 'is-required' : 'is-waived'}`}>
+							<label htmlFor={`dr-doc_${d.key}`}><span>{d.label}{req && ' *'}</span></label>
+							{d.lender && <div className="dr-lender-choice" role="radiogroup" aria-label="Primary lender">
+								<label className={needsLender ? '' : 'on'}><input type="radio" name="lender_choice" checked={!needsLender} onChange={() => setNeedsLender(false)} /> I have a primary lender <small>Upload their term sheet or approval</small></label>
+								<label className={needsLender ? 'on' : ''}><input type="radio" name="lender_choice" checked={needsLender} onChange={() => setNeedsLender(true)} /> I need a primary lender <small>We’ll provide one for this deal</small></label>
+							</div>}
+							{d.lender && needsLender && <input type="hidden" name="needs_lender" value="Yes" />}
+							{req ? <>
+								{!d.lender && <small className="dr-doc-hint">{d.hint}</small>}
+								<input id={`dr-doc_${d.key}`} name={`doc_${d.key}`} type="file" required accept={ACCEPT} />
+							</> : <small className="dr-doc-hint">No term sheet needed. We’ll provide your primary lender.</small>}
+							{e[`doc_${d.key}`] && <em className="dr-error">{e[`doc_${d.key}`]}</em>}
+						</div>;
+					})}</div>
 					<Field label="Other documents (optional)" name="documents" error={e.documents}><input id="dr-documents" name="documents[]" type="file" multiple accept={ACCEPT} /></Field>
 					<p className="dr-hint">PDF, PNG or JPG, up to 5 MB each. Addendums, photos, title commitment or anything else that helps.</p>
 					<h3>Deal description</h3>
