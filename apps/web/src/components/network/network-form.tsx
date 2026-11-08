@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { ArrowDown, ArrowUpRight, CheckCircle2, Handshake, MessageSquareText, Send, Sparkles, UserPlus } from 'lucide-react';
 import { sendForm } from '@/lib/send-form';
@@ -19,6 +19,38 @@ const STEPS = [
 
 const scrollToForm = () => document.getElementById('join')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
+/** The floating network visual: a slow orbit of upright, gently bobbing role chips that leans toward the cursor. */
+function NetworkOrbit() {
+	const box = useRef<HTMLDivElement>(null);
+	useEffect(() => {
+		const el = box.current;
+		if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches || !window.matchMedia('(pointer: fine)').matches) return;
+		let tx = 0, ty = 0, x = 0, y = 0, raf = 0;
+		const move = (e: PointerEvent) => { const r = el.getBoundingClientRect(); const clamp = (n: number) => Math.max(-0.5, Math.min(0.5, n)); tx = clamp((e.clientX - r.left) / r.width - 0.5); ty = clamp((e.clientY - r.top) / r.height - 0.5); if (!raf) raf = requestAnimationFrame(tick); };
+		const leave = () => { tx = 0; ty = 0; if (!raf) raf = requestAnimationFrame(tick); };
+		const tick = () => {
+			x += (tx - x) * 0.08; y += (ty - y) * 0.08;
+			el.style.setProperty('--mx', x.toFixed(4)); el.style.setProperty('--my', y.toFixed(4));
+			raf = Math.abs(tx - x) + Math.abs(ty - y) > 0.0005 ? requestAnimationFrame(tick) : 0;
+		};
+		window.addEventListener('pointermove', move, { passive: true });
+		document.addEventListener('pointerleave', leave);
+		return () => { window.removeEventListener('pointermove', move); document.removeEventListener('pointerleave', leave); cancelAnimationFrame(raf); };
+	}, []);
+	return <div ref={box} className="network-orbit" aria-hidden="true">
+		<div className="network-orbit-tilt">
+			<div className="network-orbit-ring r1" /><div className="network-orbit-ring r2" />
+			<div className="network-orbit-spin">{ORBIT.map((r, i) => {
+				const t = (2 * Math.PI * i) / ORBIT.length - Math.PI / 2, rad = i % 2 ? 44 : 34;
+				return <span key={r} className={`network-orbit-chip${i % 2 ? ' outer' : ''}`} style={{ left: `${50 + rad * Math.cos(t)}%`, top: `${50 + rad * Math.sin(t)}%`, ['--d' as string]: `${-(i * 1.3) % 7}s`, ['--i' as string]: `${0.25 + i * 0.07}s` }}>
+					<span className="orbit-counter"><span className="orbit-bob">{r}</span></span>
+				</span>;
+			})}</div>
+			<div className="network-orbit-core"><BrandFace size={64} /><span>Claw Point<br />network</span></div>
+		</div>
+	</div>;
+}
+
 /** Top of the Network page: headline, a floating "who's in the network" visual and the main call to action. */
 export function NetworkHero() {
 	return <section className="network-hero sky-bloom"><div className="learn-wrap network-hero-grid">
@@ -29,11 +61,7 @@ export function NetworkHero() {
 			<div className="hero-buttons"><button type="button" className="button" onClick={scrollToForm}>Join the network <ArrowDown size={16} /></button><a className="text-link dark" href="#who">See who’s in it</a></div>
 			<ul className="network-hero-facts"><li><strong>30+</strong><span>Roles we work with</span></li><li><strong>50</strong><span>States we fund in</span></li><li><strong>1 min</strong><span>To join</span></li></ul>
 		</div>
-		<div className="network-orbit" aria-hidden="true">
-			<div className="network-orbit-ring r1" /><div className="network-orbit-ring r2" />
-			<div className="network-orbit-core"><BrandFace size={64} /><span>Claw Point<br />network</span></div>
-			{ORBIT.map((r, i) => { const t = (2 * Math.PI * i) / ORBIT.length - Math.PI / 2, rad = i % 2 ? 44 : 34; return <span key={r} className={`network-orbit-chip${i % 2 ? " outer" : ""}`} style={{ left: `${50 + rad * Math.cos(t)}%`, top: `${50 + rad * Math.sin(t)}%`, ['--d' as string]: `${(i % 5) * 0.6}s` }}>{r}</span>; })}
-		</div>
+		<NetworkOrbit />
 	</div></section>;
 }
 
