@@ -79,7 +79,7 @@ if ($form === 'deal') {
 	// Key endings: * the lender's own document, waived when we provide the lender; + required only when the
 	// borrower has their own lender; ? always optional.
 	$required = [
-		'stack' => ['psa+' => 'Purchase contract (PSA)', 'lender_terms*' => 'Primary lender term sheet', 'loi+' => 'LOI (letter of intent)', 'seller_terms?' => 'Seller-carry terms'],
+		'stack' => ['psa?' => 'Purchase contract (PSA)', 'lender_terms*' => 'Primary lender term sheet', 'loi+' => 'LOI (letter of intent)', 'seller_terms?' => 'Seller-carry terms'],
 		'echo' => ['ab_contract' => 'A–B purchase contract', 'bc_contract' => 'B–C purchase contract', 'lender_terms*' => 'End buyer’s lender term sheet or approval'],
 		'double-close' => ['ab_contract' => 'A–B purchase contract', 'bc_contract' => 'B–C purchase contract', 'buyer_funds' => 'End buyer proof of funds or lender approval'],
 		'emd' => ['contract' => 'Signed purchase contract'],

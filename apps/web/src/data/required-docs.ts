@@ -7,7 +7,7 @@ export type RequiredDoc = { key: string; label: string; hint: string; lender?: b
 
 export const requiredDocs: Record<string, RequiredDoc[]> = {
 	stack: [
-		{ key: 'psa', label: 'Purchase contract (PSA)', hint: 'The purchase and sale agreement with the seller.', withLender: true },
+		{ key: 'psa', label: 'Purchase contract (PSA), if you have one', hint: 'The purchase and sale agreement with the seller.', optional: true },
 		{ key: 'lender_terms', label: 'Primary lender term sheet', hint: 'Term sheet from the lender funding the largest share of the price.', lender: true },
 		{ key: 'loi', label: 'LOI (letter of intent)', hint: 'The LOI setting out the deal terms.', withLender: true },
 		{ key: 'seller_terms', label: 'Seller-carry terms, if drafted', hint: 'Seller finance addendum, note terms or a term sheet.', optional: true },
