@@ -1,7 +1,7 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { celebrate } from '@/components/brand-face';
 import * as Dialog from '@radix-ui/react-dialog';
-import { FileCheck2, X } from 'lucide-react';
+import { FileCheck2, FileText, UploadCloud, X } from 'lucide-react';
 import { sendForm } from '@/lib/send-form';
 import { useFormSubmission } from '@/hooks/use-form-submission';
 import { requiredDocs } from '@/data/required-docs';
@@ -24,9 +24,35 @@ function Money({ name, value, required, error, label }: { name: string; value?: 
 	return <Field label={label} name={name} required={required} error={error}><span className="dr-money"><i>$</i><input id={`dr-${name}`} name={name} inputMode="numeric" required={required} value={raw} onChange={e => setRaw(grouped(Number(e.target.value.replace(/[^0-9]/g, '')) || undefined))} aria-invalid={Boolean(error)} /></span></Field>;
 }
 
+const fileSize = (n: number) => (n > 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
+
+/** A drag-and-drop upload box around a real file input, so browser validation and form data work as usual. */
+function FileDrop({ id, name, required, multiple, onChange }: { id: string; name: string; required?: boolean; multiple?: boolean; onChange?: (has: boolean) => void }) {
+	const input = useRef<HTMLInputElement>(null);
+	const [files, setFiles] = useState<File[]>([]);
+	const [over, setOver] = useState(false);
+	const pick = (list: FileList | null) => { const f = list ? [...list] : []; setFiles(f); onChange?.(f.length > 0); };
+	const clear = () => { if (input.current) input.current.value = ''; pick(null); };
+	const total = files.reduce((n, f) => n + f.size, 0);
+	return <div className={`dr-drop${files.length ? ' has-file' : ''}${over ? ' is-over' : ''}`} onDragEnter={() => setOver(true)} onDragLeave={() => setOver(false)} onDrop={() => setOver(false)}>
+		<input ref={input} id={id} name={name} type="file" required={required} multiple={multiple} accept={ACCEPT} onChange={ev => pick(ev.target.files)} />
+		{files.length ? <>
+			<FileText size={20} className="dr-drop-icon" />
+			<span className="dr-drop-text"><strong>{files.length === 1 ? files[0].name : `${files.length} files selected`}</strong><small>{fileSize(total)} · ready to send</small></span>
+			<button type="button" className="dr-drop-remove" onClick={clear}>Remove</button>
+		</> : <>
+			<UploadCloud size={20} className="dr-drop-icon" />
+			<span className="dr-drop-text"><strong>Drop {multiple ? 'files' : 'a file'} here or <u>browse</u></strong><small>PDF, PNG or JPG · up to 5 MB{multiple ? ' each' : ''}</small></span>
+		</>}
+	</div>;
+}
+
 export function DealRequestDialog({ open, onOpenChange, method, title, prefill, calculator, onBack }: { open: boolean; onOpenChange: (o: boolean) => void; method: string; title: string; prefill: RequestPrefill; calculator: Record<string, number>; onBack: () => void }) {
 	const [needsLender, setNeedsLender] = useState(false);
 	const docs = requiredDocs[method] ?? [];
+	const [attached, setAttached] = useState<Record<string, boolean>>({});
+	const requiredNow = docs.filter(d => !d.optional && !((d.lender || d.withLender) && needsLender));
+	const done = requiredNow.filter(d => attached[d.key]).length;
 	const form = useFormSubmission({
 		submit: (_v, data) => {
 			for (const k of MONEY) { const v = String(data.get(k) ?? '').replace(/[^0-9.]/g, ''); if (v) data.set(k, v); else data.delete(k); }
@@ -69,6 +95,7 @@ export function DealRequestDialog({ open, onOpenChange, method, title, prefill, 
 					{!docs.some(d => d.lender) && <label className="check-label dr-lender"><input type="checkbox" name="needs_lender" value="Yes" checked={needsLender} onChange={ev => setNeedsLender(ev.target.checked)} /> I need a primary lender: please provide one for this deal.</label>}
 					<h3>Required documents</h3>
 					<p className="dr-hint dr-docs-intro"><FileCheck2 size={16} /> Attach each document marked <strong>Required</strong>. Your request can’t be sent without them.{docs.some(d => d.optional) && ' Optional documents can follow later.'}</p>
+					{requiredNow.length > 0 && <div className="dr-progress" aria-live="polite"><div className="dr-progress-bar"><i style={{ width: `${(done / requiredNow.length) * 100}%` }} /></div><span>{done === requiredNow.length ? 'All required documents attached ✓' : `${done} of ${requiredNow.length} required attached`}</span></div>}
 					{docs.some(d => d.lender) && <div className="dr-lender-choice" role="radiogroup" aria-label="Primary lender">
 						<label className={needsLender ? '' : 'on'}><input type="radio" name="lender_choice" checked={!needsLender} onChange={() => setNeedsLender(false)} /> I have a primary lender <small>Send the lender’s paperwork below</small></label>
 						<label className={needsLender ? 'on' : ''}><input type="radio" name="lender_choice" checked={needsLender} onChange={() => setNeedsLender(true)} /> I need a primary lender <small>We’ll provide one for this deal</small></label>
@@ -77,13 +104,13 @@ export function DealRequestDialog({ open, onOpenChange, method, title, prefill, 
 					<div className="dr-docs">{docs.map(d => {
 						if (d.lender && needsLender) return <div key={d.key} className="dr-field dr-doc is-waived"><label><span>{d.label}</span></label><small className="dr-doc-hint">Not needed: we’ll provide your primary lender.</small></div>;
 						const req = !d.optional && !(d.withLender && needsLender);
-						return <Field key={d.key} label={d.label} name={`doc_${d.key}`} required={req} error={e[`doc_${d.key}`]} className={`dr-doc ${req ? 'is-required' : 'is-optional'}`}>
+						return <Field key={d.key} label={d.label} name={`doc_${d.key}`} required={req} error={e[`doc_${d.key}`]} className={`dr-doc ${req ? 'is-required' : 'is-optional'}${attached[d.key] ? ' is-attached' : ''}`}>
 							<small className="dr-doc-hint">{d.hint}</small>
-							<input id={`dr-doc_${d.key}`} name={`doc_${d.key}`} type="file" required={req} accept={ACCEPT} />
+							<FileDrop id={`dr-doc_${d.key}`} name={`doc_${d.key}`} required={req} onChange={has => setAttached(a => ({ ...a, [d.key]: has }))} />
 						</Field>;
 					})}</div>
-					<Field label="Other documents (optional)" name="documents" error={e.documents}><input id="dr-documents" name="documents[]" type="file" multiple accept={ACCEPT} /></Field>
-					<p className="dr-hint">PDF, PNG or JPG, up to 5 MB each. Addendums, photos, title commitment or anything else that helps.</p>
+					<Field label="Other documents (optional)" name="documents" error={e.documents}><FileDrop id="dr-documents" name="documents[]" multiple /></Field>
+					<p className="dr-hint">Addendums, photos, title commitment or anything else that helps.</p>
 					<h3>Deal description</h3>
 					<Field label="Anything that helps us understand the deal" name="description" error={e.description}><textarea id="dr-description" name="description" rows={4} maxLength={5000} placeholder="Exit plan, seller terms, timeline, anything unusual…" /></Field>
 					<h3>Referred by someone? <small>(optional)</small></h3>
@@ -95,7 +122,7 @@ export function DealRequestDialog({ open, onOpenChange, method, title, prefill, 
 					<label className="check-label dr-consent"><input type="checkbox" name="consent" value="true" required /> I agree that Claw Point Advisory may store the information and documents I submit and contact me about this request.</label>
 					<p className="dr-legal">We use your details only to review this request and to follow up with you about it. You can ask us to delete your information at any time. Don’t include bank account numbers, Social Security numbers or other identity documents in this form.</p>
 					{form.isError && <p className="dr-error" role="alert">We couldn’t send your request. Check the highlighted fields and try again, or use the contact page.</p>}
-					<button type="submit" className="button dr-submit" disabled={form.isSubmitting}>{form.isSubmitting ? 'Sending…' : 'Submit request'}</button>
+					<div className="dr-submit-bar"><button type="submit" className="button dr-submit" disabled={form.isSubmitting}>{form.isSubmitting ? <><span className="dr-spinner" aria-hidden="true" /> Sending…</> : 'Submit request →'}</button></div>
 				</form>}
 			</Dialog.Content>
 		</Dialog.Portal>
