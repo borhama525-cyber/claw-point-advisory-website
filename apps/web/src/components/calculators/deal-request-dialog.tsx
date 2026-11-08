@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { celebrate } from '@/components/brand-face';
 import * as Dialog from '@radix-ui/react-dialog';
-import { FileCheck2, FileText, UploadCloud, X } from 'lucide-react';
+import { FileText, UploadCloud, X } from 'lucide-react';
 import { sendForm } from '@/lib/send-form';
 import { useFormSubmission } from '@/hooks/use-form-submission';
 import { requiredDocs } from '@/data/required-docs';
@@ -94,7 +94,6 @@ export function DealRequestDialog({ open, onOpenChange, method, title, prefill, 
 					<Money label={method === 'emd' ? 'EMD amount' : 'Requested funding'} name="requested_funding" value={prefill.requested_funding} required error={e.requested_funding} /></div>
 					{!docs.some(d => d.lender) && <label className="check-label dr-lender"><input type="checkbox" name="needs_lender" value="Yes" checked={needsLender} onChange={ev => setNeedsLender(ev.target.checked)} /> I need a primary lender: please provide one for this deal.</label>}
 					<h3>Required documents</h3>
-					<p className="dr-hint dr-docs-intro"><FileCheck2 size={16} /> Attach each document marked <strong>Required</strong>. Your request can’t be sent without them.{docs.some(d => d.optional) && ' Optional documents can follow later.'}</p>
 					{requiredNow.length > 0 && <div className="dr-progress" aria-live="polite"><div className="dr-progress-bar"><i style={{ width: `${(done / requiredNow.length) * 100}%` }} /></div><span>{done === requiredNow.length ? 'All required documents attached ✓' : `${done} of ${requiredNow.length} required attached`}</span></div>}
 					{docs.some(d => d.lender) && <div className="dr-lender-choice" role="radiogroup" aria-label="Primary lender">
 						<label className={needsLender ? '' : 'on'}><input type="radio" name="lender_choice" checked={!needsLender} onChange={() => setNeedsLender(false)} /> I have a primary lender <small>Send the lender’s paperwork below</small></label>
