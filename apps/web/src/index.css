@@ -945,3 +945,15 @@ h1 em,h2 em{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-
 .network-roles .contact-topics label:hover{border-color:var(--t,var(--leaf));box-shadow:0 0 0 4px color-mix(in srgb,var(--t,#24533d) 12%,transparent),0 6px 18px color-mix(in srgb,var(--t,#24533d) 22%,transparent);transform:translateY(-1px)}
 .network-roles .contact-topics label.on:hover{box-shadow:0 0 0 4px color-mix(in srgb,var(--t,#24533d) 18%,transparent),0 8px 22px color-mix(in srgb,var(--t,#24533d) 32%,transparent)}
 @media(prefers-reduced-motion:reduce){.network-roles .contact-topics label:hover{transform:none}}
+
+/* ---------- Drifting sky clouds ---------- */
+.hero,.tool-hero,.page-heading,.network-hero,.ask-page,.booking-page,.ask-teaser{position:relative;isolation:isolate;overflow:hidden}
+.sky-clouds{position:absolute;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.sky-cloud{position:absolute;max-width:62vw;transform:translate3d(calc(var(--cx,0) * var(--d) * -36px),calc(var(--cy,0) * var(--d) * -22px),0);will-change:transform}
+.sky-cloud>svg{display:block;width:100%;height:auto;opacity:var(--o);filter:drop-shadow(0 18px 24px #1633270f)}
+.sky-cloud:nth-child(odd)>svg{animation:sky-drift var(--dur) ease-in-out var(--delay) infinite alternate}
+.sky-cloud:nth-child(even)>svg{animation:sky-drift-b var(--dur) ease-in-out var(--delay) infinite alternate}
+@keyframes sky-drift{from{translate:-34px 0}to{translate:46px -6px}}
+@keyframes sky-drift-b{from{translate:30px 4px}to{translate:-40px -4px}}
+@media(max-width:760px){.sky-cloud{max-width:90vw}.sky-cloud>svg{opacity:calc(var(--o) * .7)}}
+@media(prefers-reduced-motion:reduce){.sky-cloud>svg{animation:none}.sky-cloud{transform:none}}
