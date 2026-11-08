@@ -65,7 +65,7 @@ if ($form === 'deal') {
 		return $mode === 'have' ? $party('escrow', 'escrow company') : ($mode === 'need' ? 'Needs an escrow agent: please provide one' : 'Same company as title');
 	};
 	$party = function (string $p, string $label) {
-		$parts = ['company' => 'name', 'contact' => 'contact', 'email' => 'email', 'phone' => 'phone'] + ($p === 'title' ? ['website' => 'website'] : []);
+		$parts = ['company' => 'name', 'contact' => 'officer name', 'email' => 'email', 'phone' => 'phone'] + ($p === 'title' ? ['website' => 'website'] : []);
 		foreach ($parts as $k => $l) if (field("{$p}_{$k}") === '') reply(422, ['ok' => false, 'error' => "Please add the {$label} {$l}."]);
 		if (!filter_var(field("{$p}_email"), FILTER_VALIDATE_EMAIL)) reply(422, ['ok' => false, 'error' => "Please enter a valid {$label} email."]);
 		$site = '';
