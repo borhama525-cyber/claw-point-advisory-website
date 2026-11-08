@@ -50,8 +50,8 @@ const PAGE: Record<string, string[]> = {
 };
 
 // The kitty's head for the floating pose (viewBox 0 0 140 120).
-const HEAD = 'M24,46 C18,40 14,30 13,20 C22,22 32,27 40,33 C47,30 55,29 62,30 C68,22 76,14 86,10 C88,22 88,33 85,42 C94,52 98,64 96,76 C93,96 76,106 56,106 C36,106 20,96 17,78 C15,66 18,55 24,46 Z';
-const PUFF = Array.from({ length: 26 }, (_, i) => { const a = (i / 26) * Math.PI * 2, r = i % 2 ? 50 : 63; return `${(67 + Math.cos(a) * r).toFixed(1)},${(64 + Math.sin(a) * r * 0.92).toFixed(1)}`; }).join(' ');
+const HEAD = 'M30,54 C27,42 25,29 28,19 Q29,14 34,17 C41,21 47,26 52,31 C62,28 78,28 88,31 C93,26 99,21 106,17 Q111,14 112,19 C115,29 113,42 110,54 C118,63 121,77 115,89 C107,104 89,112 70,112 C51,112 33,104 25,89 C19,77 22,63 30,54 Z';
+const PUFF = Array.from({ length: 30 }, (_, i) => { const a = (i / 30) * Math.PI * 2, r = i % 2 ? 54 : 64; return `${(70 + Math.cos(a) * r).toFixed(1)},${(70 + Math.sin(a) * r * 0.9).toFixed(1)}`; }).join(' ');
 
 // Friendly nudges with a button, so visitors can act on them right away.
 type Nudge = { line: string; label: string; go: 'deal' | 'booking' | 'chat' | 'funding' | 'network' };
@@ -63,6 +63,13 @@ const NUDGES: Nudge[] = [
 	{ line: 'We fund in all 50 states. I nap in all 50.', label: 'See funding', go: 'funding' },
 	{ line: 'Want to work together? Join the network!', label: 'Join the network', go: 'network' },
 ];
+
+const SIDE_BODY = 'M36,70 C36,58 52,54 70,55 C84,56 94,54 100,62 C106,72 102,86 88,88 L50,88 C40,88 36,80 36,70 Z';
+const SIDE_HEAD = 'M90,52 C90,40 99,33 108,34 L112,22 Q114,17 117,21 L123,35 C129,41 131,49 129,57 C126,69 115,74 105,72 C95,70 90,63 90,52 Z';
+const SIDE_EAR = 'M99,38 L100,25 Q101,20 105,23 L111,33 Z';
+const SIDE_TAIL = 'M38,72 C20,70 12,54 18,38 C20,32 27,32 27,38 C25,50 29,60 42,64 Z';
+const LOAF = 'M24,102 C18,88 26,74 42,70 C48,63 57,59 66,60 L70,47 Q72,42 76,46 L83,55 C88,54 93,54 98,55 L105,46 Q109,42 111,47 L112,61 C120,67 124,77 122,87 C124,97 120,106 108,108 L36,108 C30,108 26,106 24,102 Z';
+const LOAF_TAIL = 'M30,104 C42,114 82,116 102,108 C107,106 105,101 100,102 C82,107 52,107 34,99 Z';
 
 type Mode = 'float' | 'walk' | 'nap' | 'bully' | 'visit' | 'hiss' | 'party' | 'pounce';
 type Pose = 'head' | 'walk' | 'loaf' | 'sit' | 'puff';
@@ -294,11 +301,11 @@ export function GhostChase() {
 			const flip = still ? kp.face : 1;
 			k.style.transform = `translate3d(${kp.x.toFixed(1)}px,${(kp.y + bob).toFixed(1)}px,0) rotate(${(kp.tilt + kp.spin + (mode === 'pounce' && jump.phase === 'leap' ? Math.max(-30, Math.min(30, Math.atan2(kp.vy, Math.abs(kp.vx) || 1) * 57)) * kp.face : 0)).toFixed(2)}deg) scale(${(sq.x * flip).toFixed(3)},${sq.y.toFixed(3)})`;
 			const sp = Math.hypot(kp.vx, kp.vy) || 1;
-			kEyes.current?.setAttribute('transform', laughUntil > t ? 'translate(0 46) scale(1 .4)' : `translate(${(kp.vx / sp * 4).toFixed(2)} ${(kp.vy / sp * 3).toFixed(2)})`);
+			kEyes.current?.setAttribute('transform', laughUntil > t ? 'translate(0 42) scale(1 .4)' : `translate(${(kp.vx / sp * 4).toFixed(2)} ${(kp.vy / sp * 3).toFixed(2)})`);
 			// Walking legs and a swishing tail.
 			const step = s * 12;
 			legs.current?.querySelectorAll('line').forEach((l, i) => { const a = Math.sin(step + (i % 2 ? Math.PI : 0) + (i > 1 ? Math.PI / 2 : 0)) * 6; l.setAttribute('x2', String(Number(l.dataset.x) + a)); });
-			tail.current?.setAttribute('transform', `rotate(${(Math.sin(s * (pose === 'loaf' ? 1.2 : 3)) * (pose === 'loaf' ? 4 : 14)).toFixed(1)} 30 72)`);
+			tail.current?.setAttribute('transform', `rotate(${(Math.sin(s * (pose === 'loaf' ? 1.2 : 3)) * (pose === 'loaf' ? 4 : 14)).toFixed(1)} 38 68)`);
 			zzz.current?.classList.toggle('show', napping);
 			// Bubbles follow their speakers and fade on their own.
 			if (kBubble.current) { kBubble.current.style.transform = `translate3d(${(kp.x + KW / 2).toFixed(1)}px,${(kp.y + bob - 6).toFixed(1)}px,0)`; if (t > kSayUntil) kBubble.current.classList.remove('show'); }
@@ -326,39 +333,53 @@ export function GhostChase() {
 				<svg ref={kSvg} viewBox="0 0 140 120" overflow="visible" data-pose="head">
 					<defs>
 						<linearGradient id="gc-iri" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#dcc64a" /><stop offset=".5" stopColor="#e2806f" /><stop offset="1" stopColor="#9cc3c6" /></linearGradient>
-						<filter id="gc-soft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2.2" /></filter>
+						<radialGradient id="gc-fur" cx="38%" cy="30%" r="80%"><stop offset="0" stopColor="#2c5a43" /><stop offset=".55" stopColor={BODY} /><stop offset="1" stopColor="#10291d" /></radialGradient>
+						<filter id="gc-soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.1" /></filter>
 						<filter id="gc-halo" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="9" /></filter>
 						<filter id="gc-rim" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4.5" /></filter>
 					</defs>
 					{/* Floating head (also the base of the puffed-up hiss) */}
-					<g className="gc-pose gc-pose-head" transform="translate(12 4) scale(.95)">
-						<polygon className="gc-puff" points={PUFF} fill={BODY} filter="url(#gc-soft)" transform="translate(-6 -4)" />
-						<path d={HEAD} fill="#24533d" opacity=".35" filter="url(#gc-halo)" transform="translate(0 4) scale(1.06) translate(-3 -3)" />
-						<path className="gc-rim" d={HEAD} fill="url(#gc-iri)" filter="url(#gc-rim)" transform="translate(8 9)" />
-						<path d={HEAD} fill={BODY} filter="url(#gc-soft)" />
-						<g ref={kEyes}><circle cx="44" cy="74" r="7.5" fill="#fff7dc" /><circle cx="73" cy="62" r="7.5" fill="#fff7dc" /><circle cx="46.5" cy="71.5" r="2.2" fill="#dcc64a" /><circle cx="75.5" cy="59.5" r="2.2" fill="#dcc64a" /></g>
-						<path d="M26,94 Q56,110 88,90" fill="none" stroke="#dcc64a" strokeWidth="6" strokeLinecap="round" />
-						<circle cx="57" cy="104" r="6" fill="#dcc64a" /><circle cx="57" cy="104" r="2.2" fill="#a88f1e" />
-						<g className="gc-fangs"><path d="M46,88 Q58,98 70,86" fill="#ff6f91" /><path d="M50,89 l3,6 l3,-5 Z M62,89 l3,5 l3,-6 Z" fill="#fff" /></g>
+					<g className="gc-pose gc-pose-head">
+						<polygon className="gc-puff" points={PUFF} fill="url(#gc-fur)" filter="url(#gc-soft)" />
+						<path d={HEAD} fill="#24533d" opacity=".32" filter="url(#gc-halo)" transform="translate(0 6)" />
+						<path className="gc-rim" d={HEAD} fill="url(#gc-iri)" filter="url(#gc-rim)" transform="translate(7 8)" />
+						<path d={HEAD} fill="url(#gc-fur)" filter="url(#gc-soft)" />
+						<path d="M34,22 Q36,19 40,22 L47,29 C42,31 38,33 35,36 Z M106,22 Q104,19 100,22 L93,29 C98,31 102,33 105,36 Z" fill="#e2806f" opacity=".55" />
+						<g ref={kEyes}>
+							<circle cx="53" cy="70" r="10" fill="#fff7dc" /><circle cx="87" cy="70" r="10" fill="#fff7dc" />
+							<circle cx="54" cy="71" r="6" fill="#0f241a" /><circle cx="88" cy="71" r="6" fill="#0f241a" />
+							<circle cx="56.5" cy="67.5" r="2.4" fill="#fff" /><circle cx="90.5" cy="67.5" r="2.4" fill="#fff" />
+						</g>
+						<path d="M66,83 Q70,81 74,83 Q70,88 66,83 Z" fill="#e2806f" />
+						<path d="M70,87 Q66,92 62,89 M70,87 Q74,92 78,89" fill="none" stroke="#0f241a" strokeWidth="2" strokeLinecap="round" opacity=".6" />
+						<path d="M30,100 Q70,118 110,100" fill="none" stroke="#dcc64a" strokeWidth="5.5" strokeLinecap="round" />
+						<circle cx="70" cy="110" r="5.5" fill="#dcc64a" /><circle cx="70" cy="110" r="2" fill="#a88f1e" />
+						<g className="gc-fangs"><path d="M60,89 Q70,99 80,89 Q70,93 60,89 Z" fill="#e2806f" /><path d="M63,90 l2.5,5 l2.5,-4 Z M72,91 l2.5,4 l2.5,-5 Z" fill="#fff" /></g>
 					</g>
 					{/* Walking along the edge (side view) */}
 					<g className="gc-pose gc-pose-walk">
-						<g className="gc-rim" filter="url(#gc-rim)" transform="translate(5 6)"><ellipse cx="64" cy="76" rx="38" ry="19" fill="url(#gc-iri)" /><circle cx="104" cy="58" r="18" fill="url(#gc-iri)" /></g>
-						<path ref={tail} d="M30,72 C12,62 12,38 26,32" fill="none" stroke={BODY} strokeWidth="8" strokeLinecap="round" filter="url(#gc-soft)" />
-						<g ref={legs} stroke={BODY} strokeWidth="7" strokeLinecap="round" filter="url(#gc-soft)">
-							<line data-x="44" x1="44" y1="84" x2="44" y2="106" /><line data-x="54" x1="54" y1="84" x2="54" y2="106" />
-							<line data-x="78" x1="78" y1="84" x2="78" y2="106" /><line data-x="88" x1="88" y1="84" x2="88" y2="106" />
+						<g className="gc-rim" filter="url(#gc-rim)" transform="translate(5 6)" fill="url(#gc-iri)"><path d={SIDE_BODY} /><path d={SIDE_HEAD} /></g>
+						<path ref={tail} d={SIDE_TAIL} fill="url(#gc-fur)" filter="url(#gc-soft)" />
+						<g ref={legs} stroke={BODY} strokeWidth="9" strokeLinecap="round">
+							<line data-x="48" x1="48" y1="80" x2="48" y2="104" /><line data-x="58" x1="58" y1="80" x2="58" y2="104" />
+							<line data-x="82" x1="82" y1="80" x2="82" y2="104" /><line data-x="92" x1="92" y1="80" x2="92" y2="104" />
 						</g>
-						<g fill={BODY} filter="url(#gc-soft)"><ellipse cx="64" cy="76" rx="38" ry="19" /><circle cx="104" cy="58" r="18" /><path d="M92,46 L94,28 L104,42 Z M106,42 L116,28 L118,48 Z" /></g>
-						<circle cx="110" cy="57" r="4.2" fill="#fff7dc" /><path d="M93,72 Q102,80 114,70" fill="none" stroke="#dcc64a" strokeWidth="4.5" strokeLinecap="round" />
+						<g fill="url(#gc-fur)" filter="url(#gc-soft)"><path d={SIDE_EAR} opacity=".85" /><path d={SIDE_BODY} /><path d={SIDE_HEAD} /></g>
+						<path d="M114,26 L119,35 L114,34 Z" fill="#e2806f" opacity=".6" />
+						<circle cx="115" cy="52" r="5.5" fill="#fff7dc" /><circle cx="116.5" cy="52.5" r="3.2" fill="#0f241a" /><circle cx="117.5" cy="51" r="1.2" fill="#fff" />
+						<path d="M127,60 Q129,62 127,64" fill="none" stroke="#e2806f" strokeWidth="2.5" strokeLinecap="round" />
+						<path d="M94,66 Q106,74 120,68" fill="none" stroke="#dcc64a" strokeWidth="4.5" strokeLinecap="round" />
 					</g>
 					{/* Loaf: napping (closed eyes) or sitting and watching (open eyes) */}
 					<g className="gc-pose gc-pose-loaf">
-						<g className="gc-rim" filter="url(#gc-rim)" transform="translate(5 6)"><ellipse cx="68" cy="88" rx="44" ry="24" fill="url(#gc-iri)" /></g>
-						<path d="M28,96 C24,112 72,116 96,106" fill="none" stroke={BODY} strokeWidth="8" strokeLinecap="round" filter="url(#gc-soft)" />
-						<g fill={BODY} filter="url(#gc-soft)"><ellipse cx="68" cy="88" rx="44" ry="24" /><circle cx="96" cy="68" r="21" /><path d="M80,58 L82,38 L94,52 Z M98,50 L112,38 L114,60 Z" /></g>
-						<g className="gc-sleepy" fill="none" stroke="#fff7dc" strokeWidth="3" strokeLinecap="round"><path d="M86,70 q4,4 8,0" /><path d="M100,68 q4,4 8,0" /></g>
-						<g className="gc-awake" fill="#fff7dc"><circle cx="90" cy="69" r="4.6" /><circle cx="104" cy="66" r="4.6" /></g>
+						<path className="gc-rim" d={LOAF} fill="url(#gc-iri)" filter="url(#gc-rim)" transform="translate(5 6)" />
+						<path d={LOAF} fill="url(#gc-fur)" filter="url(#gc-soft)" />
+						<path d={LOAF_TAIL} fill="url(#gc-fur)" filter="url(#gc-soft)" />
+						<path d="M72,50 L78,56 L73,57 Z M108,49 L109,57 L104,56 Z" fill="#e2806f" opacity=".55" />
+						<path d="M76,90 Q92,98 110,88" fill="none" stroke="#dcc64a" strokeWidth="4.5" strokeLinecap="round" />
+						<g className="gc-sleepy" fill="none" stroke="#fff7dc" strokeWidth="3" strokeLinecap="round"><path d="M80,76 q5,5 10,0" /><path d="M98,76 q5,5 10,0" /></g>
+						<g className="gc-awake"><circle cx="85" cy="76" r="6.5" fill="#fff7dc" /><circle cx="103" cy="76" r="6.5" fill="#fff7dc" /><circle cx="86" cy="77" r="3.8" fill="#0f241a" /><circle cx="104" cy="77" r="3.8" fill="#0f241a" /><circle cx="87.5" cy="75" r="1.4" fill="#fff" /><circle cx="105.5" cy="75" r="1.4" fill="#fff" /></g>
+						<path d="M92,82 Q94,80 96,82 Q94,85 92,82 Z" fill="#e2806f" />
 					</g>
 				</svg>
 			</div>
