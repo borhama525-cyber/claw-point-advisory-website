@@ -806,3 +806,8 @@ h1 em,h2 em{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-
 .dr-intro-ack{font-size:12.5px!important;background:#f3f8f6;border-radius:12px;padding:12px 14px;font-weight:600!important}
 .dr-intro{margin:18px 0;padding:16px;border-radius:16px;background:linear-gradient(120deg,var(--sky-soft),#fff);border:1px solid #d9e6e2;animation:dr-in .4s both}
 .dr-intro p{font-size:13.5px;margin:0 0 12px}.dr-intro .button{gap:8px}
+.dr-steps{background:linear-gradient(120deg,var(--sky-soft),#fff);border:1px solid #d9e6e2;border-radius:16px;padding:14px 16px;animation:dr-in .35s both}
+.dr-steps .dr-party-head{margin-bottom:10px}
+.dr-steps ol{list-style:none;margin:0;padding:0;display:grid;gap:10px;counter-reset:drnext}
+.dr-steps li{position:relative;padding-left:34px;font-size:13px;line-height:1.5;color:#2f403b;counter-increment:drnext}
+.dr-steps li:before{content:counter(drnext);position:absolute;left:0;top:0;width:22px;height:22px;border-radius:50%;background:#fff;border:1.5px solid var(--leaf);color:var(--leaf);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}

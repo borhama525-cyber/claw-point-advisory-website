@@ -39,8 +39,8 @@ export const dealTypes: DealType[] = [
 		picker: 'Earnest money deposit funding',
 		what: 'We fund your earnest money deposit so you can secure a contract without using your own reserves. Built for investors and wholesalers juggling several contracts at once.',
 		when: ['You’re working several contracts and need EMD liquidity', 'A deposit deadline is close and your capital is committed elsewhere'],
-		how: ['Send the contract, the EMD amount and the escrow details.', 'We verify the funds and issue written terms.', 'The deposit is wired to escrow, and repaid under the agreement at closing or termination.'],
-		need: ['Signed purchase contract', 'Escrow wiring instructions', 'The contract’s terms on refunding the EMD'],
+		how: ['Send the signed PSA and your title details (ideally the title company is TBD in the PSA).', 'We send our mutual release, signed by the buyer and the seller. If a wholesaler is the buyer on the PSA, the wholesaler signs it with the seller.', 'We then set your EMD structure. Commercial deals with a 60+ or 90+ day inspection period get a 30-day fee structure and a mutual EMD loan agreement.'],
+		need: ['Signed purchase contract (PSA)', 'Your role on the PSA (buyer or wholesaler)', 'The inspection period', 'Title company details, or TBD on the PSA'],
 	},
 ];
 

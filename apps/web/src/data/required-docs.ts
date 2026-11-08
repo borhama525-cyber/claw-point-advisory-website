@@ -24,6 +24,6 @@ export const requiredDocs: Record<string, RequiredDoc[]> = {
 		{ key: 'escrow_receipt', label: 'Escrow receipt for the buyer’s funds', hint: 'Proof the B–C buyer’s money is already in escrow. We fund the A–B only after it is.' },
 	],
 	emd: [
-		{ key: 'contract', label: 'Signed purchase contract', hint: 'Must show the EMD amount and deadline.' },
+		{ key: 'contract', label: 'Signed purchase contract (PSA)', hint: 'Must show the EMD amount and deadline. Ideally with the title company listed as TBD.' },
 	],
 };

@@ -57,3 +57,49 @@ export function IntroEmail({ to, address, name }: { to: string[]; address: strin
 		<a className="button" href={href} onClick={() => setSent(true)}><Mail size={16} /> {sent ? 'Open the intro email again' : 'Send the intro email'}</a>
 	</div>;
 }
+
+export type TitleMode = 'tbd' | 'chosen';
+
+/** EMD: the borrower's role on the PSA, the inspection period, title (ideally TBD on the PSA) and what happens next. */
+export function EmdSection({ errors: e, propertyType, titleMode, onTitleMode }: { errors: Errors; propertyType: string; titleMode: TitleMode; onTitleMode: (m: TitleMode) => void }) {
+	const [role, setRole] = useState('');
+	const [days, setDays] = useState('');
+	const longCommercial = propertyType === 'Commercial' && Number(days) >= 60;
+	const wholesaler = role === 'Wholesaler acting as buyer';
+	return <>
+		<h3>EMD details</h3>
+		<div className="dr-party">
+			<div className="dr-row">
+				<label className="dr-field" htmlFor="dr-emd_role"><span>Your role on the PSA *</span>
+					<select id="dr-emd_role" name="emd_role" required value={role} onChange={ev => setRole(ev.target.value)}><option value="" disabled>Select</option><option>Buyer</option><option>Wholesaler acting as buyer</option></select>
+					{e.emd_role && <em className="dr-error">{e.emd_role}</em>}</label>
+				<label className="dr-field" htmlFor="dr-inspection_days"><span>Inspection period (days) *</span>
+					<input id="dr-inspection_days" name="inspection_days" inputMode="numeric" pattern="\d{1,3}" required maxLength={3} placeholder="e.g. 30" value={days} onChange={ev => setDays(ev.target.value.replace(/\D/g, ''))} />
+					{e.inspection_days && <em className="dr-error">{e.inspection_days}</em>}</label>
+			</div>
+			{longCommercial && <p className="dr-note">Commercial deal with a {Number(days) >= 90 ? '90+' : '60+'} day inspection period: the EMD is structured with a fee every 30 days and a separate mutual EMD loan agreement. We’ll go through it once your PSA and title details are in.</p>}
+		</div>
+		<div className="dr-party">
+			<p className="dr-party-head"><strong>Title company</strong></p>
+			<p className="dr-note ok">Tip: list the title company as <strong>TBD</strong> in the PSA where you can.</p>
+			<div className="dr-lender-choice" role="radiogroup" aria-label="Title company">
+				<label className={titleMode === 'tbd' ? 'on' : ''}><input type="radio" name="title_mode" value="tbd" checked={titleMode === 'tbd'} onChange={() => onTitleMode('tbd')} /> TBD on the PSA <small>We’ll coordinate title with you</small></label>
+				<label className={titleMode === 'chosen' ? 'on' : ''}><input type="radio" name="title_mode" value="chosen" checked={titleMode === 'chosen'} onChange={() => onTitleMode('chosen')} /> Title is already chosen <small>I’ll add their details</small></label>
+			</div>
+			{titleMode === 'chosen' && <div className="dr-party-fields">
+				<div className="dr-row"><Input name="title_company" label="Company name" required error={e.title_company} />
+					<Input name="title_contact" label="Title officer or contact" required error={e.title_contact} autoComplete="off" /></div>
+				<div className="dr-row"><Input name="title_email" label="Email" type="email" required error={e.title_email} placeholder="officer@titleco.com" />
+					<Input name="title_phone" label="Phone" type="tel" required error={e.title_phone} placeholder="(555) 555-5555" /></div>
+			</div>}
+		</div>
+		<div className="dr-steps">
+			<p className="dr-party-head"><strong>What happens next</strong></p>
+			<ol>
+				<li>You send the signed PSA and the title details.</li>
+				<li>We send our <strong>mutual release</strong> to be signed by {wholesaler ? <>you (as the buyer on the PSA) and the seller</> : <>the buyer and the seller</>}.{!role && ' If a wholesaler is the buyer on the PSA, the wholesaler signs it with the seller.'}</li>
+				<li>Then we set your EMD structure together. Commercial deals with a 60+ or 90+ day inspection period get a 30-day fee structure and a mutual EMD loan agreement.</li>
+			</ol>
+		</div>
+	</>;
+}

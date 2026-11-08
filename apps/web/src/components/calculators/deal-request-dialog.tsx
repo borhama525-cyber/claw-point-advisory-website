@@ -6,7 +6,7 @@ import { sendForm } from '@/lib/send-form';
 import { useFormSubmission } from '@/hooks/use-form-submission';
 import { requiredDocs } from '@/data/required-docs';
 import { toolBySlug } from '@/data/deal-tools';
-import { IntroEmail, SEPARATE_ESCROW_STATES, TitleEscrowSection, type EscrowMode } from '@/components/calculators/title-escrow';
+import { EmdSection, IntroEmail, SEPARATE_ESCROW_STATES, TitleEscrowSection, type EscrowMode, type TitleMode } from '@/components/calculators/title-escrow';
 
 export type RequestPrefill = { purchase_price?: number; seller_finance?: number; resale_price?: number; primary_loan?: number; requested_funding?: number };
 
@@ -54,6 +54,9 @@ export function DealRequestDialog({ open, onOpenChange, method, title, prefill, 
 	const [escrowMode, setEscrowMode] = useState<EscrowMode>('same');
 	const [intro, setIntro] = useState<{ to: string[]; address: string; name: string } | null>(null);
 	const isDoubleClose = method === 'double-close';
+	const isEmd = method === 'emd';
+	const [propertyType, setPropertyType] = useState('');
+	const [titleMode, setTitleMode] = useState<TitleMode>('tbd');
 	const docs = requiredDocs[method] ?? [];
 	const [attached, setAttached] = useState<Record<string, boolean>>({});
 	const requiredNow = docs.filter(d => !d.optional && !((d.lender || d.withLender) && needsLender));
@@ -91,7 +94,7 @@ export function DealRequestDialog({ open, onOpenChange, method, title, prefill, 
 					<div className="dr-row"><Field label="Borrower email" name="email" required error={e.email}><input id="dr-email" name="email" type="email" autoComplete="email" required placeholder="you@example.com" /></Field>
 					<Field label="Borrower phone" name="phone" required error={e.phone}><input id="dr-phone" name="phone" type="tel" autoComplete="tel" required maxLength={40} placeholder="(555) 555-5555" /></Field></div>
 					<h3>Deal information</h3>
-					<Field label="Property type" name="property_type" required error={e.property_type}><select id="dr-property_type" name="property_type" required defaultValue=""><option value="" disabled>Select</option>{PROPERTY_TYPES.map(t => <option key={t}>{t}</option>)}</select></Field>
+					<Field label="Property type" name="property_type" required error={e.property_type}><select id="dr-property_type" name="property_type" required defaultValue="" onChange={ev => setPropertyType(ev.target.value)}><option value="" disabled>Select</option>{PROPERTY_TYPES.map(t => <option key={t}>{t}</option>)}</select></Field>
 					<Field label="Subject property address" name="address" required error={e.address}><input id="dr-address" name="address" autoComplete="street-address" required maxLength={300} placeholder="Street address" /></Field>
 					<div className="dr-row dr-row-3"><Field label="City" name="city" required error={e.city}><input id="dr-city" name="city" autoComplete="address-level2" required maxLength={120} /></Field>
 					<Field label="State" name="state" required error={e.state}><select id="dr-state" name="state" autoComplete="address-level1" required defaultValue="" onChange={ev => { setUsState(ev.target.value); if (SEPARATE_ESCROW_STATES.includes(ev.target.value) && escrowMode === 'same') setEscrowMode('have'); }}><option value="" disabled>Select</option>{STATES.map(s => <option key={s}>{s}</option>)}</select></Field>
@@ -101,7 +104,8 @@ export function DealRequestDialog({ open, onOpenChange, method, title, prefill, 
 					{method === 'stack' ? <Money label="Seller finance amount" name="seller_finance" value={prefill.seller_finance} required error={e.seller_finance} /> : <Money label={method === 'echo' || method === 'double-close' ? 'B–C sale price' : 'Estimated value or ARV'} name="resale_price" value={prefill.resale_price} error={e.resale_price} />}</div>
 					<div className="dr-row"><Money label="Primary loan amount (if you have one)" name="primary_loan" value={prefill.primary_loan} error={e.primary_loan} />
 					<Money label={method === 'emd' ? 'EMD amount' : 'Requested funding'} name="requested_funding" value={prefill.requested_funding} required error={e.requested_funding} /></div>
-					{!docs.some(d => d.lender) && !isDoubleClose && <label className="check-label dr-lender"><input type="checkbox" name="needs_lender" value="Yes" checked={needsLender} onChange={ev => setNeedsLender(ev.target.checked)} /> I need a primary lender: please provide one for this deal.</label>}
+					{!docs.some(d => d.lender) && !isDoubleClose && !isEmd && <label className="check-label dr-lender"><input type="checkbox" name="needs_lender" value="Yes" checked={needsLender} onChange={ev => setNeedsLender(ev.target.checked)} /> I need a primary lender: please provide one for this deal.</label>}
+					{isEmd && <EmdSection errors={e} propertyType={propertyType} titleMode={titleMode} onTitleMode={setTitleMode} />}
 					{isDoubleClose && <TitleEscrowSection errors={e} usState={usState} mode={escrowMode} onMode={setEscrowMode} />}
 					<h3>Required documents</h3>
 					{requiredNow.length > 0 && <div className="dr-progress" aria-live="polite"><div className="dr-progress-bar"><i style={{ width: `${(done / requiredNow.length) * 100}%` }} /></div><span>{done === requiredNow.length ? 'All required documents attached ✓' : `${done} of ${requiredNow.length} required attached`}</span></div>}
