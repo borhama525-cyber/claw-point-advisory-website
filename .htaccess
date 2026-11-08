@@ -10,16 +10,20 @@ RewriteCond %{HTTPS} !=on
 RewriteCond %{HTTP:X-Forwarded-Proto} !https
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
+# One address only: www.clawpoint.capital -> clawpoint.capital
+RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
+
 # Generated files
 RewriteRule ^sitemap\.xml$ sitemap.php [L]
 RewriteRule ^robots\.txt$ robots.php [L]
 RewriteRule ^llms\.txt$ llms.php [L]
 
-# Pages that aren't pre-built (e.g. a mistyped address) load the app, which shows "page not found"
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^ /__spa-fallback.html [L]
 </IfModule>
+
+# Pages that aren't pre-built (e.g. a mistyped address) load the app, which shows "page not found".
+# Served as an error page so search engines get a real 404 status instead of indexing it.
+ErrorDocument 404 /__spa-fallback.html
 
 # Hide the helper and private settings files
 <FilesMatch "^(site-origin|lead-sheet)\.php$">
