@@ -420,6 +420,13 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 @media(max-width:900px){.booking-layout{grid-template-columns:1fr}.booking-info{position:static}.booking-calendar iframe{height:820px}}
 @media(max-width:560px){.booking-page{padding-top:32px!important}.booking-info{padding:24px 20px}.booking-calendar{padding:12px 10px 8px}}
 @media(prefers-reduced-motion:reduce){.booking-card{animation:none}}
+/* Booking: pick who to talk to */
+.booking-people{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:2px 0 18px}
+.booking-people button{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:16px;border:1px solid #dbe7e3;background:#fff;text-align:left;cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .2s}
+.booking-people button:hover{transform:translateY(-1px);border-color:#b9d3cc}
+.booking-people button.on{border-color:var(--leaf);box-shadow:0 0 0 3px #24533d1f,0 8px 20px #1d3a2b14}
+.booking-people strong{display:block;font-size:14px}.booking-people small{display:block;font-size:12px;color:var(--quiet)}
+.booking-people .contact-avatar{flex-shrink:0}
 /* Calendly embed: placeholder crossfades into the calendar */
 .calendly-shell{position:relative;height:700px;border-radius:14px;overflow:hidden;background:#fbfdfc}
 .calendly-host,.calendly-host .calendly-inline-widget,.calendly-host iframe{height:100%;width:100%}

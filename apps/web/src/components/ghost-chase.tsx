@@ -45,7 +45,7 @@ const PAGE: Record<string, string[]> = {
 	'/calculators': ['Calculators! My kind of toys.'],
 	'/network': ['Join the pack! We love new friends.'],
 	'/contact': ['Say hi! My humans reply fast.'],
-	'/booking': ['Pick a time. Amira’s lovely.'],
+	'/booking': ['Pick a time. Amira and Adam are lovely.'],
 	'/ask': ['Ask away! I know a few things.'],
 };
 
@@ -69,7 +69,7 @@ const ARCH_TAIL = 'M30,80 C17,72 14,54 19,38 C21,32 26,31 27,36';
 type Nudge = { line: string; label: string; go: 'deal' | 'booking' | 'chat' | 'funding' | 'network' };
 const NUDGES: Nudge[] = [
 	{ line: 'Got a deal? My humans fund those.', label: 'Submit a deal', go: 'deal' },
-	{ line: 'Amira’s really nice. Book a quick call?', label: 'Book a call', go: 'booking' },
+	{ line: 'Amira and Adam are really nice. Book a call?', label: 'Book a call', go: 'booking' },
 	{ line: 'Stuck on a structure? Text the team.', label: 'Text the team', go: 'chat' },
 	{ line: 'No primary lender? We can provide one.', label: 'Start a request', go: 'deal' },
 	{ line: 'We fund in all 50 states. I nap in all 50.', label: 'See funding', go: 'funding' },

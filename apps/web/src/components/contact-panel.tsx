@@ -37,7 +37,7 @@ export function ContactPanel() {
 				<div className="contact-who"><strong>{p.name}</strong><span>{p.display}</span></div>
 				<div className="contact-actions">
 					<a className="button small" href={smsHref(p.e164)} aria-label={`Text ${p.name} at ${p.display}`}><MessageSquareText size={15} /> Text</a>
-					{p.schedule && <Link className="button small outline" to="/booking" onClick={() => setOpen(false)} aria-label={`Schedule a call with ${p.name}`}><CalendarCheck size={15} /> Schedule</Link>}
+					{p.schedule && <Link className="button small outline" to={p.slug === 'amira' ? '/booking' : `/booking?with=${p.slug}`} onClick={() => setOpen(false)} aria-label={`Schedule a call with ${p.name}`}><CalendarCheck size={15} /> Schedule</Link>}
 				</div>
 			</li>)}</ul>
 			<a className="contact-email" href={mailtoHref({ email: TEAM_EMAIL, subject: 'Question for Claw Point Advisory' })}><Mail size={16} />{TEAM_EMAIL}</a>

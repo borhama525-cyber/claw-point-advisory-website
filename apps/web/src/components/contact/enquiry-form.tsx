@@ -24,7 +24,7 @@ export function EnquiryForm() {
 		<section className="band contact-ways">
 			<div className="learn-wrap contact-ways-grid">
 				<RequestButton className="contact-way primary"><FileUp size={22} /><strong>Submit a deal</strong><span>Upload your contract and get it reviewed.</span><em>Start <ArrowUpRight size={15} /></em></RequestButton>
-				<Link to="/booking" className="contact-way"><CalendarCheck size={22} /><strong>Book a call</strong><span>Pick a time with Amira on the calendar.</span><em>Schedule <ArrowUpRight size={15} /></em></Link>
+				<Link to="/booking" className="contact-way"><CalendarCheck size={22} /><strong>Book a call</strong><span>Pick a time with Amira or Adam.</span><em>Schedule <ArrowUpRight size={15} /></em></Link>
 				<a href={`mailto:${TEAM_EMAIL}`} className="contact-way"><Mail size={22} /><strong>Email us</strong><span>{TEAM_EMAIL}</span><em>Write <ArrowUpRight size={15} /></em></a>
 			</div>
 		</section>

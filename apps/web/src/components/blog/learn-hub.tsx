@@ -94,7 +94,7 @@ export function LearnHub() {
 
 		<section className="band learn-cta">
 			<div className="learn-wrap learn-cta-card">
-				<div><h2>Still deciding? <em>Talk it through.</em></h2><p>Book a short call with Amira, or text the team. We’ll tell you which structure fits.</p></div>
+				<div><h2>Still deciding? <em>Talk it through.</em></h2><p>Book a short call with Amira or Adam, or text the team. We’ll tell you which structure fits.</p></div>
 				<div className="learn-cta-actions"><Link to="/booking" className="button"><CalendarCheck size={17} /> Book a call</Link><button type="button" className="button outline" onClick={openContactPanel}><MessageSquare size={17} /> Text the team</button></div>
 			</div>
 		</section>
