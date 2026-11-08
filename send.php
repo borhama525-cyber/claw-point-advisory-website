@@ -6,6 +6,7 @@
  * To change where emails go, edit TO_EMAIL below.
  */
 const TO_EMAIL = 'clawpointadvisory@gmail.com';
+const LEADS_SHEET = 'https://docs.google.com/spreadsheets/d/1Kr1Ejrtb4dO89KP3XjHGKJ9K6R0NsCXw5eLgyH5QzYA/edit';
 const MAX_FILE_BYTES = 5 * 1024 * 1024;   // 5 MB per file
 const MAX_FILES = 11;                     // purchase agreement + up to 10 other documents
 const MAX_PER_HOUR = 12;                  // submissions per visitor per hour
@@ -46,7 +47,7 @@ if ($form === 'deal') {
 	$types = ['stack' => 'Stack Method', 'echo' => 'Echo Method', 'double-close' => 'Double Close', 'emd' => 'EMD'];
 	$type = $types[field('method', 20)] ?? 'Funding';
 	$name = oneLine(field('first_name', 100) . ' ' . field('last_name', 100));
-	$subject = "New {$type} request: {$name}";
+	$subject = "New funding inquiry · {$type}: {$name}";
 	$intro = "A new {$type} funding request was submitted on the website.";
 	$rows = [
 		'Deal type' => $type, 'Borrower' => $name, 'Email' => $email, 'Phone' => field('phone', 40),
@@ -60,11 +61,11 @@ if ($form === 'deal') {
 } elseif ($form === 'enquiry') {
 	if (field('message', 5000) === '') reply(422, ['ok' => false, 'error' => 'Please tell us about your transaction.']);
 	$name = oneLine(field('name', 200));
-	$subject = 'New website enquiry: ' . ($name !== '' ? $name : $email);
+	$subject = 'New website lead · Contact form: ' . ($name !== '' ? $name : $email);
 	$intro = 'A new enquiry was sent from the website’s contact form.';
 	$rows = ['Topic' => oneLine(field('topic', 80)), 'Name' => $name, 'Email' => $email, 'Phone' => field('phone', 60), 'Message' => field('message', 5000)];
 } elseif ($form === 'newsletter') {
-	$subject = "New newsletter sign-up: {$email}";
+	$subject = "New website lead · Newsletter: {$email}";
 	$intro = 'Someone signed up for updates on the website.';
 	$rows = ['Email' => $email];
 } else {
@@ -74,13 +75,31 @@ if ($form === 'deal') {
 // Attachments (deal requests only): the purchase agreement is required.
 $attachments = [];
 if ($form === 'deal') {
-	$files = [];
-	if (isset($_FILES['purchase_agreement'])) $files[] = $_FILES['purchase_agreement'];
-	if (isset($_FILES['documents']) && is_array($_FILES['documents']['name'])) {
-		foreach ($_FILES['documents']['name'] as $i => $n) $files[] = ['name' => $n, 'type' => $_FILES['documents']['type'][$i], 'tmp_name' => $_FILES['documents']['tmp_name'][$i], 'error' => $_FILES['documents']['error'][$i], 'size' => $_FILES['documents']['size'][$i]];
+	// Paperwork each funding type must include (keep in step with src/data/required-docs.ts).
+	// Documents marked 'lender' are waived when the borrower asks us to provide a primary lender.
+	$required = [
+		'stack' => ['contract' => 'Signed purchase contract', 'seller_terms' => 'Seller-carry terms', 'lender_terms*' => 'Primary lender term sheet or approval'],
+		'echo' => ['ab_contract' => 'A–B purchase contract', 'bc_contract' => 'B–C purchase contract', 'lender_terms*' => 'End buyer’s lender term sheet or approval'],
+		'double-close' => ['ab_contract' => 'A–B purchase contract', 'bc_contract' => 'B–C purchase contract', 'buyer_funds' => 'End buyer proof of funds or lender approval'],
+		'emd' => ['contract' => 'Signed purchase contract'],
+	][field('method', 20)] ?? [];
+	$needsLender = field('needs_lender', 3) === 'Yes';
+	$files = []; $docList = []; $missing = [];
+	foreach ($required as $key => $label) {
+		$lenderDoc = str_ends_with($key, '*'); $key = rtrim($key, '*');
+		$f = $_FILES["doc_{$key}"] ?? null;
+		$has = $f && ($f['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
+		if ($has) { $files[] = $f + ['label' => $label]; $docList[] = "✓ {$label}"; }
+		elseif ($lenderDoc && $needsLender) $docList[] = "– {$label}: not needed, we provide the lender";
+		else $missing[] = $label;
 	}
-	$files = array_values(array_filter($files, fn($f) => ($f['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE));
-	if (!isset($_FILES['purchase_agreement']) || ($_FILES['purchase_agreement']['error'] ?? 4) !== UPLOAD_ERR_OK) reply(422, ['ok' => false, 'error' => 'Please attach the purchase and sale agreement.']);
+	if ($missing) reply(422, ['ok' => false, 'error' => 'Please attach the required documents: ' . implode(', ', $missing) . '.']);
+	if (isset($_FILES['documents']) && is_array($_FILES['documents']['name'])) {
+		foreach ($_FILES['documents']['name'] as $i => $n) {
+			if ($_FILES['documents']['error'][$i] === UPLOAD_ERR_NO_FILE) continue;
+			$files[] = ['name' => $n, 'type' => $_FILES['documents']['type'][$i], 'tmp_name' => $_FILES['documents']['tmp_name'][$i], 'error' => $_FILES['documents']['error'][$i], 'size' => $_FILES['documents']['size'][$i], 'label' => 'Other'];
+		}
+	}
 	if (count($files) > MAX_FILES) reply(422, ['ok' => false, 'error' => 'Please attach at most 11 files.']);
 	$finfo = function_exists('finfo_open') ? finfo_open(FILEINFO_MIME_TYPE) : null;
 	foreach ($files as $f) {
@@ -88,20 +107,47 @@ if ($form === 'deal') {
 		if ($f['size'] > MAX_FILE_BYTES) reply(422, ['ok' => false, 'error' => 'Each file must be under 5 MB.']);
 		$mime = $finfo ? finfo_file($finfo, $f['tmp_name']) : $f['type'];
 		if (!isset(ALLOWED_TYPES[$mime])) reply(422, ['ok' => false, 'error' => 'Files must be PDF, PNG or JPG.']);
+		$prefix = preg_replace('/[^A-Za-z0-9]+/', '-', iconv('UTF-8', 'ASCII//TRANSLIT', $f['label']) ?: 'Document');
 		$base = preg_replace('/[^A-Za-z0-9._-]+/', '_', pathinfo($f['name'], PATHINFO_FILENAME)) ?: 'document';
-		$attachments[] = ['name' => mb_substr($base, 0, 80) . '.' . ALLOWED_TYPES[$mime], 'mime' => $mime, 'data' => file_get_contents($f['tmp_name'])];
+		$attachments[] = ['name' => mb_substr(trim($prefix, '-') . ' - ' . $base, 0, 100) . '.' . ALLOWED_TYPES[$mime], 'mime' => $mime, 'data' => file_get_contents($f['tmp_name'])];
 	}
+	$others = count($files) - count(array_filter($files, fn($f) => $f['label'] !== 'Other'));
+	if ($others) $docList[] = "+ {$others} other document" . ($others > 1 ? 's' : '');
+	$rows['Required paperwork'] = implode("\n", $docList);
 	$rows['Documents'] = count($attachments) . ' attached';
+	$rows['Calculator numbers'] = field('calculator_summary', 3000);
 }
 
 $rows = array_filter($rows, fn($v) => trim((string) $v) !== '');
+
+// Save the lead to the Google Sheet ("Website Leads" tab) when lead-sheet.php is set up.
+// Runs before the email so a lead is kept even if mail delivery has a problem.
+$sheet = is_file(__DIR__ . '/lead-sheet.php') ? (include __DIR__ . '/lead-sheet.php') : null;
+if (is_array($sheet) && !empty($sheet['url']) && function_exists('curl_init')) {
+	$sources = ['deal' => 'Deal request', 'enquiry' => 'Contact form', 'newsletter' => 'Newsletter'];
+	$funding = ['deal' => $rows['Deal type'] ?? 'Funding', 'enquiry' => 'General enquiry', 'newsletter' => 'Newsletter'];
+	$num = fn(string $k) => (string) ((float) preg_replace('/[^0-9.]/', '', field($k)) ?: '');
+	$lead = ['secret' => $sheet['secret'] ?? '', 'source' => $sources[$form], 'funding_type' => $funding[$form], 'email' => $email,
+		'name' => $rows['Borrower'] ?? $rows['Name'] ?? '', 'phone' => $rows['Phone'] ?? '',
+		'topic' => $form === 'enquiry' ? ($rows['Topic'] ?? '') : '', 'property_type' => $rows['Property type'] ?? '',
+		'address' => $rows['Property'] ?? '', 'close_date' => $form === 'deal' ? field('close_date', 20) : '',
+		'purchase_price' => $form === 'deal' ? $num('purchase_price') : '', 'requested_funding' => $form === 'deal' ? $num('requested_funding') : '',
+		'needs_lender' => isset($rows['Needs a primary lender']) ? 'Yes' : ($form === 'deal' ? 'No' : ''),
+		'message' => $rows['Description'] ?? $rows['Message'] ?? '',
+		'referred_by' => trim(($rows['Referred by'] ?? '') . ' ' . ($rows['Referrer email'] ?? '')), 'documents' => $rows['Required paperwork'] ?? ''];
+	$ch = curl_init($sheet['url']);
+	curl_setopt_array($ch, [CURLOPT_POST => true, CURLOPT_POSTFIELDS => http_build_query($lead), CURLOPT_RETURNTRANSFER => true,
+		CURLOPT_FOLLOWLOCATION => false, CURLOPT_CONNECTTIMEOUT => 4, CURLOPT_TIMEOUT => 8]);
+	curl_exec($ch);
+}
+
 $html = '<div style="font-family:Arial,sans-serif;color:#141a17;max-width:620px"><p style="font-size:15px">' . esc($intro) . '</p><table style="border-collapse:collapse;width:100%;font-size:14px">';
 foreach ($rows as $k => $v) {
 	$cell = ($k === 'Email' || $k === 'Referrer email') ? '<a href="mailto:' . esc($v) . '">' . esc($v) . '</a>' : nl2br(esc($v));
 	$html .= '<tr><td style="padding:8px 12px 8px 0;color:#55665f;vertical-align:top;white-space:nowrap">' . esc($k) . '</td><td style="padding:8px 0;border-bottom:1px solid #e3ece9">' . $cell . '</td></tr>';
 }
-$html .= '</table><p style="font-size:12px;color:#55665f;margin-top:18px">Reply to this email to answer the sender directly. Sent automatically by the Claw Point Advisory website.</p></div>';
-$text = $intro . "\n\n" . implode("\n", array_map(fn($k, $v) => "{$k}: {$v}", array_keys($rows), $rows));
+$html .= '</table><p style="font-size:12px;color:#55665f;margin-top:18px">Reply to this email to answer the sender directly. <a href="' . LEADS_SHEET . '" style="color:#24533d;font-weight:bold">Open the Website Leads sheet</a>. Sent automatically by the Claw Point Advisory website.</p></div>';
+$text = $intro . "\n\n" . implode("\n", array_map(fn($k, $v) => "{$k}: {$v}", array_keys($rows), $rows)) . "\n\nWebsite Leads sheet: " . LEADS_SHEET;
 
 // From an address on this website's own domain (better delivery); replies go to the visitor.
 $host = preg_replace('/^www\./i', '', preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? 'localhost'));
