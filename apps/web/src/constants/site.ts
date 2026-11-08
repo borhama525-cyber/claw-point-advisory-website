@@ -1,0 +1,10 @@
+/** Calendly event the booking page embeds. Change it here to switch meeting types. */
+export const CALENDLY_URL = 'https://calendly.com/clawpointadvisory/schedule-with-amira';
+/** Team contact details: shown in the Team chat card, footer and contact page. */
+export const TEAM_EMAIL = 'clawpointadvisory@gmail.com';
+export const TEAM = [
+	{ name: 'Amira', display: '(346) 291-5546', e164: '+13462915546', schedule: true },
+	{ name: 'Adam', display: '+1 (347) 266-7772', e164: '+13472667772', schedule: false },
+];
+export const siteImage = 'https://images.hostinger.com/2deeaaef-b87c-40c2-a621-3d286ff074f6/056c939a-a907-4ca7-a36a-d4e80b757d22.png';
+export const siteImageSet = `${siteImage}?width=375 375w, ${siteImage}?width=768 768w, ${siteImage}?width=1024 1024w, ${siteImage} 1344w`;

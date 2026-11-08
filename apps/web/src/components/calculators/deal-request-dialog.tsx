@@ -1,0 +1,80 @@
+import { useEffect, useState, type ReactNode } from 'react';
+import { celebrate } from '@/components/brand-face';
+import * as Dialog from '@radix-ui/react-dialog';
+import { X } from 'lucide-react';
+import { sendForm } from '@/lib/send-form';
+import { useFormSubmission } from '@/hooks/use-form-submission';
+
+export type RequestPrefill = { purchase_price?: number; seller_finance?: number; resale_price?: number; primary_loan?: number; requested_funding?: number };
+
+const STATES = 'AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY'.split(' ');
+const MONEY = ['purchase_price', 'seller_finance', 'resale_price', 'primary_loan', 'requested_funding'] as const;
+const grouped = (n?: number) => (n === undefined || !Number.isFinite(n) ? '' : Math.round(n).toLocaleString('en-US'));
+
+function Field({ label, name, required, error, children, className }: { label: string; name: string; required?: boolean; error?: string; children: ReactNode; className?: string }) {
+	return <label className={`dr-field ${className ?? ''}`} htmlFor={`dr-${name}`}><span>{label}{required && ' *'}</span>{children}{error && <em className="dr-error">{error}</em>}</label>;
+}
+
+function Money({ name, value, required, error, label }: { name: string; value?: number; required?: boolean; error?: string; label: string }) {
+	const [raw, setRaw] = useState(grouped(value));
+	return <Field label={label} name={name} required={required} error={error}><span className="dr-money"><i>$</i><input id={`dr-${name}`} name={name} inputMode="numeric" required={required} value={raw} onChange={e => setRaw(grouped(Number(e.target.value.replace(/[^0-9]/g, '')) || undefined))} aria-invalid={Boolean(error)} /></span></Field>;
+}
+
+export function DealRequestDialog({ open, onOpenChange, method, title, prefill, calculator, onBack }: { open: boolean; onOpenChange: (o: boolean) => void; method: string; title: string; prefill: RequestPrefill; calculator: Record<string, number>; onBack: () => void }) {
+	const form = useFormSubmission({
+		submit: (_v, data) => {
+			for (const k of MONEY) { const v = String(data.get(k) ?? '').replace(/[^0-9.]/g, ''); if (v) data.set(k, v); else data.delete(k); }
+			const docs = data.getAll('documents[]').filter(f => f instanceof File && f.size > 0); data.delete('documents[]'); for (const f of docs) data.append('documents[]', f);
+			data.set('method', method); data.set('consent', data.get('consent') ? 'true' : 'false'); data.set('calculator', JSON.stringify(calculator));
+			return sendForm('deal', data);
+		},
+	});
+	useEffect(() => { if (form.isSuccess) celebrate(); }, [form.isSuccess]);
+	const e = form.fieldErrors;
+	return <Dialog.Root open={open} onOpenChange={onOpenChange}>
+		<Dialog.Portal>
+			<Dialog.Overlay className="dr-overlay" />
+			<Dialog.Content className="dr-panel" aria-describedby="dr-desc">
+				<Dialog.Close className="dr-close" aria-label="Close"><X size={18} /></Dialog.Close>
+				<button type="button" className="dr-back" onClick={onBack}>← All funding types</button>
+				<Dialog.Title className="dr-title">{title}</Dialog.Title>
+				<p id="dr-desc" className="dr-sub">About two minutes. Your calculator numbers are already filled in, and every request is reviewed individually.</p>
+				{form.isSuccess ? <div className="dr-done" role="status"><h3>Request received.</h3><p>Thank you. Our team will review your deal and reply by email. If anything is missing, we’ll ask for it then. Submitting a request is not a funding commitment.</p><button type="button" className="button" onClick={() => onOpenChange(false)}>Back to the calculator</button></div> :
+				<form className="dr-form" onSubmit={form.onSubmit} encType="multipart/form-data" noValidate={false}>
+					<input {...form.honeypotProps} />
+					<h3>Borrower information</h3>
+					<div className="dr-row"><Field label="Borrower first name" name="first_name" required error={e.first_name}><input id="dr-first_name" name="first_name" autoComplete="given-name" required maxLength={100} /></Field>
+					<Field label="Borrower last name" name="last_name" required error={e.last_name}><input id="dr-last_name" name="last_name" autoComplete="family-name" required maxLength={100} /></Field></div>
+					<div className="dr-row"><Field label="Borrower email" name="email" required error={e.email}><input id="dr-email" name="email" type="email" autoComplete="email" required placeholder="you@example.com" /></Field>
+					<Field label="Borrower phone" name="phone" required error={e.phone}><input id="dr-phone" name="phone" type="tel" autoComplete="tel" required maxLength={40} placeholder="(555) 555-5555" /></Field></div>
+					<h3>Deal information</h3>
+					<Field label="Subject property address" name="address" required error={e.address}><input id="dr-address" name="address" autoComplete="street-address" required maxLength={300} placeholder="Street address" /></Field>
+					<div className="dr-row dr-row-3"><Field label="City" name="city" required error={e.city}><input id="dr-city" name="city" autoComplete="address-level2" required maxLength={120} /></Field>
+					<Field label="State" name="state" required error={e.state}><select id="dr-state" name="state" autoComplete="address-level1" required defaultValue=""><option value="" disabled>Select</option>{STATES.map(s => <option key={s}>{s}</option>)}</select></Field>
+					<Field label="ZIP" name="zip" required error={e.zip}><input id="dr-zip" name="zip" autoComplete="postal-code" inputMode="numeric" required pattern="\d{5}(-\d{4})?" maxLength={10} /></Field></div>
+					<Field label="Target close date" name="close_date" required error={e.close_date}><input id="dr-close_date" name="close_date" type="date" required /></Field>
+					<div className="dr-row"><Money label="Purchase price" name="purchase_price" value={prefill.purchase_price} required error={e.purchase_price} />
+					{method === 'stack' ? <Money label="Seller finance amount" name="seller_finance" value={prefill.seller_finance} required error={e.seller_finance} /> : <Money label={method === 'echo' || method === 'double-close' ? 'B–C sale price' : 'Estimated value or ARV'} name="resale_price" value={prefill.resale_price} error={e.resale_price} />}</div>
+					<div className="dr-row"><Money label="Primary loan amount (DSCR or other)" name="primary_loan" value={prefill.primary_loan} error={e.primary_loan} />
+					<Money label={method === 'emd' ? 'EMD amount' : 'Requested funding'} name="requested_funding" value={prefill.requested_funding} required error={e.requested_funding} /></div>
+					<h3>Documents</h3>
+					<Field label="Purchase and sale agreement" name="purchase_agreement" required error={e.purchase_agreement}><input id="dr-purchase_agreement" name="purchase_agreement" type="file" required accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg" /></Field>
+					<Field label="Addendums or other documents" name="documents" error={e.documents}><input id="dr-documents" name="documents[]" type="file" multiple accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg" /></Field>
+					<p className="dr-hint">PDF, PNG or JPG, up to 5 MB each and 10 extra files. You can send more documents after you submit.</p>
+					<h3>Deal description</h3>
+					<Field label="Anything that helps us understand the deal" name="description" error={e.description}><textarea id="dr-description" name="description" rows={4} maxLength={5000} placeholder="Exit plan, seller terms, timeline, anything unusual…" /></Field>
+					<h3>Referred by someone? <small>(optional)</small></h3>
+					<div className="dr-row"><Field label="Referrer first name" name="referrer_first_name"><input id="dr-referrer_first_name" name="referrer_first_name" maxLength={100} /></Field>
+					<Field label="Referrer last name" name="referrer_last_name"><input id="dr-referrer_last_name" name="referrer_last_name" maxLength={100} /></Field></div>
+					<div className="dr-row"><Field label="Referrer email" name="referrer_email" error={e.referrer_email}><input id="dr-referrer_email" name="referrer_email" type="email" /></Field>
+					<Field label="Referrer phone" name="referrer_phone"><input id="dr-referrer_phone" name="referrer_phone" type="tel" maxLength={40} /></Field></div>
+					<p className="dr-hint">If a partner sent you, add their details so they get credit and a copy of your request.</p>
+					<label className="check-label dr-consent"><input type="checkbox" name="consent" value="true" required /> I agree that Claw Point Advisory may store the information and documents I submit and contact me about this request.</label>
+					<p className="dr-legal">We use your details only to review this request and to follow up with you about it. You can ask us to delete your information at any time. Don’t include bank account numbers, Social Security numbers or other identity documents in this form.</p>
+					{form.isError && <p className="dr-error" role="alert">We couldn’t send your request. Check the highlighted fields and try again, or use the contact page.</p>}
+					<button type="submit" className="button dr-submit" disabled={form.isSubmitting}>{form.isSubmitting ? 'Sending…' : 'Submit request'}</button>
+				</form>}
+			</Dialog.Content>
+		</Dialog.Portal>
+	</Dialog.Root>;
+}

@@ -1,0 +1,73 @@
+# Website update — Claw Point Advisory
+
+**Branding.** Every "CloseFlow Capital" / "CloseFlow" reference (page titles, headings, footer, chat, login, newsletter, llms.txt, structured data) is now "Claw Point Advisory" / "Claw Point", matching the logo.
+
+**Calculator structure.**
+- `/calculators` is a tool library: one card per calculator plus a "more tools on the way" card, and a closing call-to-action.
+- Each calculator has its own page: `/calculators/stack`, `/calculators/echo`, `/calculators/dscr`, `/calculators/hard-money`. Each has a dark hero with two buttons (discuss the deal / read the guide), a calculator card with tabs, $/% inputs, live dollar hints, a headline result (blue = works, orange = short) and a breakdown, plus "What this calculator tells you" and "How to use it".
+- Each structure has a guide page: `/stack`, `/echo`, `/dscr`, `/hard-money`, with a worked example calculated live from the same math as the calculator.
+- Funding page structure cards and the footer link to the guides. All new routes are in the sitemap.
+
+**Calculation fix.** The Echo calculator subtracted B–C closing costs twice (once inside the funded amount, once from the spread). Fixed in `apps/web/src/lib/deal-math.mjs`; tests updated and extended (`node tests/deal-math.test.mjs`, 13 checks pass).
+
+Layout was modeled on the structure of realquickfunds.com's calculator pages. All copy, example figures and numbers are original. No reference text, branding, rates, video, testimonials or claims were copied.
+
+Verified: typecheck, lint, production build, tests, and in-browser checks at desktop and phone width. The PocketBase backend was not run, so forms, login, chat and shop data were not tested. Not deployed.
+
+**Visual theme (sky & bloom).** New palette: soft sky teal, mist white, sage and deep leaf green, mimosa yellow and coral pink, with a near-black ink for type and buttons. Heroes use a sky gradient with soft blurred yellow/coral/sage "bloom" light at the bottom (pure CSS, no images). Header is frosted and sticky; buttons are black pills; footer and feature sections are deep green with yellow highlights; the closing CTA is a yellow-to-coral gradient. Font is now Manrope. All overrides live in the "Sky & bloom theme" block at the end of `apps/web/src/index.css`.
+
+**Stack Method pages, matched to the supplied design.**
+- `/calculators/stack`: single-column layout. Purchase tab with the design's field rows, a "Cash to seller" line and a detailed result note (what the seller nets, what is funded, a warning when primary + carry exceed 100% of price). Cash flow tab with intro, editable-rate tip, the design's field rows (monthly payments shown beside each rate), a full monthly P&L statement, and a result with the yearly amount and debt coverage (NOI ÷ both payments).
+- `/stack` guide rebuilt in the design's section order: what it is, who it's for, the three pieces, how the money moves, $500K math table, the one test, doing it properly, when it isn't a Stack deal, how we handle it, what you'll need, FAQ. All copy is original.
+- **Deal request form**: "Start a Stack request" / "Submit this deal" open a "Stack Method Request" dialog, pre-filled from the calculator (price, seller finance, primary loan, requested funding). Borrower and deal details, purchase agreement upload (required) plus other documents, description, optional referrer, consent. Submissions save to a new PocketBase collection `deal_requests` (migration `apps/pocketbase/pb_migrations/1794090000_deal_requests.js`), readable by admins only. **Not tested end to end**: the PocketBase backend wasn't running here, so run it once to apply the migration, then send a test request.
+
+**Site-wide restyle after the supplied screen recording (layout only; sky & bloom colors kept).**
+- Home: hero with the full Stack Method calculator, a scrolling keyword strip, a "Why Claw Point" stats grid (uses the existing 567 / $400M / 200+ figures, which still need confirming), "Six ways to get funded" cards with Learn more (side panel) and Start (request form), two community cards (book a call, guides), how it works, CTA and newsletter. The old Funding intro, Stack Method band, Services list and Stats band are no longer on the home page (their component files remain).
+- "What are you funding?" picker: the header's "Get funded" button and CTA boxes open it; choosing a type opens that type's request form; "← All funding types" returns to the picker. Six types: Stack, Echo, Double Close, EMD, Hard Money, DSCR (`apps/web/src/data/deal-types.ts`).
+- Side panel per deal type: what it is, when to use it, how we fund it, what you'll need, calculator and guide links.
+- Footer: brand plus Funding, Tools, Company and Contact columns.
+- Echo, DSCR and Hard Money guides rewritten in the long-form format of the Stack guide, with worked math tables and FAQs. All copy is original.
+- Request form handles all six types (EMD amount, B–C sale price / ARV fields as relevant); `deal_requests` migration updated accordingly.
+- No founder quote or testimonials were added: the site has no real ones to show, and fabricated reviews shouldn't be published.
+
+**Calendly booking.** `/booking` now embeds the Calendly event "Networking / Consultation Session" (https://calendly.com/clawpointadvisory/schedule-with-amira), with a link to open it in a new tab. Change `CALENDLY_URL` in `apps/web/src/constants/site.ts` to switch meeting types. The previous product-based booking list is no longer used on that page.
+
+**Ask Claw Point (AI assistant).** `/ask`, plus an "Ask anything" box on the home page and an "Ask AI" link in the header and footer. It answers general questions about transactional funding and loan underwriting only, declines everything else, never quotes rates or approvals, and warns visitors not to share personal details. The server route `apps/web/src/routes/api.ask.ts` calls Claude (`claude-opus-5-5`, low effort, server-side refusal fallback) via `apps/web/src/lib/ask-assistant.server.ts`, where the topic rules live. It is limited to 20 questions per visitor per hour, 12 turns per conversation and 2,000 characters per question. Conversations are not stored. **To switch it on, set `ANTHROPIC_API_KEY`** in `apps/web/.env` or the host's environment settings. Without it, the page shows a "not switched on yet" message. Real answers have not been tested, because no API key was available while building.
+
+**Ask Claw Point switched to a free answer library (replaces the AI version above).** No API, no key and no running cost. `/ask` and the home page box search 25 written answers in `apps/web/src/data/faq.ts` and show the best match plus related questions; unmatched questions point to /contact and /booking. To add or edit an answer, edit that file (instructions at the top). The AI route, the Anthropic SDK and the `.env` placeholder were removed.
+
+**Ask page motion.** Typing dots, then each answer writes out word by word (about 1.5 seconds, time-based), with a blinking cursor; messages slide in; related questions fade in afterwards; smooth scrolling; hover and press effects. Visitors with reduced-motion settings see answers instantly.
+
+**Booking page restyled.** Sky & bloom background with two frosted cards: "Schedule with Amira" details (1 hour, what we’ll cover, before the call, a shortcut to the request form) and the Calendly calendar. Calendly’s own title panel is hidden (`hide_event_type_details=1`) and the site colors are passed to it; Calendly applies custom colors on paid plans only.
+
+**Calendly embed upgraded.** Uses Calendly’s official inline widget (`apps/web/src/components/booking/calendly-embed.tsx`) instead of a plain iframe. A calendar-shaped placeholder shows while it loads; if it hasn’t loaded after 8 seconds, a "Show available times" button opens Calendly as a pop-up on the same page. When a booking is completed, a "You’re booked!" message appears. Tested in the preview, which blocks Calendly content, so the placeholder and pop-up paths were verified; the live calendar needs checking on the published site.
+
+**Smoother calendar loading.** The booking page preconnects to Calendly and preloads its script; a shimmering placeholder stays until Calendly reports the calendar is drawn, then crossfades into it (fade plus a slight rise, no layout jump).
+
+**Calendar reveal fix.** The calendar now shows as soon as Calendly’s frame finishes loading (Calendly’s messages only speed this up), so it can no longer stay hidden behind the placeholder. A small "Calendar not showing? Show available times" button under it opens the same-page pop-up.
+
+**Owner emails to clawpointadvisory@gmail.com.** `apps/pocketbase/pb_hooks/notify-owner.pb.js` (with `notify-owner-lib.js`) emails a summary of every new deal request, contact enquiry and newsletter sign-up through the backend’s built-in mailer. Set `OWNER_NOTIFY_EMAIL` on the backend to change the address. A failed email is logged and never blocks the submission. Uploaded documents stay in the PocketBase dashboard (not attached). Not tested on a running backend: send one test request after publishing. The address also appears in the footer’s Contact column.
+
+**Refined look (layout unchanged).** Headlines, big numbers and highlight words use Instrument Serif (italic for highlights); Manrope stays for text, buttons and figures. Palette refined: deeper forest green, softer gold in place of bright yellow, softer coral, calmer sky with a faint film-grain texture. All overrides are in the "Refined palette & editorial type" block at the end of `apps/web/src/index.css`.
+
+**Logo character (replaces the cube).** `apps/web/src/components/brand-face.tsx`: an original roof-like cap with two eyes. The eyes follow the visitor's cursor, the cap's slanted underside tilts like an eyebrow, it blinks every few seconds and squints when the logo is hovered; on touch screens it glances around by itself; still for reduced-motion users. Forest green with dark eyes in the header, gold with white eyes in the footer. Inspired by a reference animation; drawn from scratch.
+
+**Home hero.** Removed the "Real estate transactional funding" line above the headline and tightened the space above it; logo enlarged (50px header, 58px footer).
+
+**Logo character: interactions and celebration.** The eyes look at the form field being typed in; widen over main buttons; a click makes it wink and hop; after 12 seconds without movement it gets sleepy (droopy eyes, slow breathing) and wakes when the cursor moves. Springy motion: it leans with fast cursor movement and squashes/stretches on hops (time-based physics, capped). `celebrate()` in `brand-face.tsx` runs when a deal request is submitted or a Calendly booking completes: three hops with happy "^ ^" eyes and a brand-coloured confetti burst from the logo (removed after about 3 seconds; skipped for reduced-motion users).
+
+**Funding page redesigned (same wording).** Sky hero with Get funded / Run the numbers, a dark trust strip, a three-step "how it works" flow, "what it is / isn’t" and "what to bring" cards, the six deal-type cards (shared with the home page), a two-column FAQ with expandable cards (all existing answers kept), the existing process steps and the closing CTA. `funding-guide.tsx` was removed; its guide links live in the deal-type side panels.
+
+**Pricing wording.** The Funding FAQ "How much do you charge?" and the Ask-page cost answer now say pricing depends on each deal (structure, amount, timeline; exact costs in written terms), with two guidelines: EMD funding starts at $7,000; double closes under $150,000 have a fixed $1,500 fee paid at closing. The earlier percentage fees were removed. The EMD Ask answer notes the $7,000 minimum.
+
+**Sign-in link removed from the footer.** The /login page remains only because Team chat uses it (visitors sign in to see replies); nothing else links to it.
+
+**How it works (home and Funding pages).** Rebuilt as an animated timeline (`components/home/process.tsx`): serif heading with Get funded / Book a call, three icon markers joined by a line that draws itself (green → gold → coral) when scrolled into view, and step cards that rise in one after another, each with a short "what happens next" tag. Same step wording. Vertical on phones; static for reduced-motion users.
+
+
+
+**Nationwide map (smooth).** `apps/web/src/components/nationwide-map.tsx` with shapes in `apps/web/src/data/us-map.ts`: the lower 48 as one smooth curved outline plus Alaska and Hawaii insets, filled with a west-to-east brand gradient, soft shadow, light rim and a slow sheen that sweeps across. It wipes in west to east when scrolled into view; ten city points pulse and gold arcs flow between them (decorative only, not claimed deals). Shown on the home and Funding pages. Static for reduced-motion users.
+
+**Shop removed; Team chat is now a contact card.** Removed the header shopping bag and the shop, product, cart, checkout (including `public/checkout/`), chat and sign-in pages, their components and all links (sitemap no longer lists products). The floating "Team chat" button opens a card with: a notice that callers must schedule or text first (unscheduled calls are rejected automatically); Amira (346) 291-5546 with Text and Schedule buttons; Adam +1 (347) 266-7772 with a Text button; and clawpointadvisory@gmail.com. Details live in `TEAM` / `TEAM_EMAIL` in `apps/web/src/constants/site.ts`. The footer Contact column and the contact page list the same text links. The Funding FAQ payment answer no longer points to a payments page. The backend’s chat and shop collections are untouched.
+
+**Static export for Hostinger web hosting.** `react-router.config.ts` now pre-renders every page to HTML (`ssr: false` + `prerender`), so the site runs on any Hostinger web plan without Node.js. Build: `npm run build` in `apps/web`; upload the contents of `dist/apps/web/client/` to `public_html` (see `HOSTINGER-UPLOAD-GUIDE.md`). Forms post to `public/send.php`, which validates input, blocks bots (honeypot) and floods (12/hour per visitor), and emails clawpointadvisory@gmail.com via PHP `mail()` with documents attached (PDF/PNG/JPG up to 5 MB, 11 files). `/sitemap.xml`, `/robots.txt` and `/llms.txt` come from `public/sitemap.php`, `robots.php` and `llms.php` via `public/.htaccess` (which also forces HTTPS and sends unknown paths to the app's 404 page); temporary `*.hostingersite.com` hosts are kept out of search engines. The Node-only routes (`api/*`, server sitemap/robots/llms) were removed, and the PocketBase backend is no longer used by the site. Tested locally: all pages, client navigation, 404, every send.php path (success, validation errors, bad file type, honeypot), and the PHP helpers.

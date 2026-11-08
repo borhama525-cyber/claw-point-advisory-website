@@ -1,0 +1,5 @@
+import type { Route } from './+types/calculators';
+import { seo } from '@/lib/seo';
+import { ToolCta, ToolHero, ToolLibrary } from '@/components/calculators/tool-sections';
+export function meta({matches,location}:Route.MetaArgs){return seo({matches,location},{title:'Real Estate Deal Calculators | Claw Point Advisory',description:'Free Stack Method, Echo, DSCR and hard money calculators. Edit every assumption and see cash to close, spread, coverage and flip profit instantly.'});}
+export default function Calculators(){return <><ToolHero eyebrow="DEAL TOOLS" title="Put numbers behind your next move." lead="Four calculators for the structures we discuss most. Every field is editable, and every result comes with its assumptions."/><ToolLibrary/><ToolCta/></>;}
