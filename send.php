@@ -40,7 +40,7 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) reply(422, ['ok' => false, 'erro
 
 $rows = []; $subject = ''; $intro = '';
 if ($form === 'deal') {
-	$required = ['first_name' => 'first name', 'last_name' => 'last name', 'phone' => 'phone', 'address' => 'property address', 'city' => 'city', 'state' => 'state', 'zip' => 'ZIP', 'close_date' => 'close date', 'purchase_price' => 'purchase price', 'requested_funding' => 'requested funding'];
+	$required = ['first_name' => 'first name', 'last_name' => 'last name', 'phone' => 'phone', 'address' => 'property address', 'city' => 'city', 'state' => 'state', 'zip' => 'ZIP', 'property_type' => 'property type', 'close_date' => 'close date', 'purchase_price' => 'purchase price', 'requested_funding' => 'requested funding'];
 	foreach ($required as $key => $label) if (field($key) === '') reply(422, ['ok' => false, 'error' => "Please fill in the {$label}."]);
 	if (field('consent') !== 'true') reply(422, ['ok' => false, 'error' => 'Please tick the consent box.']);
 	$types = ['stack' => 'Stack Method', 'echo' => 'Echo Method', 'double-close' => 'Double Close', 'emd' => 'EMD'];
@@ -50,6 +50,7 @@ if ($form === 'deal') {
 	$intro = "A new {$type} funding request was submitted on the website.";
 	$rows = [
 		'Deal type' => $type, 'Borrower' => $name, 'Email' => $email, 'Phone' => field('phone', 40),
+		'Property type' => oneLine(field('property_type', 40)),
 		'Property' => oneLine(field('address') . ', ' . field('city', 120) . ', ' . field('state', 2) . ' ' . field('zip', 10)),
 		'Target close date' => field('close_date', 20), 'Purchase price' => money(field('purchase_price')), 'Seller finance' => money(field('seller_finance')),
 		'B–C price / ARV' => money(field('resale_price')), 'Primary loan' => money(field('primary_loan')), 'Requested funding' => money(field('requested_funding')), 'Needs a primary lender' => field('needs_lender', 3) === 'Yes' ? 'Yes, please provide one' : '',

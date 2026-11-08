@@ -56,7 +56,9 @@ Send complete documents with your request to avoid delays. We confirm timing in 
 - EMD funding starts at $7,000 (the smallest EMD amount we fund).
 - Double closes under $150,000 have a fixed $1,500 fee, paid at closing.
 
-Your exact costs come in your written terms before closing. The fee fields in our calculators are editable estimates so you can test scenarios.`},{q:`Do I need experience to get funded?`,k:`first time beginner new investor`,a:`Not always. Many structures are reviewed mainly on the deal itself. Experience can help with a primary lender’s terms, and first-time investors may need more cash in the deal.
+Your exact costs come in your written terms before closing. The fee fields in our calculators are editable estimates so you can test scenarios.`},{q:`What property types do you fund?`,k:`asset types property commercial industrial single family multifamily multi family land lots residential retail office warehouse`,a:`All asset types: single family, multifamily, commercial, industrial and land, in all 50 states.
+
+Every deal is reviewed on its own numbers, so send it over and we’ll tell you what fits.`},{q:`Do I need experience to get funded?`,k:`first time beginner new investor`,a:`Not always. Many structures are reviewed mainly on the deal itself. Experience can help with a primary lender’s terms, and first-time investors may need more cash in the deal.
 
 If you’re new, book a call at /booking and we’ll talk through your first deal.`},{q:`Can I buy in an LLC?`,k:`entity company corporation business name`,a:`Usually, yes. Buying in an LLC or other entity is common with transactional funding and investor loans. Have your entity documents ready: articles of organization, operating agreement and EIN letter.`},{q:`What happens if my deal doesn’t close?`,k:`fall through cancel fails delay`,a:`If a closing is delayed or cancelled, nothing is disbursed until the conditions in the escrow instructions are met. For EMD funding, the deposit is handled under the contract’s refund terms.
 
