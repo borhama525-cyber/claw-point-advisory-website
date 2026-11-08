@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import { CheckCircle2, Lock, Send, Star } from 'lucide-react';
 import { sendForm } from '@/lib/send-form';
 import { useFormSubmission } from '@/hooks/use-form-submission';
@@ -17,16 +18,23 @@ function ReviewForm() {
 	const [rating, setRating] = useState(0);
 	const [hover, setHover] = useState(0);
 	useEffect(() => { if (form.isSuccess) { celebrate(); setRating(0); } }, [form.isSuccess]);
+	// Links in the after-closing email carry the deal's private code and the client's first name.
+	const [params] = useSearchParams();
+	const ref = (params.get('ref') ?? '').replace(/[^a-z0-9]/gi, '').slice(0, 16);
+	const first = (params.get('name') ?? '').slice(0, 60);
 	const shown = hover || rating;
 	const label = useMemo(() => LABELS[shown], [shown]);
 	return <form id="leave" className="contact-form rv-form" onSubmit={form.onSubmit}>
 		<input {...form.honeypotProps} />
+		{ref && <input type="hidden" name="ref" value={ref} />}
 		{form.isSuccess ? <div className="contact-success" role="status">
 			<CheckCircle2 size={40} />
 			<h3>Thank you! <em>Truly.</em></h3>
 			<p>Your review went straight to the team. We read every one.</p>
 		</div> : <>
-			<div className="contact-form-head"><h3>Leave a review</h3><p>How was working with Claw Point? A few honest words help us get better.</p></div>
+			<div className="contact-form-head">{ref
+				? <><h3>{first ? `Thanks for closing with us, ${first}!` : 'Thanks for closing with us!'}</h3><p>Congrats on the deal. How was working with Claw Point? It only takes a minute.</p></>
+				: <><h3>Leave a review</h3><p>How was working with Claw Point? A few honest words help us get better.</p></>}</div>
 			<p className="rv-private"><Lock size={15} /> Private: only the Claw Point team sees your review. It’s never posted on the website.</p>
 			<fieldset className="rv-rate" onMouseLeave={() => setHover(0)}><legend>Your rating</legend>
 				<div>{[1, 2, 3, 4, 5].map(i => <label key={i} className={i <= shown ? 'on' : ''} onMouseEnter={() => setHover(i)}>
@@ -34,7 +42,7 @@ function ReviewForm() {
 				</label>)}<span className="rv-rate-label">{label}</span></div>
 			</fieldset>
 			<div className="contact-row">
-				<label>Name<input name="name" autoComplete="name" required maxLength={120} placeholder="Your name" /></label>
+				<label>Name<input name="name" autoComplete="name" required maxLength={120} placeholder="Your name" defaultValue={first} key={first} /></label>
 				<label>Email<input name="email" type="email" autoComplete="email" required placeholder="you@company.com" /></label>
 			</div>
 			<div className="contact-row">
