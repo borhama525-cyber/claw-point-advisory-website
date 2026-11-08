@@ -20,7 +20,7 @@ export function HomeHero() {
 	</div></section>;
 }
 
-const TICKER = ['Stack Method', 'Echo Method', 'Double close', 'EMD funding', 'Primary lender available', 'Funds only through escrow', 'Written terms before closing', 'Every file reviewed by a person', 'Free deal calculators'];
+const TICKER = ['Stack Method', 'Echo Method', 'Double close', 'EMD funding', 'Primary lender available', 'All asset types', 'Single family', 'Multifamily', 'Commercial', 'Industrial', 'Land', 'Funds only through escrow', 'Written terms before closing', 'Every file reviewed by a person', 'Free deal calculators'];
 
 export function Ticker() {
 	const items = [...TICKER, ...TICKER];

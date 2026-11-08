@@ -8,6 +8,7 @@ import { useFormSubmission } from '@/hooks/use-form-submission';
 export type RequestPrefill = { purchase_price?: number; seller_finance?: number; resale_price?: number; primary_loan?: number; requested_funding?: number };
 
 const STATES = 'AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY'.split(' ');
+const PROPERTY_TYPES = ['Single family', 'Multifamily', 'Commercial', 'Industrial', 'Land'];
 const MONEY = ['purchase_price', 'seller_finance', 'resale_price', 'primary_loan', 'requested_funding'] as const;
 const grouped = (n?: number) => (n === undefined || !Number.isFinite(n) ? '' : Math.round(n).toLocaleString('en-US'));
 
@@ -48,6 +49,7 @@ export function DealRequestDialog({ open, onOpenChange, method, title, prefill, 
 					<div className="dr-row"><Field label="Borrower email" name="email" required error={e.email}><input id="dr-email" name="email" type="email" autoComplete="email" required placeholder="you@example.com" /></Field>
 					<Field label="Borrower phone" name="phone" required error={e.phone}><input id="dr-phone" name="phone" type="tel" autoComplete="tel" required maxLength={40} placeholder="(555) 555-5555" /></Field></div>
 					<h3>Deal information</h3>
+					<Field label="Property type" name="property_type" required error={e.property_type}><select id="dr-property_type" name="property_type" required defaultValue=""><option value="" disabled>Select</option>{PROPERTY_TYPES.map(t => <option key={t}>{t}</option>)}</select></Field>
 					<Field label="Subject property address" name="address" required error={e.address}><input id="dr-address" name="address" autoComplete="street-address" required maxLength={300} placeholder="Street address" /></Field>
 					<div className="dr-row dr-row-3"><Field label="City" name="city" required error={e.city}><input id="dr-city" name="city" autoComplete="address-level2" required maxLength={120} /></Field>
 					<Field label="State" name="state" required error={e.state}><select id="dr-state" name="state" autoComplete="address-level1" required defaultValue=""><option value="" disabled>Select</option>{STATES.map(s => <option key={s}>{s}</option>)}</select></Field>
