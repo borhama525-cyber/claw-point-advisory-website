@@ -123,10 +123,9 @@ if ($form === 'deal') {
 	$rating = (int) field('rating', 1);
 	if ($name === '' || mb_strlen($review) < 10) reply(422, ['ok' => false, 'error' => 'Please add your name and a few words about your experience.']);
 	if ($rating < 1 || $rating > 5) reply(422, ['ok' => false, 'error' => 'Please choose a star rating.']);
-	if (field('consent') !== 'true') reply(422, ['ok' => false, 'error' => 'Please tick the box so we can publish your review.']);
 	$stars = str_repeat('★', $rating) . str_repeat('☆', 5 - $rating);
 	$subject = "New website review · {$stars} from {$name}";
-	$intro = 'A client left a review on the website. It appears on the site once you tick Approve on its row in the Reviews tab of the sheet.';
+	$intro = 'A client left a private review on the website. It is saved in the Reviews tab of the sheet and is not shown on the site.';
 	$rows = ['Rating' => "{$stars} ({$rating} of 5)", 'Name' => $name, 'Role / company' => oneLine(field('role', 120)), 'Deal type' => oneLine(field('deal', 40)), 'Review' => $review, 'Email' => $email];
 } elseif ($form === 'newsletter') {
 	$subject = "New website lead · Newsletter: {$email}";
@@ -191,7 +190,7 @@ $rows = array_filter($rows, fn($v) => trim((string) $v) !== '');
 $sheet = is_file(__DIR__ . '/lead-sheet.php') ? (include __DIR__ . '/lead-sheet.php') : null;
 if (is_array($sheet) && !empty($sheet['url']) && function_exists('curl_init')) {
 	if ($form === 'review') {
-		// Reviews go to their own tab with an Approve checkbox; nothing is published until it's ticked.
+		// Reviews are private: they go to their own tab and are never shown on the site.
 		$lead = ['secret' => $sheet['secret'] ?? '', 'kind' => 'review', 'name' => $rows['Name'], 'email' => $email, 'role' => $rows['Role / company'] ?? '',
 			'deal' => $rows['Deal type'] ?? '', 'rating' => (string) $rating, 'review' => $rows['Review']];
 	} else {
