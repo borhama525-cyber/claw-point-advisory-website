@@ -1,0 +1,1 @@
+import{t as e}from"./jsx-runtime-afkERV6J.js";var t=e();function n({index:e,title:n,text:r}){return(0,t.jsxs)(`section`,{className:`page-heading`,children:[(0,t.jsxs)(`p`,{className:`eyebrow`,children:[e,` / CLAW POINT ADVISORY`]}),(0,t.jsx)(`h1`,{children:n}),(0,t.jsx)(`p`,{children:r})]})}export{n as t};

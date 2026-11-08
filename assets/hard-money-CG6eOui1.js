@@ -1,0 +1,1 @@
+import{o as e,t}from"./jsx-runtime-afkERV6J.js";import{n,t as r}from"./method-page-rRjgNRRP.js";var i=t(),a=n(`hard-money`),o=e(function(){return(0,i.jsx)(r,{slug:`hard-money`})});export{o as default,a as meta};
