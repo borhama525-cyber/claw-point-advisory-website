@@ -89,7 +89,7 @@ export function AskPanel({ initialQuestion }: { initialQuestion?: string }) {
 			: <div className="ask-thread" aria-live="polite">{turns.map(t => <div key={t.id} className={`ask-turn ${t.role}`}>{t.role === 'user' ? <p>{t.content}</p> : <Reply turn={t} onAsk={ask} onProgress={() => t.live && follow()} onDone={() => t.live && setWriting(false)} />}</div>)}<div ref={end} className="ask-end" /></div>}
 		<form className="ask-box" onSubmit={submit}>
 			<label htmlFor="ask-input" className="sr-only">Your question</label>
-			<textarea id="ask-input" rows={empty ? 3 : 1} maxLength={500} value={draft} placeholder={empty ? 'Ask anything… e.g. how does EMD funding get repaid?' : 'Ask another question…'} onChange={e => setDraft(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ask(draft); } }} />
+			<textarea id="ask-input" rows={empty ? 3 : 1} maxLength={500} value={draft} placeholder={empty ? 'Ask anything, like how does EMD funding get repaid?' : 'Ask another question…'} onChange={e => setDraft(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ask(draft); } }} />
 			<div className="ask-box-row"><span className="ask-scope">Transactional funding · Underwriting</span><button type="submit" className="ask-send" disabled={!draft.trim() || writing} aria-label="Send question"><ArrowUp size={18} /></button></div>
 		</form>
 		{empty && <div className="ask-chips">{SUGGESTIONS.map((s, i) => <button key={s} type="button" style={{ animationDelay: `${120 + i * 60}ms` }} onClick={() => ask(s)}>{s}</button>)}</div>}
@@ -108,7 +108,7 @@ export function AskTeaser() {
 		<p className="ask-teaser-lead">General answers about transactional funding and loan underwriting, from double closes to the Stack Method.</p>
 		<form className="ask-box" onSubmit={e => { e.preventDefault(); go(q); }}>
 			<label htmlFor="ask-teaser-input" className="sr-only">Your question</label>
-			<textarea id="ask-teaser-input" rows={2} maxLength={500} value={q} placeholder="Ask anything… e.g. what does an underwriter check first?" onChange={e => setQ(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); go(q); } }} />
+			<textarea id="ask-teaser-input" rows={2} maxLength={500} value={q} placeholder="Ask anything, like what does an underwriter check first?" onChange={e => setQ(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); go(q); } }} />
 			<div className="ask-box-row"><span className="ask-scope">Transactional funding · Underwriting</span><button type="submit" className="ask-send" aria-label="Ask"><ArrowUp size={18} /></button></div>
 		</form>
 		<div className="ask-chips">{SUGGESTIONS.slice(0, 3).map(s => <button key={s} type="button" onClick={() => go(s)}>{s}</button>)}</div>

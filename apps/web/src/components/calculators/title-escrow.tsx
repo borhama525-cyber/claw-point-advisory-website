@@ -83,7 +83,7 @@ export function EmdSection({ errors: e, propertyType, titleMode, onTitleMode, us
 					<select id="dr-emd_role" name="emd_role" required value={role} onChange={ev => setRole(ev.target.value)}><option value="" disabled>Select</option><option>Buyer</option><option>Wholesaler acting as buyer</option></select>
 					{e.emd_role && <em className="dr-error">{e.emd_role}</em>}</label>
 				<label className="dr-field" htmlFor="dr-inspection_days"><span>Inspection period (days) *</span>
-					<input id="dr-inspection_days" name="inspection_days" inputMode="numeric" pattern="\d{1,3}" required maxLength={3} placeholder="e.g. 30" value={days} onChange={ev => setDays(ev.target.value.replace(/\D/g, ''))} />
+					<input id="dr-inspection_days" name="inspection_days" inputMode="numeric" pattern="\d{1,3}" required maxLength={3} placeholder="30" value={days} onChange={ev => setDays(ev.target.value.replace(/\D/g, ''))} />
 					{e.inspection_days && <em className="dr-error">{e.inspection_days}</em>}</label>
 			</div>
 			{longCommercial && <p className="dr-note">Commercial deal with a {Number(days) >= 90 ? '90+' : '60+'} day inspection period: the EMD is structured with a fee every 30 days and a separate mutual EMD loan agreement. We’ll go through it once your PSA and title details are in.</p>}
