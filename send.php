@@ -126,7 +126,9 @@ if ($form === 'deal') {
 	$stars = str_repeat('★', $rating) . str_repeat('☆', 5 - $rating);
 	$subject = "New website review · {$stars} from {$name}";
 	$intro = 'A client left a private review on the website. It is saved in the Reviews tab of the sheet and is not shown on the site.';
-	$rows = ['Rating' => "{$stars} ({$rating} of 5)", 'Name' => $name, 'Role / company' => oneLine(field('role', 120)), 'Deal type' => oneLine(field('deal', 40)), 'Review' => $review, 'Email' => $email];
+	$ref = preg_replace('/[^a-z0-9]/i', '', field('ref', 16));
+	if ($ref !== '') $intro = 'A client left a private review after their deal closed. It is saved in the Reviews tab and linked to the deal in Website Leads.';
+	$rows = ['Rating' => "{$stars} ({$rating} of 5)", 'Name' => $name, 'Role / company' => oneLine(field('role', 120)), 'Deal type' => oneLine(field('deal', 40)), 'Review' => $review, 'Email' => $email, 'Closed deal ref' => $ref];
 } elseif ($form === 'newsletter') {
 	$subject = "New website lead · Newsletter: {$email}";
 	$intro = 'Someone signed up for updates on the website.';
@@ -192,7 +194,7 @@ if (is_array($sheet) && !empty($sheet['url']) && function_exists('curl_init')) {
 	if ($form === 'review') {
 		// Reviews are private: they go to their own tab and are never shown on the site.
 		$lead = ['secret' => $sheet['secret'] ?? '', 'kind' => 'review', 'name' => $rows['Name'], 'email' => $email, 'role' => $rows['Role / company'] ?? '',
-			'deal' => $rows['Deal type'] ?? '', 'rating' => (string) $rating, 'review' => $rows['Review']];
+			'deal' => $rows['Deal type'] ?? '', 'rating' => (string) $rating, 'review' => $rows['Review'], 'ref' => $rows['Closed deal ref'] ?? ''];
 	} else {
 		$sources = ['deal' => 'Deal request', 'enquiry' => 'Contact form', 'newsletter' => 'Newsletter', 'network' => 'Network list'];
 		$funding = ['deal' => $rows['Deal type'] ?? 'Funding', 'enquiry' => 'General enquiry', 'newsletter' => 'Newsletter', 'network' => 'Network'];
