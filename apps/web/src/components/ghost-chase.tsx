@@ -24,7 +24,7 @@ const writePref = (v: string) => { try { localStorage.setItem(KEY, v); } catch {
 const firstVisit = () => { try { if (localStorage.getItem(MET)) return false; localStorage.setItem(MET, '1'); return true; } catch { return false; } };
 
 const SAY = {
-	idle: ['Mrrp! Happy to see you.', 'EMD? Earnest Meow Deposit.', 'I closed on a cardboard box once.', 'Is that a double close? Twice the treats.', 'Take your time, I’ll be here.', 'Every deal gets a real human. And a cat.'],
+	idle: ['Good to see you.', 'EMD? Earnest Meow Deposit.', 'I closed on a cardboard box once.', 'Is that a double close? Twice the treats.', 'Take your time, I’ll be here.', 'Every deal gets a real human. And a cat.'],
 	hiss: ['Hsss! No poking!', 'Hsss! Paws off!', 'Hsss! …okay, hi.', 'Personal space! Hsss!'],
 	napWake: ['Hsss! I was napping!', 'Five more minutes…', 'Mrrf. Fine, I’m up.'],
 	napStart: ['*yawn*', 'Nap o’clock.', 'Wake me at closing.'],
@@ -50,8 +50,8 @@ const PAGE: Record<string, string[]> = {
 };
 
 // The kitty's head for the floating pose (viewBox 0 0 140 120).
-const HEAD = 'M30,54 C27,42 25,29 28,19 Q29,14 34,17 C41,21 47,26 52,31 C62,28 78,28 88,31 C93,26 99,21 106,17 Q111,14 112,19 C115,29 113,42 110,54 C118,63 121,77 115,89 C107,104 89,112 70,112 C51,112 33,104 25,89 C19,77 22,63 30,54 Z';
-const PUFF = Array.from({ length: 30 }, (_, i) => { const a = (i / 30) * Math.PI * 2, r = i % 2 ? 54 : 64; return `${(70 + Math.cos(a) * r).toFixed(1)},${(70 + Math.sin(a) * r * 0.9).toFixed(1)}`; }).join(' ');
+const HEAD = 'M41,60 L31,13 Q31,10 34,12 L58,35 Q70,32 82,35 L106,12 Q109,10 109,13 L99,60 Q103,84 88,100 Q70,113 52,100 Q37,84 41,60 Z';
+const PUFF = Array.from({ length: 34 }, (_, i) => { const a = (i / 34) * Math.PI * 2, r = i % 2 ? 50 : 60; return `${(70 + Math.cos(a) * r).toFixed(1)},${(70 + Math.sin(a) * r * 0.9).toFixed(1)}`; }).join(' ');
 
 // Friendly nudges with a button, so visitors can act on them right away.
 type Nudge = { line: string; label: string; go: 'deal' | 'booking' | 'chat' | 'funding' | 'network' };
@@ -64,12 +64,10 @@ const NUDGES: Nudge[] = [
 	{ line: 'Want to work together? Join the network!', label: 'Join the network', go: 'network' },
 ];
 
-const SIDE_BODY = 'M36,70 C36,58 52,54 70,55 C84,56 94,54 100,62 C106,72 102,86 88,88 L50,88 C40,88 36,80 36,70 Z';
-const SIDE_HEAD = 'M90,52 C90,40 99,33 108,34 L112,22 Q114,17 117,21 L123,35 C129,41 131,49 129,57 C126,69 115,74 105,72 C95,70 90,63 90,52 Z';
-const SIDE_EAR = 'M99,38 L100,25 Q101,20 105,23 L111,33 Z';
-const SIDE_TAIL = 'M38,72 C20,70 12,54 18,38 C20,32 27,32 27,38 C25,50 29,60 42,64 Z';
-const LOAF = 'M24,102 C18,88 26,74 42,70 C48,63 57,59 66,60 L70,47 Q72,42 76,46 L83,55 C88,54 93,54 98,55 L105,46 Q109,42 111,47 L112,61 C120,67 124,77 122,87 C124,97 120,106 108,108 L36,108 C30,108 26,106 24,102 Z';
-const LOAF_TAIL = 'M30,104 C42,114 82,116 102,108 C107,106 105,101 100,102 C82,107 52,107 34,99 Z';
+const SIDE_BODY = 'M26,72 C30,62 56,58 80,60 C92,61 100,57 104,50 L106,35 Q106,32 108,34 L113,44 L118,36 Q120,34 120,37 L120,52 C125,58 123,66 114,69 C106,72 100,78 94,82 C78,86 56,86 44,82 C34,80 26,78 26,72 Z';
+const SIDE_TAIL = 'M30,72 C12,70 6,52 14,40 C19,33 28,36 25,44';
+const LOAF = 'M20,106 C18,92 32,82 50,80 C54,72 58,64 64,58 C68,52 74,48 80,48 L83,33 Q84,30 86,32 L92,42 L99,34 Q101,32 102,35 L103,50 C109,56 110,66 104,73 C118,78 126,90 124,106 Z';
+const LOAF_TAIL = 'M24,106 C46,113 92,113 116,106';
 
 type Mode = 'float' | 'walk' | 'nap' | 'bully' | 'visit' | 'hiss' | 'party' | 'pounce';
 type Pose = 'head' | 'walk' | 'loaf' | 'sit' | 'puff';
@@ -301,11 +299,11 @@ export function GhostChase() {
 			const flip = still ? kp.face : 1;
 			k.style.transform = `translate3d(${kp.x.toFixed(1)}px,${(kp.y + bob).toFixed(1)}px,0) rotate(${(kp.tilt + kp.spin + (mode === 'pounce' && jump.phase === 'leap' ? Math.max(-30, Math.min(30, Math.atan2(kp.vy, Math.abs(kp.vx) || 1) * 57)) * kp.face : 0)).toFixed(2)}deg) scale(${(sq.x * flip).toFixed(3)},${sq.y.toFixed(3)})`;
 			const sp = Math.hypot(kp.vx, kp.vy) || 1;
-			kEyes.current?.setAttribute('transform', laughUntil > t ? 'translate(0 42) scale(1 .4)' : `translate(${(kp.vx / sp * 4).toFixed(2)} ${(kp.vy / sp * 3).toFixed(2)})`);
+			kEyes.current?.setAttribute('transform', laughUntil > t ? 'translate(0 47) scale(1 .3)' : `translate(${(kp.vx / sp * 4).toFixed(2)} ${(kp.vy / sp * 3).toFixed(2)})`);
 			// Walking legs and a swishing tail.
 			const step = s * 12;
 			legs.current?.querySelectorAll('line').forEach((l, i) => { const a = Math.sin(step + (i % 2 ? Math.PI : 0) + (i > 1 ? Math.PI / 2 : 0)) * 6; l.setAttribute('x2', String(Number(l.dataset.x) + a)); });
-			tail.current?.setAttribute('transform', `rotate(${(Math.sin(s * (pose === 'loaf' ? 1.2 : 3)) * (pose === 'loaf' ? 4 : 14)).toFixed(1)} 38 68)`);
+			tail.current?.setAttribute('transform', `rotate(${(Math.sin(s * (pose === 'loaf' ? 1.2 : 2.4)) * (pose === 'loaf' ? 3 : 10)).toFixed(1)} 30 72)`);
 			zzz.current?.classList.toggle('show', napping);
 			// Bubbles follow their speakers and fade on their own.
 			if (kBubble.current) { kBubble.current.style.transform = `translate3d(${(kp.x + KW / 2).toFixed(1)}px,${(kp.y + bob - 6).toFixed(1)}px,0)`; if (t > kSayUntil) kBubble.current.classList.remove('show'); }
@@ -332,54 +330,39 @@ export function GhostChase() {
 			<div ref={kitty} className="gc-kitty" style={{ width: KW, height: KH }}>
 				<svg ref={kSvg} viewBox="0 0 140 120" overflow="visible" data-pose="head">
 					<defs>
-						<linearGradient id="gc-iri" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#dcc64a" /><stop offset=".5" stopColor="#e2806f" /><stop offset="1" stopColor="#9cc3c6" /></linearGradient>
-						<radialGradient id="gc-fur" cx="38%" cy="30%" r="80%"><stop offset="0" stopColor="#2c5a43" /><stop offset=".55" stopColor={BODY} /><stop offset="1" stopColor="#10291d" /></radialGradient>
-						<filter id="gc-soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.1" /></filter>
-						<filter id="gc-halo" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="9" /></filter>
-						<filter id="gc-rim" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4.5" /></filter>
+						<linearGradient id="gc-fur" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stopColor="#2a5a43" /><stop offset=".5" stopColor={BODY} /><stop offset="1" stopColor="#0d2117" /></linearGradient>
+						<radialGradient id="gc-iris" cx="50%" cy="45%" r="60%"><stop offset="0" stopColor="#fff2b0" /><stop offset=".55" stopColor="#dcc64a" /><stop offset="1" stopColor="#a88a1c" /></radialGradient>
+						<filter id="gc-halo" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="8" /></filter>
+						<filter id="gc-glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="2.4" /></filter>
 					</defs>
-					{/* Floating head (also the base of the puffed-up hiss) */}
+					{/* Head: sleek, angular, almond gold eyes with slit pupils. Also the base of the hiss. */}
 					<g className="gc-pose gc-pose-head">
-						<polygon className="gc-puff" points={PUFF} fill="url(#gc-fur)" filter="url(#gc-soft)" />
-						<path d={HEAD} fill="#24533d" opacity=".32" filter="url(#gc-halo)" transform="translate(0 6)" />
-						<path className="gc-rim" d={HEAD} fill="url(#gc-iri)" filter="url(#gc-rim)" transform="translate(7 8)" />
-						<path d={HEAD} fill="url(#gc-fur)" filter="url(#gc-soft)" />
-						<path d="M34,22 Q36,19 40,22 L47,29 C42,31 38,33 35,36 Z M106,22 Q104,19 100,22 L93,29 C98,31 102,33 105,36 Z" fill="#e2806f" opacity=".55" />
+						<polygon className="gc-puff" points={PUFF} fill="url(#gc-fur)" stroke="#dcc64a" strokeOpacity=".5" strokeWidth="1.2" strokeLinejoin="round" />
+						<path d={HEAD} fill="#24533d" opacity=".3" filter="url(#gc-halo)" transform="translate(0 6)" />
+						<path d={HEAD} fill="url(#gc-fur)" stroke="#dcc64a" strokeOpacity=".55" strokeWidth="1.4" strokeLinejoin="round" />
 						<g ref={kEyes}>
-							<circle cx="53" cy="70" r="10" fill="#fff7dc" /><circle cx="87" cy="70" r="10" fill="#fff7dc" />
-							<circle cx="54" cy="71" r="6" fill="#0f241a" /><circle cx="88" cy="71" r="6" fill="#0f241a" />
-							<circle cx="56.5" cy="67.5" r="2.4" fill="#fff" /><circle cx="90.5" cy="67.5" r="2.4" fill="#fff" />
+							<path d="M45,69 Q55,59 65,68 Q55,75 45,69 Z M75,68 Q85,59 95,69 Q85,75 75,68 Z" fill="#dcc64a" opacity=".55" filter="url(#gc-glow)" />
+							<path d="M45,69 Q55,59 65,68 Q55,75 45,69 Z M75,68 Q85,59 95,69 Q85,75 75,68 Z" fill="url(#gc-iris)" />
+							<ellipse cx="55" cy="67.5" rx="1.5" ry="5" fill="#0d2117" /><ellipse cx="85" cy="67.5" rx="1.5" ry="5" fill="#0d2117" />
 						</g>
-						<path d="M66,83 Q70,81 74,83 Q70,88 66,83 Z" fill="#e2806f" />
-						<path d="M70,87 Q66,92 62,89 M70,87 Q74,92 78,89" fill="none" stroke="#0f241a" strokeWidth="2" strokeLinecap="round" opacity=".6" />
-						<path d="M30,100 Q70,118 110,100" fill="none" stroke="#dcc64a" strokeWidth="5.5" strokeLinecap="round" />
-						<circle cx="70" cy="110" r="5.5" fill="#dcc64a" /><circle cx="70" cy="110" r="2" fill="#a88f1e" />
-						<g className="gc-fangs"><path d="M60,89 Q70,99 80,89 Q70,93 60,89 Z" fill="#e2806f" /><path d="M63,90 l2.5,5 l2.5,-4 Z M72,91 l2.5,4 l2.5,-5 Z" fill="#fff" /></g>
+						<g className="gc-fangs"><path d="M62,89 Q70,96 78,89 Q70,92 62,89 Z" fill="#0d2117" /><path d="M64.5,89.5 l1.8,4 l1.8,-3.4 Z M72,90.1 l1.8,3.4 l1.8,-4 Z" fill="#fff7dc" /></g>
 					</g>
-					{/* Walking along the edge (side view) */}
+					{/* Walking along the edge: a long, sleek side profile */}
 					<g className="gc-pose gc-pose-walk">
-						<g className="gc-rim" filter="url(#gc-rim)" transform="translate(5 6)" fill="url(#gc-iri)"><path d={SIDE_BODY} /><path d={SIDE_HEAD} /></g>
-						<path ref={tail} d={SIDE_TAIL} fill="url(#gc-fur)" filter="url(#gc-soft)" />
-						<g ref={legs} stroke={BODY} strokeWidth="9" strokeLinecap="round">
-							<line data-x="48" x1="48" y1="80" x2="48" y2="104" /><line data-x="58" x1="58" y1="80" x2="58" y2="104" />
-							<line data-x="82" x1="82" y1="80" x2="82" y2="104" /><line data-x="92" x1="92" y1="80" x2="92" y2="104" />
+						<path ref={tail} d={SIDE_TAIL} fill="none" stroke="url(#gc-fur)" strokeWidth="5.5" strokeLinecap="round" />
+						<g ref={legs} stroke={BODY} strokeWidth="5" strokeLinecap="round">
+							<line data-x="44" x1="44" y1="78" x2="44" y2="105" /><line data-x="52" x1="52" y1="78" x2="52" y2="105" />
+							<line data-x="86" x1="86" y1="76" x2="86" y2="105" /><line data-x="94" x1="94" y1="76" x2="94" y2="105" />
 						</g>
-						<g fill="url(#gc-fur)" filter="url(#gc-soft)"><path d={SIDE_EAR} opacity=".85" /><path d={SIDE_BODY} /><path d={SIDE_HEAD} /></g>
-						<path d="M114,26 L119,35 L114,34 Z" fill="#e2806f" opacity=".6" />
-						<circle cx="115" cy="52" r="5.5" fill="#fff7dc" /><circle cx="116.5" cy="52.5" r="3.2" fill="#0f241a" /><circle cx="117.5" cy="51" r="1.2" fill="#fff" />
-						<path d="M127,60 Q129,62 127,64" fill="none" stroke="#e2806f" strokeWidth="2.5" strokeLinecap="round" />
-						<path d="M94,66 Q106,74 120,68" fill="none" stroke="#dcc64a" strokeWidth="4.5" strokeLinecap="round" />
+						<path d={SIDE_BODY} fill="url(#gc-fur)" stroke="#dcc64a" strokeOpacity=".5" strokeWidth="1.2" strokeLinejoin="round" />
+						<path d="M108,55 Q113,50 118,54 Q113,58 108,55 Z" fill="url(#gc-iris)" /><ellipse cx="113" cy="54.3" rx=".9" ry="2.8" fill="#0d2117" />
 					</g>
-					{/* Loaf: napping (closed eyes) or sitting and watching (open eyes) */}
+					{/* Resting sphinx: napping (closed eyes) or sitting up and watching (open eyes) */}
 					<g className="gc-pose gc-pose-loaf">
-						<path className="gc-rim" d={LOAF} fill="url(#gc-iri)" filter="url(#gc-rim)" transform="translate(5 6)" />
-						<path d={LOAF} fill="url(#gc-fur)" filter="url(#gc-soft)" />
-						<path d={LOAF_TAIL} fill="url(#gc-fur)" filter="url(#gc-soft)" />
-						<path d="M72,50 L78,56 L73,57 Z M108,49 L109,57 L104,56 Z" fill="#e2806f" opacity=".55" />
-						<path d="M76,90 Q92,98 110,88" fill="none" stroke="#dcc64a" strokeWidth="4.5" strokeLinecap="round" />
-						<g className="gc-sleepy" fill="none" stroke="#fff7dc" strokeWidth="3" strokeLinecap="round"><path d="M80,76 q5,5 10,0" /><path d="M98,76 q5,5 10,0" /></g>
-						<g className="gc-awake"><circle cx="85" cy="76" r="6.5" fill="#fff7dc" /><circle cx="103" cy="76" r="6.5" fill="#fff7dc" /><circle cx="86" cy="77" r="3.8" fill="#0f241a" /><circle cx="104" cy="77" r="3.8" fill="#0f241a" /><circle cx="87.5" cy="75" r="1.4" fill="#fff" /><circle cx="105.5" cy="75" r="1.4" fill="#fff" /></g>
-						<path d="M92,82 Q94,80 96,82 Q94,85 92,82 Z" fill="#e2806f" />
+						<path d={LOAF_TAIL} fill="none" stroke="url(#gc-fur)" strokeWidth="5.5" strokeLinecap="round" />
+						<path d={LOAF} fill="url(#gc-fur)" stroke="#dcc64a" strokeOpacity=".5" strokeWidth="1.2" strokeLinejoin="round" />
+						<g className="gc-sleepy" fill="none" stroke="#dcc64a" strokeWidth="1.8" strokeLinecap="round"><path d="M79,60 Q84,63 89,60" /><path d="M93,59 Q98,62 103,59" /></g>
+						<g className="gc-awake"><path d="M79,61 Q84,55 89,60 Q84,64 79,61 Z M93,60 Q98,55 103,61 Q98,64 93,60 Z" fill="url(#gc-iris)" /><ellipse cx="84" cy="60" rx=".9" ry="3" fill="#0d2117" /><ellipse cx="98" cy="60" rx=".9" ry="3" fill="#0d2117" /></g>
 					</g>
 				</svg>
 			</div>
