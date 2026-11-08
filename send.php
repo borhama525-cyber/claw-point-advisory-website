@@ -102,6 +102,21 @@ if ($form === 'deal') {
 	$subject = 'New website lead · Contact form: ' . ($name !== '' ? $name : $email);
 	$intro = 'A new enquiry was sent from the website’s contact form.';
 	$rows = ['Topic' => oneLine(field('topic', 80)), 'Name' => $name, 'Email' => $email, 'Phone' => field('phone', 60), 'Message' => field('message', 5000)];
+} elseif ($form === 'network') {
+	// Keep in step with NETWORK_ROLES in src/components/network/network-form.tsx.
+	$allowed = ['Transaction coordinator (TC)', 'Real estate agent / broker', 'Commercial broker', 'Family office', 'Buyer / investor', 'Developer', 'Wholesaler', 'Land wholesaler', 'Lender / capital partner', 'Title / escrow', 'Other'];
+	$list = fn(string $k, array $ok) => array_values(array_intersect(array_map('strval', (array) ($_POST[$k] ?? [])), $ok));
+	$roles = $list('roles', $allowed);
+	if (!$roles) reply(422, ['ok' => false, 'error' => 'Please choose at least one role.']);
+	if (in_array('Other', $roles, true)) $roles[array_search('Other', $roles, true)] = 'Other: ' . (oneLine(field('role_other', 100)) ?: 'not specified');
+	$name = oneLine(field('name', 200));
+	if ($name === '' || field('phone', 60) === '' || field('markets', 300) === '') reply(422, ['ok' => false, 'error' => 'Please add your name, phone and markets.']);
+	if (field('consent') !== 'true') reply(422, ['ok' => false, 'error' => 'Please tick the consent box.']);
+	$subject = 'New website lead · Network: ' . $name . ' (' . implode(', ', array_map(fn($r) => explode(' (', $r)[0], $roles)) . ')';
+	$intro = 'Someone joined the network list on the website.';
+	$rows = ['Role' => implode(', ', $roles), 'Name' => $name, 'Company' => oneLine(field('company', 200)), 'Email' => $email, 'Phone' => field('phone', 60),
+		'Markets' => oneLine(field('markets', 300)), 'Asset types' => implode(', ', $list('assets', ['Single family', 'Multifamily', 'Commercial', 'Industrial', 'Land'])),
+		'How they want to work with us' => field('message', 3000), 'Website' => oneLine(field('website', 200)), 'LinkedIn / Instagram' => oneLine(field('social', 200))];
 } elseif ($form === 'newsletter') {
 	$subject = "New website lead · Newsletter: {$email}";
 	$intro = 'Someone signed up for updates on the website.';
@@ -164,16 +179,16 @@ $rows = array_filter($rows, fn($v) => trim((string) $v) !== '');
 // Runs before the email so a lead is kept even if mail delivery has a problem.
 $sheet = is_file(__DIR__ . '/lead-sheet.php') ? (include __DIR__ . '/lead-sheet.php') : null;
 if (is_array($sheet) && !empty($sheet['url']) && function_exists('curl_init')) {
-	$sources = ['deal' => 'Deal request', 'enquiry' => 'Contact form', 'newsletter' => 'Newsletter'];
-	$funding = ['deal' => $rows['Deal type'] ?? 'Funding', 'enquiry' => 'General enquiry', 'newsletter' => 'Newsletter'];
+	$sources = ['deal' => 'Deal request', 'enquiry' => 'Contact form', 'newsletter' => 'Newsletter', 'network' => 'Network list'];
+	$funding = ['deal' => $rows['Deal type'] ?? 'Funding', 'enquiry' => 'General enquiry', 'newsletter' => 'Newsletter', 'network' => 'Network'];
 	$num = fn(string $k) => (string) ((float) preg_replace('/[^0-9.]/', '', field($k)) ?: '');
 	$lead = ['secret' => $sheet['secret'] ?? '', 'source' => $sources[$form], 'funding_type' => $funding[$form], 'email' => $email,
 		'name' => $rows['Borrower'] ?? $rows['Name'] ?? '', 'phone' => $rows['Phone'] ?? '',
-		'topic' => $form === 'enquiry' ? ($rows['Topic'] ?? '') : '', 'property_type' => $rows['Property type'] ?? '',
+		'topic' => $form === 'enquiry' ? ($rows['Topic'] ?? '') : ($form === 'network' ? ($rows['Role'] ?? '') : ''), 'property_type' => $rows['Property type'] ?? '',
 		'address' => $rows['Property'] ?? '', 'close_date' => $form === 'deal' ? field('close_date', 20) : '',
 		'purchase_price' => $form === 'deal' ? $num('purchase_price') : '', 'requested_funding' => $form === 'deal' ? $num('requested_funding') : '',
 		'needs_lender' => isset($rows['Needs a primary lender']) ? 'Yes' : (in_array(field('method', 20), ['stack', 'echo'], true) && $form === 'deal' ? 'No' : ''),
-		'message' => trim(implode("\n", array_filter([$rows['Description'] ?? $rows['Message'] ?? '', isset($rows['Title company']) ? 'Title: ' . $rows['Title company'] : '', isset($rows['Escrow agent']) ? 'Escrow: ' . $rows['Escrow agent'] : '', isset($rows['Role on PSA']) ? 'Role on PSA: ' . $rows['Role on PSA'] : '', isset($rows['Inspection period']) ? 'Inspection: ' . $rows['Inspection period'] : '', $rows['EMD structure'] ?? '']))),
+		'message' => trim(implode("\n", array_filter([$rows['Description'] ?? $rows['Message'] ?? $rows['How they want to work with us'] ?? '', isset($rows['Markets']) ? 'Markets: ' . $rows['Markets'] : '', !empty($rows['Asset types']) ? 'Assets: ' . $rows['Asset types'] : '', !empty($rows['Company']) ? 'Company: ' . $rows['Company'] : '', !empty($rows['Website']) ? 'Website: ' . $rows['Website'] : '', !empty($rows['LinkedIn / Instagram']) ? 'Social: ' . $rows['LinkedIn / Instagram'] : '', isset($rows['Title company']) ? 'Title: ' . $rows['Title company'] : '', isset($rows['Escrow agent']) ? 'Escrow: ' . $rows['Escrow agent'] : '', isset($rows['Role on PSA']) ? 'Role on PSA: ' . $rows['Role on PSA'] : '', isset($rows['Inspection period']) ? 'Inspection: ' . $rows['Inspection period'] : '', $rows['EMD structure'] ?? '']))),
 		'referred_by' => trim(($rows['Referred by'] ?? '') . ' ' . ($rows['Referrer email'] ?? '')), 'documents' => $rows['Required paperwork'] ?? ''];
 	$ch = curl_init($sheet['url']);
 	curl_setopt_array($ch, [CURLOPT_POST => true, CURLOPT_POSTFIELDS => http_build_query($lead), CURLOPT_RETURNTRANSFER => true,
