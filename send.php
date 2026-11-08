@@ -82,6 +82,8 @@ if ($form === 'deal') {
 		if (!in_array($role, ['Buyer', 'Wholesaler acting as buyer'], true)) reply(422, ['ok' => false, 'error' => 'Please choose your role on the PSA.']);
 		$days = (int) field('inspection_days', 3);
 		if ($days < 1) reply(422, ['ok' => false, 'error' => 'Please enter the inspection period in days.']);
+		$rows = array_combine(array_map(fn($k) => $k === 'Requested funding' ? 'EMD amount' : $k, array_keys($rows)), $rows);
+		unset($rows['B–C price / ARV'], $rows['Primary loan']);
 		$rows['Role on PSA'] = $role;
 		$rows['Inspection period'] = "{$days} days";
 		$rows['Mutual release signers'] = $role === 'Buyer' ? 'Buyer and seller' : 'Wholesaler (buyer on the PSA) and seller';
