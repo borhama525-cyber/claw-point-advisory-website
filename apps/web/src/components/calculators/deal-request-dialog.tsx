@@ -1,15 +1,18 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { celebrate } from '@/components/brand-face';
 import * as Dialog from '@radix-ui/react-dialog';
-import { X } from 'lucide-react';
+import { FileCheck2, X } from 'lucide-react';
 import { sendForm } from '@/lib/send-form';
 import { useFormSubmission } from '@/hooks/use-form-submission';
+import { requiredDocs } from '@/data/required-docs';
+import { toolBySlug } from '@/data/deal-tools';
 
 export type RequestPrefill = { purchase_price?: number; seller_finance?: number; resale_price?: number; primary_loan?: number; requested_funding?: number };
 
 const STATES = 'AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY'.split(' ');
 const PROPERTY_TYPES = ['Single family', 'Multifamily', 'Commercial', 'Industrial', 'Land'];
 const MONEY = ['purchase_price', 'seller_finance', 'resale_price', 'primary_loan', 'requested_funding'] as const;
+const ACCEPT = '.pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg';
 const grouped = (n?: number) => (n === undefined || !Number.isFinite(n) ? '' : Math.round(n).toLocaleString('en-US'));
 
 function Field({ label, name, required, error, children, className }: { label: string; name: string; required?: boolean; error?: string; children: ReactNode; className?: string }) {
@@ -22,11 +25,15 @@ function Money({ name, value, required, error, label }: { name: string; value?: 
 }
 
 export function DealRequestDialog({ open, onOpenChange, method, title, prefill, calculator, onBack }: { open: boolean; onOpenChange: (o: boolean) => void; method: string; title: string; prefill: RequestPrefill; calculator: Record<string, number>; onBack: () => void }) {
+	const [needsLender, setNeedsLender] = useState(false);
+	const docs = requiredDocs[method] ?? [];
 	const form = useFormSubmission({
 		submit: (_v, data) => {
 			for (const k of MONEY) { const v = String(data.get(k) ?? '').replace(/[^0-9.]/g, ''); if (v) data.set(k, v); else data.delete(k); }
 			const docs = data.getAll('documents[]').filter(f => f instanceof File && f.size > 0); data.delete('documents[]'); for (const f of docs) data.append('documents[]', f);
 			data.set('method', method); data.set('consent', data.get('consent') ? 'true' : 'false'); data.set('calculator', JSON.stringify(calculator));
+			const tool = toolBySlug(method);
+			if (tool) data.set('calculator_summary', tool.fields.filter(f => calculator[f.key] !== undefined).map(f => `${f.label}: ${f.unit === '$' ? '$' + Math.round(calculator[f.key]).toLocaleString('en-US') : calculator[f.key] + ' ' + f.unit}`).join('\n'));
 			return sendForm('deal', data);
 		},
 	});
@@ -59,11 +66,15 @@ export function DealRequestDialog({ open, onOpenChange, method, title, prefill, 
 					{method === 'stack' ? <Money label="Seller finance amount" name="seller_finance" value={prefill.seller_finance} required error={e.seller_finance} /> : <Money label={method === 'echo' || method === 'double-close' ? 'B–C sale price' : 'Estimated value or ARV'} name="resale_price" value={prefill.resale_price} error={e.resale_price} />}</div>
 					<div className="dr-row"><Money label="Primary loan amount (if you have one)" name="primary_loan" value={prefill.primary_loan} error={e.primary_loan} />
 					<Money label={method === 'emd' ? 'EMD amount' : 'Requested funding'} name="requested_funding" value={prefill.requested_funding} required error={e.requested_funding} /></div>
-					<label className="check-label dr-lender"><input type="checkbox" name="needs_lender" value="Yes" /> I need a primary lender: please provide one for this deal.</label>
-					<h3>Documents</h3>
-					<Field label="Purchase and sale agreement" name="purchase_agreement" required error={e.purchase_agreement}><input id="dr-purchase_agreement" name="purchase_agreement" type="file" required accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg" /></Field>
-					<Field label="Addendums or other documents" name="documents" error={e.documents}><input id="dr-documents" name="documents[]" type="file" multiple accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg" /></Field>
-					<p className="dr-hint">PDF, PNG or JPG, up to 5 MB each and 10 extra files. You can send more documents after you submit.</p>
+					<label className="check-label dr-lender"><input type="checkbox" name="needs_lender" value="Yes" checked={needsLender} onChange={ev => setNeedsLender(ev.target.checked)} /> I need a primary lender: please provide one for this deal.</label>
+					<h3>Required documents</h3>
+					<p className="dr-hint dr-docs-intro"><FileCheck2 size={16} /> Attach each document marked <strong>Required</strong>. Your request can’t be sent without them.</p>
+					<div className="dr-docs">{docs.map(d => { const req = !(d.lender && needsLender); return <Field key={d.key} label={d.label} name={`doc_${d.key}`} required={req} error={e[`doc_${d.key}`]} className={`dr-doc ${req ? 'is-required' : 'is-waived'}`}>
+						<small className="dr-doc-hint">{req ? d.hint : 'Not needed: we’ll provide your primary lender.'}</small>
+						<input id={`dr-doc_${d.key}`} name={`doc_${d.key}`} type="file" required={req} accept={ACCEPT} />
+					</Field>; })}</div>
+					<Field label="Other documents (optional)" name="documents" error={e.documents}><input id="dr-documents" name="documents[]" type="file" multiple accept={ACCEPT} /></Field>
+					<p className="dr-hint">PDF, PNG or JPG, up to 5 MB each. Addendums, photos, title commitment or anything else that helps.</p>
 					<h3>Deal description</h3>
 					<Field label="Anything that helps us understand the deal" name="description" error={e.description}><textarea id="dr-description" name="description" rows={4} maxLength={5000} placeholder="Exit plan, seller terms, timeline, anything unusual…" /></Field>
 					<h3>Referred by someone? <small>(optional)</small></h3>

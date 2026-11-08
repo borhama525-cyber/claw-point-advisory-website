@@ -75,13 +75,31 @@ if ($form === 'deal') {
 // Attachments (deal requests only): the purchase agreement is required.
 $attachments = [];
 if ($form === 'deal') {
-	$files = [];
-	if (isset($_FILES['purchase_agreement'])) $files[] = $_FILES['purchase_agreement'];
-	if (isset($_FILES['documents']) && is_array($_FILES['documents']['name'])) {
-		foreach ($_FILES['documents']['name'] as $i => $n) $files[] = ['name' => $n, 'type' => $_FILES['documents']['type'][$i], 'tmp_name' => $_FILES['documents']['tmp_name'][$i], 'error' => $_FILES['documents']['error'][$i], 'size' => $_FILES['documents']['size'][$i]];
+	// Paperwork each funding type must include (keep in step with src/data/required-docs.ts).
+	// Documents marked 'lender' are waived when the borrower asks us to provide a primary lender.
+	$required = [
+		'stack' => ['contract' => 'Signed purchase contract', 'seller_terms' => 'Seller-carry terms', 'lender_terms*' => 'Primary lender term sheet or approval'],
+		'echo' => ['ab_contract' => 'A–B purchase contract', 'bc_contract' => 'B–C purchase contract', 'lender_terms*' => 'End buyer’s lender term sheet or approval'],
+		'double-close' => ['ab_contract' => 'A–B purchase contract', 'bc_contract' => 'B–C purchase contract', 'buyer_funds' => 'End buyer proof of funds or lender approval'],
+		'emd' => ['contract' => 'Signed purchase contract'],
+	][field('method', 20)] ?? [];
+	$needsLender = field('needs_lender', 3) === 'Yes';
+	$files = []; $docList = []; $missing = [];
+	foreach ($required as $key => $label) {
+		$lenderDoc = str_ends_with($key, '*'); $key = rtrim($key, '*');
+		$f = $_FILES["doc_{$key}"] ?? null;
+		$has = $f && ($f['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
+		if ($has) { $files[] = $f + ['label' => $label]; $docList[] = "✓ {$label}"; }
+		elseif ($lenderDoc && $needsLender) $docList[] = "– {$label}: not needed, we provide the lender";
+		else $missing[] = $label;
 	}
-	$files = array_values(array_filter($files, fn($f) => ($f['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE));
-	if (!isset($_FILES['purchase_agreement']) || ($_FILES['purchase_agreement']['error'] ?? 4) !== UPLOAD_ERR_OK) reply(422, ['ok' => false, 'error' => 'Please attach the purchase and sale agreement.']);
+	if ($missing) reply(422, ['ok' => false, 'error' => 'Please attach the required documents: ' . implode(', ', $missing) . '.']);
+	if (isset($_FILES['documents']) && is_array($_FILES['documents']['name'])) {
+		foreach ($_FILES['documents']['name'] as $i => $n) {
+			if ($_FILES['documents']['error'][$i] === UPLOAD_ERR_NO_FILE) continue;
+			$files[] = ['name' => $n, 'type' => $_FILES['documents']['type'][$i], 'tmp_name' => $_FILES['documents']['tmp_name'][$i], 'error' => $_FILES['documents']['error'][$i], 'size' => $_FILES['documents']['size'][$i], 'label' => 'Other'];
+		}
+	}
 	if (count($files) > MAX_FILES) reply(422, ['ok' => false, 'error' => 'Please attach at most 11 files.']);
 	$finfo = function_exists('finfo_open') ? finfo_open(FILEINFO_MIME_TYPE) : null;
 	foreach ($files as $f) {
@@ -89,10 +107,15 @@ if ($form === 'deal') {
 		if ($f['size'] > MAX_FILE_BYTES) reply(422, ['ok' => false, 'error' => 'Each file must be under 5 MB.']);
 		$mime = $finfo ? finfo_file($finfo, $f['tmp_name']) : $f['type'];
 		if (!isset(ALLOWED_TYPES[$mime])) reply(422, ['ok' => false, 'error' => 'Files must be PDF, PNG or JPG.']);
+		$prefix = preg_replace('/[^A-Za-z0-9]+/', '-', iconv('UTF-8', 'ASCII//TRANSLIT', $f['label']) ?: 'Document');
 		$base = preg_replace('/[^A-Za-z0-9._-]+/', '_', pathinfo($f['name'], PATHINFO_FILENAME)) ?: 'document';
-		$attachments[] = ['name' => mb_substr($base, 0, 80) . '.' . ALLOWED_TYPES[$mime], 'mime' => $mime, 'data' => file_get_contents($f['tmp_name'])];
+		$attachments[] = ['name' => mb_substr(trim($prefix, '-') . ' - ' . $base, 0, 100) . '.' . ALLOWED_TYPES[$mime], 'mime' => $mime, 'data' => file_get_contents($f['tmp_name'])];
 	}
+	$others = count($files) - count(array_filter($files, fn($f) => $f['label'] !== 'Other'));
+	if ($others) $docList[] = "+ {$others} other document" . ($others > 1 ? 's' : '');
+	$rows['Required paperwork'] = implode("\n", $docList);
 	$rows['Documents'] = count($attachments) . ' attached';
+	$rows['Calculator numbers'] = field('calculator_summary', 3000);
 }
 
 $rows = array_filter($rows, fn($v) => trim((string) $v) !== '');
@@ -111,7 +134,7 @@ if (is_array($sheet) && !empty($sheet['url']) && function_exists('curl_init')) {
 		'purchase_price' => $form === 'deal' ? $num('purchase_price') : '', 'requested_funding' => $form === 'deal' ? $num('requested_funding') : '',
 		'needs_lender' => isset($rows['Needs a primary lender']) ? 'Yes' : ($form === 'deal' ? 'No' : ''),
 		'message' => $rows['Description'] ?? $rows['Message'] ?? '',
-		'referred_by' => trim(($rows['Referred by'] ?? '') . ' ' . ($rows['Referrer email'] ?? '')), 'documents' => $rows['Documents'] ?? ''];
+		'referred_by' => trim(($rows['Referred by'] ?? '') . ' ' . ($rows['Referrer email'] ?? '')), 'documents' => $rows['Required paperwork'] ?? ''];
 	$ch = curl_init($sheet['url']);
 	curl_setopt_array($ch, [CURLOPT_POST => true, CURLOPT_POSTFIELDS => http_build_query($lead), CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_FOLLOWLOCATION => false, CURLOPT_CONNECTTIMEOUT => 4, CURLOPT_TIMEOUT => 8]);
