@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router';
+import { Lightbulb } from 'lucide-react';
 import { starterTips, type Tip } from '@/data/tips';
 
 const TZ = 'America/New_York';
@@ -9,11 +10,10 @@ const timeOf = (s: string) => (/T\d/.test(s) ? new Date(s).toLocaleTimeString('e
 const daysBetween = (a: string, b: string) => Math.round((Date.parse(`${a}T00:00Z`) - Date.parse(`${b}T00:00Z`)) / 86400000);
 const groupLabel = (n: number) => (n <= 0 ? 'Today' : n === 1 ? '1 day ago' : `${n} days ago`);
 
-/** "Live Tip Drop": one box with a live badge, a summary and a slowly scrolling feed of tips grouped by day. */
+/** "Tip drop": one bold box with a live badge and a slowly scrolling feed of tips grouped by day. */
 export function TipDrop() {
 	const [tips, setTips] = useState<Tip[]>(starterTips);
 	const [live, setLive] = useState(false);
-	const [updated, setUpdated] = useState<Date | null>(null);
 	const feed = useRef<HTMLDivElement>(null);
 	const hold = useRef(false);
 
@@ -23,8 +23,7 @@ export function TipDrop() {
 		const load = () => fetch('/tips.php', { cache: 'no-store' }).then(r => r.json()).then((d: { ok?: boolean; tips?: Tip[] }) => {
 			if (stop) return;
 			if (d?.ok && Array.isArray(d.tips) && d.tips.length) { setTips(d.tips); setLive(true); }
-			setUpdated(new Date());
-		}).catch(() => { if (!stop) setUpdated(new Date()); });
+		}).catch(() => {});
 		load();
 		const id = window.setInterval(load, 3 * 60 * 1000);
 		return () => { stop = true; window.clearInterval(id); };
@@ -43,8 +42,6 @@ export function TipDrop() {
 		}
 		return out;
 	}, [tips, today]);
-	const todayCount = groups[0]?.label === 'Today' ? groups[0].items.length : 0;
-	const monthCount = tips.filter(t => { const d = parse(t.date); return d && daysBetween(today, dayKey(d)) <= 30; }).length;
 
 	// Gentle auto-scroll that loops; pauses while the visitor hovers, touches or scrolls it.
 	useEffect(() => {
@@ -68,6 +65,7 @@ export function TipDrop() {
 		raf = requestAnimationFrame(step);
 		return () => cancelAnimationFrame(raf);
 	}, [groups]);
+	let n = 0;
 	const pause = () => { hold.current = true; };
 	const resume = () => { hold.current = false; };
 
@@ -80,24 +78,24 @@ export function TipDrop() {
 		</div>
 
 		<div className="tip-box">
+			<div className="tip-box-glow" aria-hidden="true" />
 			<div className="tip-box-head">
-				<h3><span className="tip-dot" aria-hidden="true" /> Live Tip Drop</h3>
-				<span className="tip-pill">{live ? 'Live' : 'Latest'}</span>
+				<span className="tip-box-icon" aria-hidden="true"><Lightbulb size={20} /></span>
+				<h3>Tip <em>drop</em></h3>
+				<span className={`tip-pill${live ? ' is-live' : ''}`}><span className="tip-dot" aria-hidden="true" /> Live</span>
 			</div>
-			<div className="tip-stat"><span>Tips shared last 30 days:</span><strong>{monthCount}</strong></div>
-			<p className="tip-sub"><b>{todayCount}</b> new {todayCount === 1 ? 'tip' : 'tips'} today <i>·</i> <b>{tips.length}</b> in the feed <i>·</i></p>
-			<p className="tip-updated">Last updated {updated ? `${updated.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: TZ })} ET` : 'just now'}</p>
-			<div ref={feed} className="tip-scroll" tabIndex={0} aria-label="Tip feed" onMouseEnter={pause} onMouseLeave={resume} onTouchStart={pause} onTouchEnd={resume} onFocus={pause} onBlur={resume} onWheel={pause}>
+			<div ref={feed} className="tip-scroll" tabIndex={0} aria-label="Lending tips" onMouseEnter={pause} onMouseLeave={resume} onTouchStart={pause} onTouchEnd={resume} onFocus={pause} onBlur={resume} onWheel={pause}>
 				{groups.map(g => <div key={g.label} className="tip-group">
-					<p className={`tip-day${g.label === 'Today' ? ' is-today' : ''}`}>{g.label}</p>
-					{g.items.map(t => <article key={t.date + t.tip} className="tip-item">
-						<div className="tip-item-top"><strong>{t.category}</strong><span className="tip-chip"><small>BY</small> {t.by || 'Claw Point'}</span></div>
-						<p>{t.tip}</p>
-						{timeOf(t.date) && <time>{timeOf(t.date)}</time>}
-					</article>)}
+					<p className={`tip-day${g.label === 'Today' ? ' is-today' : ''}`}><span>{g.label}</span></p>
+					{g.items.map(t => { n += 1; return <article key={t.date + t.tip} className="tip-item">
+						<span className="tip-num" aria-hidden="true">{String(n).padStart(2, '0')}</span>
+						<span className="tip-tag">{t.category}</span>
+						<p className="tip-text">{t.tip}</p>
+						<p className="tip-meta"><span className="tip-avatar">{(t.by || 'C')[0].toUpperCase()}</span>{t.by || 'Claw Point'}{timeOf(t.date) && <> <i>·</i> {timeOf(t.date)}</>}</p>
+					</article>; })}
 				</div>)}
 			</div>
-			<p className="tip-foot">Posted by the <Link to="/network">Claw Point team</Link></p>
+			<p className="tip-foot">Straight from the <Link to="/network">Claw Point team</Link></p>
 		</div>
 	</div></section>;
 }

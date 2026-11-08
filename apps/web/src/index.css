@@ -900,37 +900,39 @@ h1 em,h2 em{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-
 @media(prefers-reduced-motion:reduce){.network-orbit-ring,.network-orbit-spin,.orbit-counter,.orbit-bob,.network-orbit-core,.network-orbit-chip{animation:none}.network-orbit-tilt{transform:none}}
 
 
-/* ---------- Tip Drop (one live box) ---------- */
+/* ---------- Tip Drop (one bold live box) ---------- */
 .tip-drop{background:#fff}
 .tip-layout{display:grid;grid-template-columns:.9fr 1.1fr;gap:56px;align-items:center}
 .tip-intro h2{font-size:clamp(38px,4.4vw,58px);margin-bottom:14px}.tip-intro>p:not(.eyebrow){color:#3a4a45;font-size:16.5px;max-width:440px}
 .tip-note{font-size:12.5px!important;color:var(--quiet)!important}.tip-note a{color:var(--leaf);font-weight:700;text-decoration:underline}
-.tip-box{background:#fff;border:1px solid #e3ebe8;border-radius:26px;padding:26px 26px 18px;box-shadow:0 30px 70px #16332714,0 2px 0 #ffffff inset;max-width:560px;width:100%;justify-self:end}
-.tip-box-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.tip-box-head h3{display:flex;align-items:center;gap:12px;margin:0;font-size:21px;font-weight:800;letter-spacing:-.02em}
-.tip-dot{position:relative;width:11px;height:11px;border-radius:50%;background:#22b35e;flex-shrink:0}
-.tip-dot:after{content:'';position:absolute;inset:-6px;border-radius:50%;background:#22b35e;opacity:.25;animation:tip-breathe 2.4s ease-in-out infinite}
-@keyframes tip-breathe{0%,100%{transform:scale(.55);opacity:.35}50%{transform:scale(1.15);opacity:0}}
-.tip-pill{font-size:13px;font-weight:700;color:#1d9a50;background:#e9f8ef;border:1px solid #c6ecd5;border-radius:30px;padding:5px 14px}
-.tip-stat{display:inline-flex;align-items:center;gap:10px;background:#ecfaf2;border:1px solid #c6ecd5;border-radius:30px;padding:9px 16px;margin-bottom:12px}
-.tip-stat span{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:#4d5b56;font-weight:600}
-.tip-stat strong{font-size:19px;color:#1d9a50;font-weight:800;font-variant-numeric:tabular-nums}
-.tip-sub{margin:0 0 6px;font-size:14px;color:#55625d}.tip-sub b{color:#20201e;font-weight:800}.tip-sub i{font-style:normal;color:#c9d2cf;margin:0 6px}
-.tip-updated{margin:0 0 14px;font-size:13px;color:#77746e}
-.tip-scroll{height:330px;overflow-y:auto;background:#f8faf9;border:1px solid #e6ece9;border-radius:18px;padding:16px 18px 6px;scrollbar-width:thin;scrollbar-color:#cfd8d4 transparent;-webkit-mask-image:linear-gradient(180deg,#000 88%,transparent);mask-image:linear-gradient(180deg,#000 88%,transparent)}
-.tip-scroll:focus-visible{outline:3px solid var(--sage);outline-offset:3px}
-.tip-day{display:flex;align-items:center;gap:12px;margin:4px 0 10px;font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#6b7772}
-.tip-day:after{content:'';width:28px;height:1px;background:#d5ddd9}
-.tip-day.is-today{color:#1d9a50}
-.tip-item{padding:6px 0 14px 14px;animation:tip-in .5s cubic-bezier(.2,.8,.2,1) both}
-@keyframes tip-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.tip-item-top{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:4px}
-.tip-item-top strong{font-size:15.5px;font-weight:800;color:#1c2421}
-.tip-chip{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:800;color:#1d9a50;background:#ecfaf2;border-radius:10px;padding:3px 10px}
-.tip-chip small{font-size:10.5px;letter-spacing:.14em;color:#4d7b62;font-weight:700}
-.tip-item p{margin:0 0 4px;font-size:14px;line-height:1.5;color:#3a4542}
-.tip-item time{font-size:12.5px;color:#7d8783}
-.tip-foot{text-align:right;margin:12px 2px 0;font-size:13px;color:#77746e}.tip-foot a{color:#1d9a50;font-weight:700}
+.tip-box{position:relative;overflow:hidden;isolation:isolate;max-width:580px;width:100%;justify-self:end;border-radius:30px;padding:24px 24px 18px;color:#fff;background:linear-gradient(160deg,#1f4a36 0%,#14301f 55%,#0f2418 100%);box-shadow:0 40px 90px #0f241840,0 0 0 1px #ffffff14 inset}
+.tip-box-glow{position:absolute;inset:-30% -20% auto auto;width:70%;height:70%;border-radius:50%;background:radial-gradient(circle,#dcc64a55,transparent 65%);z-index:-1;animation:tip-glow 9s ease-in-out infinite alternate}
+.tip-box:before{content:'';position:absolute;inset:auto auto -25% -20%;width:60%;height:60%;border-radius:50%;background:radial-gradient(circle,#e2806f33,transparent 65%);z-index:-1}
+@keyframes tip-glow{from{transform:translate(0,0) scale(1)}to{transform:translate(-30px,25px) scale(1.15)}}
+.tip-box-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.tip-box-icon{width:42px;height:42px;border-radius:14px;background:var(--mimosa);color:#14301f;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px #dcc64a40}
+.tip-box-head h3{margin:0;flex:1;font-family:'Instrument Serif',Georgia,serif!important;font-weight:400!important;font-size:38px;line-height:1;letter-spacing:-.01em;color:#fff}
+.tip-box-head h3 em{color:var(--mimosa);font-style:italic}
+.tip-pill{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#fff;background:#ffffff14;border:1px solid #ffffff2a;border-radius:30px;padding:7px 14px}
+.tip-dot{position:relative;width:9px;height:9px;border-radius:50%;background:#ff6a55;flex-shrink:0}
+.tip-dot:after{content:'';position:absolute;inset:-5px;border-radius:50%;border:2px solid #ff6a55;animation:tip-ping 1.8s cubic-bezier(.2,.8,.2,1) infinite}
+.tip-pill:not(.is-live) .tip-dot{background:var(--mimosa)}.tip-pill:not(.is-live) .tip-dot:after{border-color:var(--mimosa)}
+@keyframes tip-ping{0%{transform:scale(.5);opacity:.9}100%{transform:scale(1.9);opacity:0}}
+.tip-scroll{height:400px;overflow-y:auto;margin:0 -8px;padding:4px 8px;scrollbar-width:none;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 18px,#000 84%,transparent);mask-image:linear-gradient(180deg,transparent 0,#000 18px,#000 84%,transparent)}
+.tip-scroll::-webkit-scrollbar{display:none}
+.tip-scroll:focus-visible{outline:3px solid var(--mimosa);outline-offset:2px;border-radius:16px}
+.tip-day{margin:8px 0 10px;display:flex;align-items:center;gap:10px}.tip-day:after{content:"";flex:1;height:1px;background:#ffffff1f}
+.tip-day span{font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#cfe2d8;background:#14301fe6;backdrop-filter:blur(6px);border:1px solid #ffffff1f;border-radius:30px;padding:5px 12px}
+.tip-day.is-today span{color:#14301f;background:var(--mimosa);border-color:var(--mimosa)}
+.tip-item{position:relative;padding:18px 18px 16px;margin-bottom:12px;border-radius:20px;background:linear-gradient(180deg,#ffffff12,#ffffff08);border:1px solid #ffffff1c;animation:tip-in .55s cubic-bezier(.2,.8,.2,1) both;transition:background .25s,border-color .25s,transform .25s}
+.tip-item:hover{background:#ffffff1c;border-color:#dcc64a66;transform:translateY(-2px)}
+@keyframes tip-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.tip-num{position:absolute;right:16px;top:8px;font-family:'Instrument Serif',Georgia,serif;font-size:46px;line-height:1;color:#ffffff14;pointer-events:none}
+.tip-tag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mimosa);margin-bottom:8px}
+.tip-text{margin:0 0 12px;font-size:17.5px;line-height:1.45;font-weight:600;color:#fff;letter-spacing:-.005em;padding-right:34px}
+.tip-meta{display:flex;align-items:center;gap:8px;margin:0;font-size:12.5px;color:#b9cfc4}.tip-meta i{font-style:normal;color:#ffffff40}
+.tip-avatar{width:24px;height:24px;border-radius:50%;background:var(--mimosa);color:#14301f;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center}
+.tip-foot{margin:12px 2px 0;font-size:12.5px;color:#b9cfc4;text-align:right}.tip-foot a{color:var(--mimosa);font-weight:700}
 @media(max-width:960px){.tip-layout{grid-template-columns:1fr;gap:28px}.tip-box{justify-self:stretch;max-width:none}}
-@media(max-width:480px){.tip-box{padding:20px 16px 14px;border-radius:22px}.tip-scroll{height:360px;padding:14px 12px 4px}.tip-stat span{font-size:10px;letter-spacing:.1em}}
-@media(prefers-reduced-motion:reduce){.tip-dot:after,.tip-item{animation:none}}
+@media(max-width:480px){.tip-box{padding:20px 16px 14px;border-radius:24px}.tip-box-head h3{font-size:32px}.tip-scroll{height:430px}.tip-text{font-size:16px}}
+@media(prefers-reduced-motion:reduce){.tip-dot:after,.tip-item,.tip-box-glow{animation:none}}
