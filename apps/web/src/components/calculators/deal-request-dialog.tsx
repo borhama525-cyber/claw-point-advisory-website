@@ -70,7 +70,7 @@ export function DealRequestDialog({ open, onOpenChange, method, title, prefill, 
 			if (tool) data.set('calculator_summary', tool.fields.filter(f => calculator[f.key] !== undefined).map(f => `${f.label}: ${f.unit === '$' ? '$' + Math.round(calculator[f.key]).toLocaleString('en-US') : calculator[f.key] + ' ' + f.unit}`).join('\n'));
 			if (method === 'double-close') {
 				const get = (k: string) => String(data.get(k) ?? '').trim();
-				setIntro({ to: [get('title_email'), escrowMode === 'have' ? get('escrow_email') : ''].filter(Boolean), address: [get('address'), get('city'), get('state')].filter(Boolean).join(', '), name: `${get('first_name')} ${get('last_name')}`.trim() });
+				setIntro({ to: [get('title_email'), get('escrow_email')].filter(Boolean), address: [get('address'), get('city'), get('state')].filter(Boolean).join(', '), name: `${get('first_name')} ${get('last_name')}`.trim() });
 			}
 			return sendForm('deal', data);
 		},
@@ -97,7 +97,7 @@ export function DealRequestDialog({ open, onOpenChange, method, title, prefill, 
 					<Field label="Property type" name="property_type" required error={e.property_type}><select id="dr-property_type" name="property_type" required defaultValue="" onChange={ev => setPropertyType(ev.target.value)}><option value="" disabled>Select</option>{PROPERTY_TYPES.map(t => <option key={t}>{t}</option>)}</select></Field>
 					<Field label="Subject property address" name="address" required error={e.address}><input id="dr-address" name="address" autoComplete="street-address" required maxLength={300} placeholder="Street address" /></Field>
 					<div className="dr-row dr-row-3"><Field label="City" name="city" required error={e.city}><input id="dr-city" name="city" autoComplete="address-level2" required maxLength={120} /></Field>
-					<Field label="State" name="state" required error={e.state}><select id="dr-state" name="state" autoComplete="address-level1" required defaultValue="" onChange={ev => { setUsState(ev.target.value); if (SEPARATE_ESCROW_STATES.includes(ev.target.value) && escrowMode === 'same') setEscrowMode('have'); }}><option value="" disabled>Select</option>{STATES.map(s => <option key={s}>{s}</option>)}</select></Field>
+					<Field label="State" name="state" required error={e.state}><select id="dr-state" name="state" autoComplete="address-level1" required defaultValue="" onChange={ev => { setUsState(ev.target.value); setEscrowMode(SEPARATE_ESCROW_STATES.includes(ev.target.value) ? (escrowMode === 'same' ? 'have' : escrowMode) : 'same'); }}><option value="" disabled>Select</option>{STATES.map(s => <option key={s}>{s}</option>)}</select></Field>
 					<Field label="ZIP" name="zip" required error={e.zip}><input id="dr-zip" name="zip" autoComplete="postal-code" inputMode="numeric" required pattern="\d{5}(-\d{4})?" maxLength={10} /></Field></div>
 					<Field label="Target close date" name="close_date" required error={e.close_date}><input id="dr-close_date" name="close_date" type="date" required /></Field>
 					{isEmd ? <div className="dr-row"><Money label="Purchase price" name="purchase_price" value={prefill.purchase_price} required error={e.purchase_price} />
@@ -107,7 +107,7 @@ export function DealRequestDialog({ open, onOpenChange, method, title, prefill, 
 					<div className="dr-row"><Money label="Primary loan amount (if you have one)" name="primary_loan" value={prefill.primary_loan} error={e.primary_loan} />
 					<Money label="Requested funding" name="requested_funding" value={prefill.requested_funding} required error={e.requested_funding} /></div></>}
 					{!docs.some(d => d.lender) && !isDoubleClose && !isEmd && <label className="check-label dr-lender"><input type="checkbox" name="needs_lender" value="Yes" checked={needsLender} onChange={ev => setNeedsLender(ev.target.checked)} /> I need a primary lender: please provide one for this deal.</label>}
-					{isEmd && <EmdSection errors={e} propertyType={propertyType} titleMode={titleMode} onTitleMode={setTitleMode} />}
+					{isEmd && <EmdSection errors={e} propertyType={propertyType} titleMode={titleMode} onTitleMode={setTitleMode} usState={usState} escrowMode={escrowMode} onEscrowMode={setEscrowMode} />}
 					{isDoubleClose && <TitleEscrowSection errors={e} usState={usState} mode={escrowMode} onMode={setEscrowMode} />}
 					<h3>Required documents</h3>
 					{requiredNow.length > 0 && <div className="dr-progress" aria-live="polite"><div className="dr-progress-bar"><i style={{ width: `${(done / requiredNow.length) * 100}%` }} /></div><span>{done === requiredNow.length ? 'All required documents attached ✓' : `${done} of ${requiredNow.length} required attached`}</span></div>}

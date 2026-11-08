@@ -58,6 +58,12 @@ if ($form === 'deal') {
 		'Description' => field('description', 5000),
 		'Referred by' => oneLine(field('referrer_first_name', 100) . ' ' . field('referrer_last_name', 100)), 'Referrer email' => oneLine(field('referrer_email', 200)), 'Referrer phone' => field('referrer_phone', 40),
 	];
+	// Escrow agent: asked only for states where title and escrow are separate; otherwise title handles it.
+	$escrow = function () use (&$party) {
+		$mode = field('escrow_mode', 10) ?: 'same';
+		if (!in_array($mode, ['same', 'have', 'need'], true)) reply(422, ['ok' => false, 'error' => 'Please choose an escrow option.']);
+		return $mode === 'have' ? $party('escrow', 'escrow company') : ($mode === 'need' ? 'Needs an escrow agent: please provide one' : 'Same company as title');
+	};
 	$party = function (string $p, string $label) {
 		$parts = ['company' => 'name', 'contact' => 'contact', 'email' => 'email', 'phone' => 'phone'] + ($p === 'title' ? ['website' => 'website'] : []);
 		foreach ($parts as $k => $l) if (field("{$p}_{$k}") === '') reply(422, ['ok' => false, 'error' => "Please add the {$label} {$l}."]);
@@ -71,9 +77,7 @@ if ($form === 'deal') {
 	};
 	if (field('method', 20) === 'double-close') {
 		$rows['Title company'] = $party('title', 'title company');
-		$mode = field('escrow_mode', 10);
-		if (!in_array($mode, ['same', 'have', 'need'], true)) reply(422, ['ok' => false, 'error' => 'Please choose an escrow option.']);
-		$rows['Escrow agent'] = $mode === 'have' ? $party('escrow', 'escrow company') : ($mode === 'need' ? 'Needs an escrow agent: please provide one' : 'Same company as title');
+		$rows['Escrow agent'] = $escrow();
 		if (field('intro_ack', 3) !== 'Yes') reply(422, ['ok' => false, 'error' => 'Please confirm you’ll introduce us to your title and escrow contacts.']);
 		$rows['Intro to title/escrow'] = 'Borrower will send the intro email (cc us)';
 	}
@@ -90,6 +94,7 @@ if ($form === 'deal') {
 		if (field('property_type', 40) === 'Commercial' && $days >= 60) $rows['EMD structure'] = 'Commercial, ' . ($days >= 90 ? '90+' : '60+') . ' day inspection: 30-day fee structure and mutual EMD loan agreement';
 		if (field('title_mode', 10) === 'chosen') $rows['Title company'] = $party('title', 'title company');
 		else $rows['Title company'] = 'TBD on the PSA';
+		if (field('escrow_mode', 10) !== '') $rows['Escrow agent'] = $escrow();
 	}
 } elseif ($form === 'enquiry') {
 	if (field('message', 5000) === '') reply(422, ['ok' => false, 'error' => 'Please tell us about your transaction.']);
