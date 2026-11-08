@@ -5,5 +5,6 @@ header('Cache-Control: public, max-age=3600');
 $origin = site_origin();
 $paths = ['/', '/funding', '/calculators', '/calculators/stack', '/calculators/echo', '/stack', '/echo', '/booking', '/ask', '/contact', '/network', '/blog', '/blog/transactional-funding-explained','/blog/prepare-your-funding-enquiry','/blog/double-closing-questions'];
 echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
-foreach ($paths as $p) echo "\t<url><loc>" . htmlspecialchars($origin . $p, ENT_XML1) . "</loc></url>\n";
+// Pages are folders on the server (/funding/index.html), so their real address ends in "/"; without it they redirect.
+foreach ($paths as $p) echo "\t<url><loc>" . htmlspecialchars($origin . rtrim($p, '/') . '/', ENT_XML1) . "</loc></url>\n";
 echo '</urlset>' . "\n";

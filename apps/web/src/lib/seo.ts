@@ -12,6 +12,7 @@
  * because SEO audits score the card tags on their own.
  */
 import type { MetaDescriptor } from 'react-router';
+import { SITE_ORIGIN } from '@/constants/site';
 
 type RouteMatchLike = { id: string; loaderData: unknown } | undefined;
 
@@ -43,11 +44,11 @@ export type SeoInput = {
 
 const ROOT_ROUTE_ID = 'root';
 
-/** The site's public origin, as published by the root loader. */
+/** The site's public origin, as published by the root loader, or the live domain in the static build. */
 export const siteOriginFrom = (matches: readonly RouteMatchLike[]): string => {
 	const root = matches.find(match => match?.id === ROOT_ROUTE_ID);
 
-	return (root?.loaderData as { origin?: string } | undefined)?.origin ?? '';
+	return (root?.loaderData as { origin?: string } | undefined)?.origin || SITE_ORIGIN;
 };
 
 export const absoluteUrl = (origin: string, target: string): string => {

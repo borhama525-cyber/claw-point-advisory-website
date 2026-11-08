@@ -1,3 +1,7 @@
+/** The live domain. Canonical links, og:url and structured data use it, because the static build has no request to read it from. */
+export const SITE_ORIGIN = 'https://clawpoint.capital';
+/** Official social profiles: listed in the structured data (`sameAs`) so search engines tie them to this site. */
+export const SOCIAL_LINKS: { name: string; url: string }[] = [];
 /** Calendly events the booking page embeds, one per teammate. Change them here to switch meeting types. */
 export const CALENDLY_URL = 'https://calendly.com/clawpointadvisory/schedule-with-amira';
 export const ADAM_CALENDLY_URL = 'https://calendly.com/cashclawcapital/30min';
