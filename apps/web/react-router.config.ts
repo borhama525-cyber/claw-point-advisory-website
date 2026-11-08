@@ -15,7 +15,7 @@ export default {
 	async prerender() {
 		return [
 			'/', '/funding', '/calculators', ...CALCULATORS.map(s => `/calculators/${s}`),
-			'/stack', '/echo', '/booking', '/ask', '/contact', '/blog',
+			'/stack', '/echo', '/booking', '/ask', '/contact', '/network', '/blog',
 			...articles.map(a => `/blog/${a.slug}`),
 		];
 	},
