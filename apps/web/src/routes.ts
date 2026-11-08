@@ -11,6 +11,7 @@ export default [
     route('ask', 'routes/ask.tsx'),
     route('contact', 'routes/contact.tsx'),
     route('network', 'routes/network.tsx'),
+    route('reviews', 'routes/reviews.tsx'),
     route('blog', 'routes/blog.tsx'),
     route('blog/:slug', 'routes/blog.$slug.tsx'),
 ] satisfies RouteConfig;
