@@ -6,7 +6,6 @@ import { useFormSubmission } from '@/hooks/use-form-submission';
 import { celebrate, BrandFace } from '@/components/brand-face';
 import { TEAM_EMAIL } from '@/constants/site';
 import { networkGroups } from '@/data/network';
-import { SkyClouds } from '@/components/sky-clouds';
 
 const ASSETS = ['Single family', 'Multifamily', 'Commercial', 'Industrial', 'Land'];
 // Chips that float around the hero badge.
@@ -54,7 +53,7 @@ function NetworkOrbit() {
 
 /** Top of the Network page: headline, a floating "who's in the network" visual and the main call to action. */
 export function NetworkHero() {
-	return <section className="network-hero sky-bloom"><SkyClouds /><div className="learn-wrap network-hero-grid">
+	return <section className="network-hero sky-bloom"><div className="learn-wrap network-hero-grid">
 		<div className="network-hero-copy">
 			<p className="eyebrow">NETWORK WITH US</p>
 			<h1>Want to network <em>with us?</em></h1>

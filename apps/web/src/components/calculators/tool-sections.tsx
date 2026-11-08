@@ -1,4 +1,3 @@
-import { SkyClouds } from '@/components/sky-clouds';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router';
 import { ArrowRight, Layers, Repeat2, Wrench } from 'lucide-react';
@@ -8,7 +7,7 @@ import { RequestButton } from '@/components/request/request-provider';
 const icons: Record<string, ReactNode> = { stack: <Layers size={18} />, echo: <Repeat2 size={18} /> };
 
 export function ToolHero({ eyebrow, title, lead, children }: { eyebrow: string; title: string; lead: string; children?: ReactNode }) {
-	return <section className="tool-hero"><SkyClouds /><div className="tool-wrap"><p className="eyebrow">{eyebrow}</p><h1>{title}</h1><p>{lead}</p>{children && <div className="hero-buttons">{children}</div>}</div></section>;
+	return <section className="tool-hero"><div className="tool-wrap"><p className="eyebrow">{eyebrow}</p><h1>{title}</h1><p>{lead}</p>{children && <div className="hero-buttons">{children}</div>}</div></section>;
 }
 
 export function ToolLibrary() {

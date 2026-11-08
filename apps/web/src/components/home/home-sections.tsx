@@ -1,4 +1,3 @@
-import { SkyClouds } from '@/components/sky-clouds';
 import { Link } from 'react-router';
 import { ArrowRight, Check } from 'lucide-react';
 import { dealTypes } from '@/data/deal-types';
@@ -10,7 +9,7 @@ import { openContactPanel } from '@/components/contact-panel';
 import { LenderNote } from '@/components/lender-note';
 
 export function HomeHero() {
-	return <section className="hero home-hero"><SkyClouds /><div className="hero-inner">
+	return <section className="hero home-hero"><div className="hero-inner">
 		<div className="hero-copy">
 			<h1>Get your deal<br /><em>moving.</em></h1>
 			<p>Short-term capital for Stack Method, Echo, double close and EMD deals. No primary lender? We can provide one. Run the numbers, pick your structure and send it to a team that reviews every file.</p>

@@ -2,7 +2,6 @@ import { Fragment, useEffect, useRef, useState, type FormEvent, type ReactNode }
 import { Link, useNavigate } from 'react-router';
 import { ArrowUp, Sparkles } from 'lucide-react';
 import { searchFaq } from '@/data/faq-search';
-import { SkyClouds } from '@/components/sky-clouds';
 
 type Turn = { id: number; role: 'user' | 'assistant'; content: string; title?: string; related?: string[]; live?: boolean };
 
@@ -103,7 +102,7 @@ export function AskTeaser() {
 	const navigate = useNavigate();
 	const [q, setQ] = useState('');
 	const go = (question: string) => { const v = question.trim(); navigate(v ? `/ask?q=${encodeURIComponent(v)}` : '/ask'); };
-	return <section className="band ask-teaser sky-bloom"><SkyClouds /><div className="tool-wrap">
+	return <section className="band ask-teaser sky-bloom"><div className="tool-wrap">
 		<p className="eyebrow">ASK CLAW POINT</p>
 		<h2>Got a question? Ask anything.</h2>
 		<p className="ask-teaser-lead">General answers about transactional funding and loan underwriting, from double closes to the Stack Method.</p>
