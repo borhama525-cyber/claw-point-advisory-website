@@ -103,8 +103,8 @@ if ($form === 'deal') {
 	$intro = 'A new enquiry was sent from the website’s contact form.';
 	$rows = ['Topic' => oneLine(field('topic', 80)), 'Name' => $name, 'Email' => $email, 'Phone' => field('phone', 60), 'Message' => field('message', 5000)];
 } elseif ($form === 'network') {
-	// Keep in step with NETWORK_ROLES in src/components/network/network-form.tsx.
-	$allowed = ['Transaction coordinator (TC)', 'Real estate agent / broker', 'Commercial broker', 'Family office', 'Buyer / investor', 'Developer', 'Wholesaler', 'Land wholesaler', 'Lender / capital partner', 'Title / escrow', 'Other'];
+	// Keep in step with src/data/network.ts.
+	$allowed = ['Title company', 'Escrow company', 'Real estate attorney', 'Transaction coordinator (TC)', 'Closing agent / notary', 'Buyer / investor', 'Institutional buyer', 'Family office', 'Fund / syndicator', 'Private lender', 'Hard money lender', 'Mortgage broker / loan officer', 'Developer', 'Builder', 'Wholesaler', 'Land wholesaler', 'Creative finance / Subto investor', 'Acquisitions manager', 'Dispositions manager', 'Bird dog', 'Real estate agent', 'Real estate broker', 'Commercial broker', 'Land broker', 'Business broker', 'Property manager', 'General contractor', 'Appraiser', 'Inspector', 'Insurance agent', 'CPA / tax advisor', 'Other'];
 	$list = fn(string $k, array $ok) => array_values(array_intersect(array_map('strval', (array) ($_POST[$k] ?? [])), $ok));
 	$roles = $list('roles', $allowed);
 	if (!$roles) reply(422, ['ok' => false, 'error' => 'Please choose at least one role.']);
