@@ -59,9 +59,15 @@ if ($form === 'deal') {
 		'Referred by' => oneLine(field('referrer_first_name', 100) . ' ' . field('referrer_last_name', 100)), 'Referrer email' => oneLine(field('referrer_email', 200)), 'Referrer phone' => field('referrer_phone', 40),
 	];
 	$party = function (string $p, string $label) {
-		foreach (['company' => 'name', 'contact' => 'contact', 'email' => 'email', 'phone' => 'phone'] as $k => $l) if (field("{$p}_{$k}") === '') reply(422, ['ok' => false, 'error' => "Please add the {$label} {$l}."]);
+		$parts = ['company' => 'name', 'contact' => 'contact', 'email' => 'email', 'phone' => 'phone'] + ($p === 'title' ? ['website' => 'website'] : []);
+		foreach ($parts as $k => $l) if (field("{$p}_{$k}") === '') reply(422, ['ok' => false, 'error' => "Please add the {$label} {$l}."]);
 		if (!filter_var(field("{$p}_email"), FILTER_VALIDATE_EMAIL)) reply(422, ['ok' => false, 'error' => "Please enter a valid {$label} email."]);
-		return oneLine(field("{$p}_company") . ' · ' . field("{$p}_contact") . ' · ' . field("{$p}_email") . ' · ' . field("{$p}_phone", 40));
+		$site = '';
+		if ($p === 'title') {
+			$site = preg_replace('~^(?!https?://)~i', 'https://', oneLine(field('title_website', 200)));
+			if (!filter_var($site, FILTER_VALIDATE_URL) || !str_contains(parse_url($site, PHP_URL_HOST) ?? '', '.')) reply(422, ['ok' => false, 'error' => 'Please enter the title company website, like acmetitle.com.']);
+		}
+		return oneLine(field("{$p}_company") . ' · ' . field("{$p}_contact") . ' · ' . field("{$p}_email") . ' · ' . field("{$p}_phone", 40) . ($site ? " · {$site}" : ''));
 	};
 	if (field('method', 20) === 'double-close') {
 		$rows['Title company'] = $party('title', 'title company');
