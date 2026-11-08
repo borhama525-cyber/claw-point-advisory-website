@@ -5,14 +5,13 @@ import { Ghost } from 'lucide-react';
 // The phantom kitty has moods: she floats around, walks along the edge under the header, naps on
 // headings and cards, bullies the little Claw Point logo, hisses when the cursor pokes her, and
 // comments on what the visitor is doing (typing in a form, running a calculator, submitting a deal,
-// reading a guide, scrolling fast). The logo buddy strolls along the bottom, watches her, and
-// complains when she boops it. Neither takes the pointer (pointer-events: none), so the page is
-// never blocked. A small corner button hides them (remembered per device); they're off by default
+// reading a guide, scrolling fast). Now and then she flies up and boops the logo in the header,
+// which wobbles. She never takes the pointer (pointer-events: none), so the page is never blocked. A small corner button hides them (remembered per device); they're off by default
 // for visitors who prefer reduced motion.
 
 const KEY = 'clawpoint:ghost-chase';
 const CELEBRATE = 'clawpoint:celebrate';
-const KW = 66, KH = 57, BUDDY = 44;
+const KW = 66, KH = 57;
 
 const pick = <T,>(list: T[]) => list[Math.floor(Math.random() * list.length)];
 const readPref = () => { try { return localStorage.getItem(KEY); } catch { return null; } };
@@ -23,7 +22,7 @@ const SAY = {
 	hiss: ['Hsss! No poking!', 'Hsss! Paws off!', 'Rude. Hsss!', 'Personal space! Hsss!'],
 	napWake: ['Hsss! I was napping!', 'Five more minutes…', 'Mrrf. Fine, I’m up.'],
 	napStart: ['*yawn*', 'Nap o’clock.', 'Wake me at closing.'],
-	bully: ['Boop.', 'Mine now.', 'Too slow, logo!', 'Tag, you’re it!'],
+	bully: ['Boop.', 'Mine now.', 'Too slow, logo!', 'Tag, you’re it!', 'Nice cap. Boop.'],
 	walk: ['Just walking the edge.', 'Patrolling the header.', 'Don’t mind me.'],
 	typing: ['Whatcha typing?', 'Ooh, a form! I’ll supervise.', 'Be honest on that one.', 'Typo patrol… purr.'],
 	math: ['Ooh, numbers!', 'Run the math, human.', 'That spread looks tasty.', 'Carry the one… meow.'],
@@ -43,7 +42,6 @@ const PAGE: Record<string, string[]> = {
 	'/booking': ['Book a call. I’ll nap through it.'],
 	'/ask': ['Ask me anything. I’ll ignore it.'],
 };
-const BUDDY_SAY = { ouch: ['Hey!', 'Not again!', 'Ow, my cap!', 'Rude!'], nap: ['Shh… she’s napping.'], deal: ['Woo-hoo!', 'Deal time!'] };
 
 // The kitty's head for the floating pose (viewBox 0 0 140 120).
 const HEAD = 'M24,46 C18,40 14,30 13,20 C22,22 32,27 40,33 C47,30 55,29 62,30 C68,22 76,14 86,10 C88,22 88,33 85,42 C94,52 98,64 96,76 C93,96 76,106 56,106 C36,106 20,96 17,78 C15,66 18,55 24,46 Z';
@@ -63,12 +61,6 @@ export function GhostChase() {
 	const kBubble = useRef<HTMLDivElement>(null);
 	const zzz = useRef<HTMLDivElement>(null);
 	const star = useRef<HTMLDivElement>(null);
-	const buddy = useRef<HTMLDivElement>(null);
-	const bBody = useRef<SVGGElement>(null);
-	const legL = useRef<SVGPathElement>(null), legR = useRef<SVGPathElement>(null);
-	const armL = useRef<SVGPathElement>(null), armR = useRef<SVGPathElement>(null);
-	const bEyes = useRef<SVGGElement>(null), bJoy = useRef<SVGGElement>(null), bOuch = useRef<SVGGElement>(null);
-	const bBubble = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -78,17 +70,14 @@ export function GhostChase() {
 	}, []);
 
 	useEffect(() => {
-		if (!on || !kitty.current || !buddy.current || !kSvg.current) return;
-		const k = kitty.current, b = buddy.current, svg = kSvg.current;
+		if (!on || !kitty.current || !kSvg.current) return;
+		const k = kitty.current, svg = kSvg.current;
 		const rand = (lo: number, hi: number) => lo + Math.random() * (hi - lo);
 		const seed = Array.from({ length: 6 }, () => rand(0, Math.PI * 2));
 		const kp = { x: innerWidth * 0.6, y: innerHeight * 0.45, vx: 0, vy: 0, tilt: 0, face: 1, spin: 0 };
-		const minX = () => 74, maxX = () => Math.max(120, innerWidth - BUDDY - 190);
-		const bp = { x: 90, vx: 0, face: 1, hop: 0, hopV: 0, ex: 0, ey: 0 };
 		let mode: Mode = 'float', modeUntil = performance.now() + rand(7000, 11000), pose: Pose = 'head';
 		let napEl: Element | null = null, napOff = 0, visitEl: Element | null = null, walkDir = 1;
-		let goal = bp.x, restUntil = 0, wave = 0, last = performance.now(), walk = 0, raf = 0, excitedAt = 0;
-		let ouchUntil = 0, laughUntil = 0, buddyJoyUntil = 0, pokedAt = 0;
+		let last = performance.now(), raf = 0, laughUntil = 0, pokedAt = 0;
 		// Pounce: crouch and wiggle, then leap in an arc to catch a sparkle (squash and stretch, cartoon style).
 		const jump = { phase: '' as '' | 'crouch' | 'leap' | 'land', t0: 0, sx: 0, sy: 0, ex: 0, ey: 0, dur: 700 };
 		let sq = { x: 1, y: 1 };
@@ -96,9 +85,8 @@ export function GhostChase() {
 		let lastPath = '', lastScrollY = scrollY, lastScrollT = performance.now(), lastMathAt = 0, lastScrollTalk = 0;
 
 		// Speech bubbles: one line at a time each, fading out on their own.
-		let kSayUntil = 0, bSayUntil = 0;
+		let kSayUntil = 0;
 		const say = (line: string, ms = 2600) => { const el = kBubble.current; if (!el) return; el.textContent = line; el.classList.add('show'); kSayUntil = performance.now() + ms; };
-		const buddySay = (line: string, ms = 2000) => { const el = bBubble.current; if (!el) return; el.textContent = line; el.classList.add('show'); bSayUntil = performance.now() + ms; };
 		const setMode = (m: Mode, ms: number) => { mode = m; modeUntil = performance.now() + ms; k.dataset.mood = m; };
 		const setPose = (p: Pose) => { if (pose !== p) { pose = p; svg.dataset.pose = p; } };
 
@@ -128,7 +116,7 @@ export function GhostChase() {
 			const t = performance.now(); if (t - lastMathAt < 9000 || mode === 'nap') return;
 			lastMathAt = t; say(pick(SAY.math));
 		};
-		const onCelebrate = () => { setMode('party', 2600); say(pick(SAY.deal), 3200); buddyJoyUntil = performance.now() + 2600; buddySay(pick(BUDDY_SAY.deal)); bp.hopV = -260; };
+		const onCelebrate = () => { setMode('party', 2600); say(pick(SAY.deal), 3200); };
 		window.addEventListener('pointermove', onPointer, { passive: true });
 		window.addEventListener('pointerdown', onDown, { passive: true });
 		document.addEventListener('focusin', onFocus);
@@ -159,7 +147,6 @@ export function GhostChase() {
 			const w = innerWidth, h = innerHeight, s = t / 1000, f = s * 1.6;
 			const header = document.querySelector('.site-header')?.getBoundingClientRect();
 			const edgeY = Math.max(4, (header?.bottom ?? 0) - KH * 0.9); // paws on the header's bottom edge
-			const by = h - BUDDY - 22;
 
 			// Page comments, and a squeal when the visitor scrolls fast.
 			if (location.pathname !== lastPath) {
@@ -210,7 +197,7 @@ export function GhostChase() {
 					const d = seek(r.left + napOff, r.top - KH * 0.92, 360, dt);
 					if (d < 6) {
 						kp.vx = 0; kp.vy = 0; kp.x = r.left + napOff; kp.y = r.top - KH * 0.92; napping = true;
-						if (pose !== 'loaf') { say(pick(SAY.napStart), 1600); if (Math.random() < 0.6) window.setTimeout(() => buddySay(pick(BUDDY_SAY.nap)), 1800); }
+						if (pose !== 'loaf') say(pick(SAY.napStart), 1600);
 					}
 					setPose(napping ? 'loaf' : 'head');
 					if (t > modeUntil) { napEl = null; setMode('float', 7000); say(pick(SAY.napWake.slice(1))); }
@@ -219,15 +206,20 @@ export function GhostChase() {
 				const r = visitEl?.isConnected ? visitEl.getBoundingClientRect() : null;
 				if (!r || document.activeElement !== visitEl || t > modeUntil || r.bottom < 90 || r.top > h) { visitEl = null; setMode('float', 6000); }
 				else { const tx = Math.min(w - KW - 10, r.right - KW * 0.6), ty = r.top - KH * 0.92, d = seek(tx, ty, 380, dt); setPose(d < 8 ? 'sit' : 'head'); if (d < 8) { kp.vx = 0; kp.vy = 0; } }
-			} else if (mode === 'bully') {
-				const d = seek(bp.x + BUDDY / 2 - KW / 2, by - KH * 0.45, 300, dt);
-				setPose('head');
-				if (d < 30) { // boop!
-					bp.hopV = -300; ouchUntil = t + 1400; laughUntil = t + 1400;
-					say(pick(SAY.bully), 1800); window.setTimeout(() => buddySay(pick(BUDDY_SAY.ouch)), 350);
-					kp.vx = (kp.x > w / 2 ? -1 : 1) * 420; kp.vy = -360; setMode('float', rand(6000, 9000));
+			} else if (mode === 'bully') { // fly up to the header logo and boop it
+				const logo = document.querySelector('.site-header .brand-face');
+				const r = logo?.getBoundingClientRect();
+				if (!r || r.bottom < 0) setMode('float', 6000);
+				else {
+					const d = seek(r.right - KW * 0.15, r.top + r.height * 0.15, 320, dt);
+					setPose('head');
+					if (d < 26) {
+						laughUntil = t + 1400; say(pick(SAY.bully), 1800);
+						logo?.classList.remove('gc-booped'); void (logo as HTMLElement | null)?.getBoundingClientRect(); logo?.classList.add('gc-booped');
+						kp.vx = 360; kp.vy = 380; setMode('float', rand(6000, 9000));
+					}
+					if (mode === 'bully' && t > modeUntil) setMode('float', 6000);
 				}
-				if (mode === 'bully' && t > modeUntil) setMode('float', 6000);
 			} else if (mode === 'pounce') {
 				const e = t - jump.t0;
 				if (jump.phase === 'crouch') { // sit and stare at the sparkle, then drop into a crouch and wiggle
@@ -277,34 +269,6 @@ export function GhostChase() {
 			if (kBubble.current) { kBubble.current.style.transform = `translate3d(${(kp.x + KW / 2).toFixed(1)}px,${(kp.y + bob - 6).toFixed(1)}px,0)`; if (t > kSayUntil) kBubble.current.classList.remove('show'); }
 			if (zzz.current) zzz.current.style.transform = `translate3d(${(kp.x + KW * (kp.face > 0 ? 0.78 : 0.22)).toFixed(1)}px,${(kp.y - 4).toFixed(1)}px,0)`;
 
-			// Buddy: strolls along the bottom, sits, watches the kitty, and reacts.
-			if (t > restUntil && Math.abs(goal - bp.x) < 6) { restUntil = t + rand(2500, 6000); goal = rand(minX(), maxX()); }
-			const strolling = t > restUntil && Math.abs(goal - bp.x) >= 6 && t > ouchUntil;
-			bp.vx += ((strolling ? Math.sign(goal - bp.x) * 46 : 0) - bp.vx) * Math.min(1, dt * 2.5);
-			bp.x = Math.max(minX(), Math.min(maxX(), bp.x + bp.vx * dt));
-			if (Math.abs(bp.vx) > 4) bp.face = bp.vx > 0 ? 1 : -1;
-			walk += dt * Math.abs(bp.vx) * 0.32;
-			const dx = cx - (bp.x + BUDDY / 2), dy = cy - (by + BUDDY / 2), d = Math.hypot(dx, dy) || 1;
-			bp.ex += ((dx / d) * 6 * bp.face - bp.ex) * Math.min(1, dt * 6);
-			bp.ey += ((dy / d) * 5 - bp.ey) * Math.min(1, dt * 6);
-			const close = d < 190 && mode !== 'bully' && t > ouchUntil;
-			if (close && t - excitedAt > 2600) { excitedAt = t; bp.hopV = Math.min(bp.hopV, -190); }
-			wave += ((close || t < buddyJoyUntil ? 1 : 0) - wave) * Math.min(1, dt * 4);
-			bp.hopV += 900 * dt; bp.hop = Math.min(0, bp.hop + bp.hopV * dt); if (bp.hop === 0) bp.hopV = 0;
-			b.style.transform = `translate3d(${bp.x.toFixed(1)}px,${(by + bp.hop).toFixed(1)}px,0)${t < ouchUntil ? ` rotate(${(Math.sin(s * 30) * 6).toFixed(1)}deg)` : ''}`;
-			bBody.current?.setAttribute('transform', `translate(50 0) scale(${bp.face} 1) translate(-50 0)`);
-			bEyes.current?.setAttribute('transform', `translate(${bp.ex.toFixed(2)} ${bp.ey.toFixed(2)})`);
-			const swing = Math.sin(walk) * (strolling ? 8 : 0);
-			legL.current?.setAttribute('d', `M38,88 L${(36 - swing).toFixed(1)},100 l-6,0`);
-			legR.current?.setAttribute('d', `M62,88 L${(64 + swing).toFixed(1)},100 l6,0`);
-			const flap = Math.sin(s * 11) * 8 * wave;
-			armL.current?.setAttribute('d', `M14,62 Q${(4 - wave * 6).toFixed(1)},${(66 - wave * 22).toFixed(1)} ${(2 - wave * 2).toFixed(1)},${(72 - wave * 44 + flap).toFixed(1)}`);
-			armR.current?.setAttribute('d', `M86,62 Q96,${(66 - swing / 2).toFixed(1)} 98,${(72 - swing / 2).toFixed(1)}`);
-			const ouch = t < ouchUntil, happy = !ouch && wave > 0.6;
-			bEyes.current?.setAttribute('opacity', ouch || happy ? '0' : '1');
-			bJoy.current?.setAttribute('opacity', happy ? '1' : '0');
-			bOuch.current?.setAttribute('opacity', ouch ? '1' : '0');
-			if (bBubble.current) { bBubble.current.style.transform = `translate3d(${(bp.x + BUDDY / 2).toFixed(1)}px,${(by + bp.hop - 8).toFixed(1)}px,0)`; if (t > bSayUntil) bBubble.current.classList.remove('show'); }
 			raf = requestAnimationFrame(tick);
 		};
 		raf = requestAnimationFrame(tick);
@@ -364,21 +328,6 @@ export function GhostChase() {
 			<div ref={star} className="gc-star"><span /></div>
 			<div ref={zzz} className="gc-zzz"><span>z</span><span>z</span><span>Z</span></div>
 			<div ref={kBubble} className="gc-bubble" />
-			<div ref={buddy} className="gc-buddy" style={{ width: BUDDY, height: BUDDY }}>
-				<svg viewBox="-8 0 116 112" overflow="visible">
-					<g ref={bBody}>
-						<path ref={armL} className="gc-limb" d="M14,62 Q4,66 2,72" />
-						<path ref={armR} className="gc-limb" d="M86,62 Q96,66 98,72" />
-						<path ref={legL} className="gc-limb" d="M38,88 L36,100 l-6,0" />
-						<path ref={legR} className="gc-limb" d="M62,88 L64,100 l6,0" />
-						<path className="face-cap" d="M6,10 H94 V92 H79 V45 L6,36 Z" />
-						<g ref={bEyes}><rect className="face-eye" x="43" y="54" width="9.5" height="21" /><rect className="face-eye" x="58" y="54" width="9.5" height="21" /></g>
-						<g ref={bJoy} opacity="0"><path className="face-joy" d="M43,68 L47.75,60 L52.5,68" /><path className="face-joy" d="M58,68 L62.75,60 L67.5,68" /></g>
-						<g ref={bOuch} opacity="0"><path className="face-joy" d="M43,58 L52,64 L43,70" /><path className="face-joy" d="M67,58 L58,64 L67,70" /></g>
-					</g>
-				</svg>
-			</div>
-			<div ref={bBubble} className="gc-bubble gc-bubble-buddy" />
 		</div>}
 		<button type="button" className={`gc-toggle${on ? ' is-on' : ''}`} onClick={toggle} aria-pressed={on} title={on ? 'Hide the phantom kitty' : 'Show the phantom kitty'}>
 			<Ghost size={16} /><span className="sr-only">{on ? 'Hide the phantom kitty' : 'Show the phantom kitty'}</span>
