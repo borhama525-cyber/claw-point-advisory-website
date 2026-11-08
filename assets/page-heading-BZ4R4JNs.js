@@ -1,1 +1,0 @@
-import{t as e}from"./sky-clouds-Ch8CD1kp.js";import{t}from"./jsx-runtime-afkERV6J.js";var n=t();function r({index:t,title:r,text:i}){return(0,n.jsxs)(`section`,{className:`page-heading`,children:[(0,n.jsx)(e,{}),(0,n.jsxs)(`p`,{className:`eyebrow`,children:[t,` / CLAW POINT ADVISORY`]}),(0,n.jsx)(`h1`,{children:r}),(0,n.jsx)(`p`,{children:i})]})}export{r as t};
