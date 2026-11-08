@@ -6,6 +6,7 @@ import { sendForm } from '@/lib/send-form';
 import { useFormSubmission } from '@/hooks/use-form-submission';
 import { requiredDocs } from '@/data/required-docs';
 import { toolBySlug } from '@/data/deal-tools';
+import { IntroEmail, SEPARATE_ESCROW_STATES, TitleEscrowSection, type EscrowMode } from '@/components/calculators/title-escrow';
 
 export type RequestPrefill = { purchase_price?: number; seller_finance?: number; resale_price?: number; primary_loan?: number; requested_funding?: number };
 
@@ -49,6 +50,10 @@ function FileDrop({ id, name, required, multiple, onChange }: { id: string; name
 
 export function DealRequestDialog({ open, onOpenChange, method, title, prefill, calculator, onBack }: { open: boolean; onOpenChange: (o: boolean) => void; method: string; title: string; prefill: RequestPrefill; calculator: Record<string, number>; onBack: () => void }) {
 	const [needsLender, setNeedsLender] = useState(false);
+	const [usState, setUsState] = useState('');
+	const [escrowMode, setEscrowMode] = useState<EscrowMode>('same');
+	const [intro, setIntro] = useState<{ to: string[]; address: string; name: string } | null>(null);
+	const isDoubleClose = method === 'double-close';
 	const docs = requiredDocs[method] ?? [];
 	const [attached, setAttached] = useState<Record<string, boolean>>({});
 	const requiredNow = docs.filter(d => !d.optional && !((d.lender || d.withLender) && needsLender));
@@ -60,6 +65,10 @@ export function DealRequestDialog({ open, onOpenChange, method, title, prefill, 
 			data.set('method', method); data.set('consent', data.get('consent') ? 'true' : 'false'); data.set('calculator', JSON.stringify(calculator));
 			const tool = toolBySlug(method);
 			if (tool) data.set('calculator_summary', tool.fields.filter(f => calculator[f.key] !== undefined).map(f => `${f.label}: ${f.unit === '$' ? '$' + Math.round(calculator[f.key]).toLocaleString('en-US') : calculator[f.key] + ' ' + f.unit}`).join('\n'));
+			if (method === 'double-close') {
+				const get = (k: string) => String(data.get(k) ?? '').trim();
+				setIntro({ to: [get('title_email'), escrowMode === 'have' ? get('escrow_email') : ''].filter(Boolean), address: [get('address'), get('city'), get('state')].filter(Boolean).join(', '), name: `${get('first_name')} ${get('last_name')}`.trim() });
+			}
 			return sendForm('deal', data);
 		},
 	});
@@ -73,7 +82,7 @@ export function DealRequestDialog({ open, onOpenChange, method, title, prefill, 
 				<button type="button" className="dr-back" onClick={onBack}>← All funding types</button>
 				<Dialog.Title className="dr-title">{title}</Dialog.Title>
 				<p id="dr-desc" className="dr-sub">About two minutes. Your calculator numbers are already filled in, and every request is reviewed individually.</p>
-				{form.isSuccess ? <div className="dr-done" role="status"><h3>Request received.</h3><p>Thank you. Our team will review your deal and reply by email. If anything is missing, we’ll ask for it then. Submitting a request is not a funding commitment.</p><button type="button" className="button" onClick={() => onOpenChange(false)}>Back to the calculator</button></div> :
+				{form.isSuccess ? <div className="dr-done" role="status"><h3>Request received.</h3><p>Thank you. Our team will review your deal and reply by email. If anything is missing, we’ll ask for it then. Submitting a request is not a funding commitment.</p>{intro && <IntroEmail {...intro} />}<button type="button" className="button" onClick={() => onOpenChange(false)}>Back to the calculator</button></div> :
 				<form className="dr-form" onSubmit={form.onSubmit} encType="multipart/form-data" noValidate={false}>
 					<input {...form.honeypotProps} />
 					<h3>Borrower information</h3>
@@ -85,14 +94,15 @@ export function DealRequestDialog({ open, onOpenChange, method, title, prefill, 
 					<Field label="Property type" name="property_type" required error={e.property_type}><select id="dr-property_type" name="property_type" required defaultValue=""><option value="" disabled>Select</option>{PROPERTY_TYPES.map(t => <option key={t}>{t}</option>)}</select></Field>
 					<Field label="Subject property address" name="address" required error={e.address}><input id="dr-address" name="address" autoComplete="street-address" required maxLength={300} placeholder="Street address" /></Field>
 					<div className="dr-row dr-row-3"><Field label="City" name="city" required error={e.city}><input id="dr-city" name="city" autoComplete="address-level2" required maxLength={120} /></Field>
-					<Field label="State" name="state" required error={e.state}><select id="dr-state" name="state" autoComplete="address-level1" required defaultValue=""><option value="" disabled>Select</option>{STATES.map(s => <option key={s}>{s}</option>)}</select></Field>
+					<Field label="State" name="state" required error={e.state}><select id="dr-state" name="state" autoComplete="address-level1" required defaultValue="" onChange={ev => { setUsState(ev.target.value); if (SEPARATE_ESCROW_STATES.includes(ev.target.value) && escrowMode === 'same') setEscrowMode('have'); }}><option value="" disabled>Select</option>{STATES.map(s => <option key={s}>{s}</option>)}</select></Field>
 					<Field label="ZIP" name="zip" required error={e.zip}><input id="dr-zip" name="zip" autoComplete="postal-code" inputMode="numeric" required pattern="\d{5}(-\d{4})?" maxLength={10} /></Field></div>
 					<Field label="Target close date" name="close_date" required error={e.close_date}><input id="dr-close_date" name="close_date" type="date" required /></Field>
 					<div className="dr-row"><Money label="Purchase price" name="purchase_price" value={prefill.purchase_price} required error={e.purchase_price} />
 					{method === 'stack' ? <Money label="Seller finance amount" name="seller_finance" value={prefill.seller_finance} required error={e.seller_finance} /> : <Money label={method === 'echo' || method === 'double-close' ? 'B–C sale price' : 'Estimated value or ARV'} name="resale_price" value={prefill.resale_price} error={e.resale_price} />}</div>
 					<div className="dr-row"><Money label="Primary loan amount (if you have one)" name="primary_loan" value={prefill.primary_loan} error={e.primary_loan} />
 					<Money label={method === 'emd' ? 'EMD amount' : 'Requested funding'} name="requested_funding" value={prefill.requested_funding} required error={e.requested_funding} /></div>
-					{!docs.some(d => d.lender) && <label className="check-label dr-lender"><input type="checkbox" name="needs_lender" value="Yes" checked={needsLender} onChange={ev => setNeedsLender(ev.target.checked)} /> I need a primary lender: please provide one for this deal.</label>}
+					{!docs.some(d => d.lender) && !isDoubleClose && <label className="check-label dr-lender"><input type="checkbox" name="needs_lender" value="Yes" checked={needsLender} onChange={ev => setNeedsLender(ev.target.checked)} /> I need a primary lender: please provide one for this deal.</label>}
+					{isDoubleClose && <TitleEscrowSection errors={e} usState={usState} mode={escrowMode} onMode={setEscrowMode} />}
 					<h3>Required documents</h3>
 					{requiredNow.length > 0 && <div className="dr-progress" aria-live="polite"><div className="dr-progress-bar"><i style={{ width: `${(done / requiredNow.length) * 100}%` }} /></div><span>{done === requiredNow.length ? 'All required documents attached ✓' : `${done} of ${requiredNow.length} required attached`}</span></div>}
 					{docs.some(d => d.lender) && <div className="dr-lender-choice" role="radiogroup" aria-label="Primary lender">

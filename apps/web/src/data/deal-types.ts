@@ -31,7 +31,7 @@ export const dealTypes: DealType[] = [
 		what: 'Two closings in sequence: you buy the property (A–B) and resell it to your end buyer (B–C), usually the same day. We fund your A–B purchase, and the B–C proceeds repay us. Your buyer never sees your contract price.',
 		when: ['An assignment is restricted, or you don’t want your fee visible', 'Your end buyer is ready and funded', 'You need short-term capital for the A–B purchase only'],
 		how: ['Send both contracts and the closing date.', 'We review the deal and confirm terms in writing.', 'We fund the A–B purchase at title, and escrow repays us from the B–C proceeds.'],
-		need: ['A–B and B–C contracts', 'End buyer proof of funds or lender approval', 'A title company that handles back-to-back closings'],
+		need: ['A–B and B–C contracts', 'The B–C HUD and an escrow receipt showing the buyer’s funds are already in escrow', 'Title company details, and your escrow agent’s if separate (we can provide one)', 'An intro email connecting us with title and escrow'],
 	},
 	{
 		slug: 'emd', name: 'EMD', eyebrow: 'TRANSACTIONAL',

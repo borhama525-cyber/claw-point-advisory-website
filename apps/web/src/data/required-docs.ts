@@ -20,7 +20,8 @@ export const requiredDocs: Record<string, RequiredDoc[]> = {
 	'double-close': [
 		{ key: 'ab_contract', label: 'A–B purchase contract', hint: 'Your contract with the seller.' },
 		{ key: 'bc_contract', label: 'B–C purchase contract', hint: 'Your contract with the end buyer.' },
-		{ key: 'buyer_funds', label: 'End buyer proof of funds or lender approval', hint: 'Shows the B–C side can close.' },
+		{ key: 'bc_hud', label: 'B–C HUD / settlement statement', hint: 'The B–C closing statement for your end buyer’s purchase.' },
+		{ key: 'escrow_receipt', label: 'Escrow receipt for the buyer’s funds', hint: 'Proof the B–C buyer’s money is already in escrow. We fund the A–B only after it is.' },
 	],
 	emd: [
 		{ key: 'contract', label: 'Signed purchase contract', hint: 'Must show the EMD amount and deadline.' },

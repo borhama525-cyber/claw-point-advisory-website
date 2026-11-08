@@ -795,3 +795,14 @@ h1 em,h2 em{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-
 .dr-done{animation:dr-in .4s both}
 @media(max-width:560px){.dr-submit-bar{margin:4px -18px 0;padding:12px 18px 16px}}
 @media(prefers-reduced-motion:reduce){.dr-panel,.dr-overlay,.dr-doc,.dr-done,.dr-drop.has-file .dr-drop-icon{animation:none}.dr-progress-bar i{transition:none}}
+.dr-party{background:#fff;border:1.5px solid #e1ebe7;border-radius:16px;padding:14px;display:grid;gap:12px;animation:dr-in .35s cubic-bezier(.2,.8,.2,1) both}
+.dr-party-head{display:flex;align-items:center;gap:8px;margin:0;font-size:14px}
+.dr-badge{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border-radius:20px;padding:2px 8px}.dr-badge.req{background:var(--coral-soft);color:#8a3527}
+.dr-party-fields{display:grid;gap:12px;animation:dr-in .3s both}
+.dr-note{margin:0;font-size:12.5px;line-height:1.5;background:var(--mimosa-soft);color:#5e4f00;border-radius:10px;padding:9px 12px}
+.dr-note.ok{background:#eef6f3;color:var(--leaf);animation:dr-in .3s both}
+@media(min-width:561px){.dr-escrow-choice{grid-template-columns:repeat(3,1fr)!important}}
+.dr-escrow-choice{margin:0!important}.dr-escrow-choice label{font-size:13px}
+.dr-intro-ack{font-size:12.5px!important;background:#f3f8f6;border-radius:12px;padding:12px 14px;font-weight:600!important}
+.dr-intro{margin:18px 0;padding:16px;border-radius:16px;background:linear-gradient(120deg,var(--sky-soft),#fff);border:1px solid #d9e6e2;animation:dr-in .4s both}
+.dr-intro p{font-size:13.5px;margin:0 0 12px}.dr-intro .button{gap:8px}
