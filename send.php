@@ -58,18 +58,30 @@ if ($form === 'deal') {
 		'Description' => field('description', 5000),
 		'Referred by' => oneLine(field('referrer_first_name', 100) . ' ' . field('referrer_last_name', 100)), 'Referrer email' => oneLine(field('referrer_email', 200)), 'Referrer phone' => field('referrer_phone', 40),
 	];
+	$party = function (string $p, string $label) {
+		foreach (['company' => 'name', 'contact' => 'contact', 'email' => 'email', 'phone' => 'phone'] as $k => $l) if (field("{$p}_{$k}") === '') reply(422, ['ok' => false, 'error' => "Please add the {$label} {$l}."]);
+		if (!filter_var(field("{$p}_email"), FILTER_VALIDATE_EMAIL)) reply(422, ['ok' => false, 'error' => "Please enter a valid {$label} email."]);
+		return oneLine(field("{$p}_company") . ' · ' . field("{$p}_contact") . ' · ' . field("{$p}_email") . ' · ' . field("{$p}_phone", 40));
+	};
 	if (field('method', 20) === 'double-close') {
-		$party = function (string $p, string $label) {
-			foreach (['company' => 'name', 'contact' => 'contact', 'email' => 'email', 'phone' => 'phone'] as $k => $l) if (field("{$p}_{$k}") === '') reply(422, ['ok' => false, 'error' => "Please add the {$label} {$l}."]);
-			if (!filter_var(field("{$p}_email"), FILTER_VALIDATE_EMAIL)) reply(422, ['ok' => false, 'error' => "Please enter a valid {$label} email."]);
-			return oneLine(field("{$p}_company") . ' · ' . field("{$p}_contact") . ' · ' . field("{$p}_email") . ' · ' . field("{$p}_phone", 40));
-		};
 		$rows['Title company'] = $party('title', 'title company');
 		$mode = field('escrow_mode', 10);
 		if (!in_array($mode, ['same', 'have', 'need'], true)) reply(422, ['ok' => false, 'error' => 'Please choose an escrow option.']);
 		$rows['Escrow agent'] = $mode === 'have' ? $party('escrow', 'escrow company') : ($mode === 'need' ? 'Needs an escrow agent: please provide one' : 'Same company as title');
 		if (field('intro_ack', 3) !== 'Yes') reply(422, ['ok' => false, 'error' => 'Please confirm you’ll introduce us to your title and escrow contacts.']);
 		$rows['Intro to title/escrow'] = 'Borrower will send the intro email (cc us)';
+	}
+	if (field('method', 20) === 'emd') {
+		$role = field('emd_role', 40);
+		if (!in_array($role, ['Buyer', 'Wholesaler acting as buyer'], true)) reply(422, ['ok' => false, 'error' => 'Please choose your role on the PSA.']);
+		$days = (int) field('inspection_days', 3);
+		if ($days < 1) reply(422, ['ok' => false, 'error' => 'Please enter the inspection period in days.']);
+		$rows['Role on PSA'] = $role;
+		$rows['Inspection period'] = "{$days} days";
+		$rows['Mutual release signers'] = $role === 'Buyer' ? 'Buyer and seller' : 'Wholesaler (buyer on the PSA) and seller';
+		if (field('property_type', 40) === 'Commercial' && $days >= 60) $rows['EMD structure'] = 'Commercial, ' . ($days >= 90 ? '90+' : '60+') . ' day inspection: 30-day fee structure and mutual EMD loan agreement';
+		if (field('title_mode', 10) === 'chosen') $rows['Title company'] = $party('title', 'title company');
+		else $rows['Title company'] = 'TBD on the PSA';
 	}
 } elseif ($form === 'enquiry') {
 	if (field('message', 5000) === '') reply(422, ['ok' => false, 'error' => 'Please tell us about your transaction.']);
@@ -95,7 +107,7 @@ if ($form === 'deal') {
 		'stack' => ['psa?' => 'Purchase contract (PSA)', 'lender_terms*' => 'Primary lender term sheet', 'loi+' => 'LOI (letter of intent)', 'seller_terms?' => 'Seller-carry terms'],
 		'echo' => ['ab_contract' => 'A–B purchase contract', 'bc_contract' => 'B–C purchase contract', 'lender_terms*' => 'End buyer’s lender term sheet or approval'],
 		'double-close' => ['ab_contract' => 'A–B purchase contract', 'bc_contract' => 'B–C purchase contract', 'bc_hud' => 'B–C HUD / settlement statement', 'escrow_receipt' => 'Escrow receipt for the buyer’s funds'],
-		'emd' => ['contract' => 'Signed purchase contract'],
+		'emd' => ['contract' => 'Signed purchase contract (PSA)'],
 	][field('method', 20)] ?? [];
 	$needsLender = field('needs_lender', 3) === 'Yes';
 	$files = []; $docList = []; $missing = [];
@@ -147,8 +159,8 @@ if (is_array($sheet) && !empty($sheet['url']) && function_exists('curl_init')) {
 		'topic' => $form === 'enquiry' ? ($rows['Topic'] ?? '') : '', 'property_type' => $rows['Property type'] ?? '',
 		'address' => $rows['Property'] ?? '', 'close_date' => $form === 'deal' ? field('close_date', 20) : '',
 		'purchase_price' => $form === 'deal' ? $num('purchase_price') : '', 'requested_funding' => $form === 'deal' ? $num('requested_funding') : '',
-		'needs_lender' => isset($rows['Needs a primary lender']) ? 'Yes' : ($form === 'deal' ? 'No' : ''),
-		'message' => trim(implode("\n", array_filter([$rows['Description'] ?? $rows['Message'] ?? '', isset($rows['Title company']) ? 'Title: ' . $rows['Title company'] : '', isset($rows['Escrow agent']) ? 'Escrow: ' . $rows['Escrow agent'] : '']))),
+		'needs_lender' => isset($rows['Needs a primary lender']) ? 'Yes' : (in_array(field('method', 20), ['stack', 'echo'], true) && $form === 'deal' ? 'No' : ''),
+		'message' => trim(implode("\n", array_filter([$rows['Description'] ?? $rows['Message'] ?? '', isset($rows['Title company']) ? 'Title: ' . $rows['Title company'] : '', isset($rows['Escrow agent']) ? 'Escrow: ' . $rows['Escrow agent'] : '', isset($rows['Role on PSA']) ? 'Role on PSA: ' . $rows['Role on PSA'] : '', isset($rows['Inspection period']) ? 'Inspection: ' . $rows['Inspection period'] : '', $rows['EMD structure'] ?? '']))),
 		'referred_by' => trim(($rows['Referred by'] ?? '') . ' ' . ($rows['Referrer email'] ?? '')), 'documents' => $rows['Required paperwork'] ?? ''];
 	$ch = curl_init($sheet['url']);
 	curl_setopt_array($ch, [CURLOPT_POST => true, CURLOPT_POSTFIELDS => http_build_query($lead), CURLOPT_RETURNTRANSFER => true,
