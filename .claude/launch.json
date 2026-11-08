@@ -1,1 +1,0 @@
-{"version":"0.0.1","configurations":[{"name":"claw-site","runtimeExecutable":"sh","runtimeArgs":["-c","cd apps/web && npx react-router dev --port 3100"],"port":3100}]}
