@@ -50,8 +50,8 @@ const PAGE: Record<string, string[]> = {
 };
 
 // The kitty's head for the floating pose (viewBox 0 0 140 120).
-const HEAD = 'M41,60 L31,13 Q31,10 34,12 L58,35 Q70,32 82,35 L106,12 Q109,10 109,13 L99,60 Q103,84 88,100 Q70,113 52,100 Q37,84 41,60 Z';
-const PUFF = Array.from({ length: 34 }, (_, i) => { const a = (i / 34) * Math.PI * 2, r = i % 2 ? 50 : 60; return `${(70 + Math.cos(a) * r).toFixed(1)},${(70 + Math.sin(a) * r * 0.9).toFixed(1)}`; }).join(' ');
+const HEAD = 'M36,62 C32,46 30,30 33,17 C34,12 38,12 41,15 C47,21 53,27 58,32 C66,30 74,30 82,32 C87,27 93,21 99,15 C102,12 106,12 107,17 C110,30 108,46 104,62 C108,83 94,104 70,106 C46,104 32,83 36,62 Z';
+const PUFF = Array.from({ length: 24 }, (_, i) => { const a = (i / 24) * Math.PI * 2, r = i % 2 ? 52 : 60; return `${(70 + Math.cos(a) * r).toFixed(1)},${(70 + Math.sin(a) * r * 0.9).toFixed(1)}`; }).join(' ');
 
 // Friendly nudges with a button, so visitors can act on them right away.
 type Nudge = { line: string; label: string; go: 'deal' | 'booking' | 'chat' | 'funding' | 'network' };
@@ -64,9 +64,9 @@ const NUDGES: Nudge[] = [
 	{ line: 'Want to work together? Join the network!', label: 'Join the network', go: 'network' },
 ];
 
-const SIDE_BODY = 'M26,72 C30,62 56,58 80,60 C92,61 100,57 104,50 L106,35 Q106,32 108,34 L113,44 L118,36 Q120,34 120,37 L120,52 C125,58 123,66 114,69 C106,72 100,78 94,82 C78,86 56,86 44,82 C34,80 26,78 26,72 Z';
-const SIDE_TAIL = 'M30,72 C12,70 6,52 14,40 C19,33 28,36 25,44';
-const LOAF = 'M20,106 C18,92 32,82 50,80 C54,72 58,64 64,58 C68,52 74,48 80,48 L83,33 Q84,30 86,32 L92,42 L99,34 Q101,32 102,35 L103,50 C109,56 110,66 104,73 C118,78 126,90 124,106 Z';
+const SIDE_BODY = 'M24,74 C26,62 46,58 66,59 C80,60 92,58 100,52 C102,45 104,39 106,34 C107,30 110,30 111,33 C112,36 113,39 114,41 C116,38 118,35 120,33 C122,31 124,33 124,36 C125,42 125,48 124,53 C128,59 126,67 118,70 C110,73 102,78 96,82 C80,87 54,87 40,83 C30,81 23,79 24,74 Z';
+const SIDE_TAIL = 'M28,73 C10,72 4,56 12,44 C17,37 26,38 25,46';
+const LOAF = 'M18,106 C16,92 30,82 48,80 C54,70 60,60 68,54 C72,50 76,48 80,48 C81,42 82,37 84,33 C85,30 88,30 89,33 C90,36 91,39 92,42 C94,39 96,36 98,34 C100,32 103,33 103,36 C104,41 104,46 103,50 C109,56 110,66 104,73 C118,78 126,90 124,106 Z';
 const LOAF_TAIL = 'M24,106 C46,113 92,113 116,106';
 
 type Mode = 'float' | 'walk' | 'nap' | 'bully' | 'visit' | 'hiss' | 'party' | 'pounce';
@@ -333,36 +333,40 @@ export function GhostChase() {
 						<linearGradient id="gc-fur" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stopColor="#2a5a43" /><stop offset=".5" stopColor={BODY} /><stop offset="1" stopColor="#0d2117" /></linearGradient>
 						<radialGradient id="gc-iris" cx="50%" cy="45%" r="60%"><stop offset="0" stopColor="#fff2b0" /><stop offset=".55" stopColor="#dcc64a" /><stop offset="1" stopColor="#a88a1c" /></radialGradient>
 						<filter id="gc-halo" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="8" /></filter>
+						<filter id="gc-smooth" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation=".7" /></filter>
 						<filter id="gc-glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="2.4" /></filter>
 					</defs>
 					{/* Head: sleek, angular, almond gold eyes with slit pupils. Also the base of the hiss. */}
 					<g className="gc-pose gc-pose-head">
-						<polygon className="gc-puff" points={PUFF} fill="url(#gc-fur)" stroke="#dcc64a" strokeOpacity=".5" strokeWidth="1.2" strokeLinejoin="round" />
+						<polygon className="gc-puff" points={PUFF} fill="url(#gc-fur)" stroke="#dcc64a" strokeOpacity=".28" strokeWidth="1.2" strokeLinejoin="round" filter="url(#gc-smooth)" />
 						<path d={HEAD} fill="#24533d" opacity=".3" filter="url(#gc-halo)" transform="translate(0 6)" />
-						<path d={HEAD} fill="url(#gc-fur)" stroke="#dcc64a" strokeOpacity=".55" strokeWidth="1.4" strokeLinejoin="round" />
+						<path d={HEAD} fill="#dcc64a" opacity=".22" filter="url(#gc-glow)" />
+						<path d={HEAD} fill="url(#gc-fur)" stroke="#dcc64a" strokeOpacity=".28" strokeWidth="1.2" strokeLinejoin="round" filter="url(#gc-smooth)" />
 						<g ref={kEyes}>
-							<path d="M45,69 Q55,59 65,68 Q55,75 45,69 Z M75,68 Q85,59 95,69 Q85,75 75,68 Z" fill="#dcc64a" opacity=".55" filter="url(#gc-glow)" />
-							<path d="M45,69 Q55,59 65,68 Q55,75 45,69 Z M75,68 Q85,59 95,69 Q85,75 75,68 Z" fill="url(#gc-iris)" />
-							<ellipse cx="55" cy="67.5" rx="1.5" ry="5" fill="#0d2117" /><ellipse cx="85" cy="67.5" rx="1.5" ry="5" fill="#0d2117" />
+							<path d="M43,69 C48,61 60,60 66,68 C60,75 48,75 43,69 Z M74,68 C80,60 92,61 97,69 C92,75 80,75 74,68 Z" fill="#dcc64a" opacity=".55" filter="url(#gc-glow)" />
+							<path d="M43,69 C48,61 60,60 66,68 C60,75 48,75 43,69 Z M74,68 C80,60 92,61 97,69 C92,75 80,75 74,68 Z" fill="url(#gc-iris)" />
+							<ellipse cx="55" cy="68" rx="1.8" ry="5.2" fill="#0d2117" /><ellipse cx="85" cy="68" rx="1.8" ry="5.2" fill="#0d2117" />
 						</g>
 						<g className="gc-fangs"><path d="M62,89 Q70,96 78,89 Q70,92 62,89 Z" fill="#0d2117" /><path d="M64.5,89.5 l1.8,4 l1.8,-3.4 Z M72,90.1 l1.8,3.4 l1.8,-4 Z" fill="#fff7dc" /></g>
 					</g>
 					{/* Walking along the edge: a long, sleek side profile */}
 					<g className="gc-pose gc-pose-walk">
-						<path ref={tail} d={SIDE_TAIL} fill="none" stroke="url(#gc-fur)" strokeWidth="5.5" strokeLinecap="round" />
-						<g ref={legs} stroke={BODY} strokeWidth="5" strokeLinecap="round">
+						<path ref={tail} d={SIDE_TAIL} fill="none" stroke="url(#gc-fur)" strokeWidth="6.5" strokeLinecap="round" />
+						<g ref={legs} stroke={BODY} strokeWidth="6.5" strokeLinecap="round">
 							<line data-x="44" x1="44" y1="78" x2="44" y2="105" /><line data-x="52" x1="52" y1="78" x2="52" y2="105" />
 							<line data-x="86" x1="86" y1="76" x2="86" y2="105" /><line data-x="94" x1="94" y1="76" x2="94" y2="105" />
 						</g>
-						<path d={SIDE_BODY} fill="url(#gc-fur)" stroke="#dcc64a" strokeOpacity=".5" strokeWidth="1.2" strokeLinejoin="round" />
-						<path d="M108,55 Q113,50 118,54 Q113,58 108,55 Z" fill="url(#gc-iris)" /><ellipse cx="113" cy="54.3" rx=".9" ry="2.8" fill="#0d2117" />
+						<path d={SIDE_BODY} fill="#dcc64a" opacity=".2" filter="url(#gc-glow)" />
+						<path d={SIDE_BODY} fill="url(#gc-fur)" stroke="#dcc64a" strokeOpacity=".28" strokeWidth="1.2" strokeLinejoin="round" filter="url(#gc-smooth)" />
+						<path d="M110,52 C112,48 117,48 120,51 C117,55 112,55 110,52 Z" fill="url(#gc-iris)" /><ellipse cx="115.3" cy="51.5" rx="1" ry="2.6" fill="#0d2117" />
 					</g>
 					{/* Resting sphinx: napping (closed eyes) or sitting up and watching (open eyes) */}
 					<g className="gc-pose gc-pose-loaf">
-						<path d={LOAF_TAIL} fill="none" stroke="url(#gc-fur)" strokeWidth="5.5" strokeLinecap="round" />
-						<path d={LOAF} fill="url(#gc-fur)" stroke="#dcc64a" strokeOpacity=".5" strokeWidth="1.2" strokeLinejoin="round" />
-						<g className="gc-sleepy" fill="none" stroke="#dcc64a" strokeWidth="1.8" strokeLinecap="round"><path d="M79,60 Q84,63 89,60" /><path d="M93,59 Q98,62 103,59" /></g>
-						<g className="gc-awake"><path d="M79,61 Q84,55 89,60 Q84,64 79,61 Z M93,60 Q98,55 103,61 Q98,64 93,60 Z" fill="url(#gc-iris)" /><ellipse cx="84" cy="60" rx=".9" ry="3" fill="#0d2117" /><ellipse cx="98" cy="60" rx=".9" ry="3" fill="#0d2117" /></g>
+						<path d={LOAF_TAIL} fill="none" stroke="url(#gc-fur)" strokeWidth="6.5" strokeLinecap="round" />
+						<path d={LOAF} fill="#dcc64a" opacity=".2" filter="url(#gc-glow)" />
+						<path d={LOAF} fill="url(#gc-fur)" stroke="#dcc64a" strokeOpacity=".28" strokeWidth="1.2" strokeLinejoin="round" filter="url(#gc-smooth)" />
+						<g className="gc-sleepy" fill="none" stroke="#dcc64a" strokeWidth="1.8" strokeLinecap="round"><path d="M80,60 Q85,63 90,60" /><path d="M93,59 Q98,62 102,59" /></g>
+						<g className="gc-awake"><path d="M79,61 C81,56 87,56 90,60 C87,64 81,64 79,61 Z M92,60 C95,56 100,56 102,61 C100,64 95,64 92,60 Z" fill="url(#gc-iris)" /><ellipse cx="84.5" cy="60" rx="1" ry="3" fill="#0d2117" /><ellipse cx="97" cy="60" rx="1" ry="3" fill="#0d2117" /></g>
 					</g>
 				</svg>
 			</div>
