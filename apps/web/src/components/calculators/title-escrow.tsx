@@ -29,7 +29,7 @@ export function EscrowBlock({ errors: e, usState, mode, onMode }: { errors: Erro
 			</div>
 			{mode === 'have' && <div className="dr-party-fields">
 				<div className="dr-row"><Input name="escrow_company" label="Escrow company" required error={e.escrow_company} />
-					<Input name="escrow_contact" label="Escrow officer or contact" required error={e.escrow_contact} autoComplete="off" /></div>
+					<Input name="escrow_contact" label="Escrow officer name" placeholder="Full name" required error={e.escrow_contact} autoComplete="off" /></div>
 				<div className="dr-row"><Input name="escrow_email" label="Email" type="email" required error={e.escrow_email} placeholder="officer@escrowco.com" />
 					<Input name="escrow_phone" label="Phone" type="tel" required error={e.escrow_phone} placeholder="(555) 555-5555" /></div>
 			</div>}
@@ -45,7 +45,7 @@ export function TitleEscrowSection({ errors: e, usState, mode, onMode }: { error
 		<div className="dr-party">
 			<p className="dr-party-head"><strong>Title company</strong><span className="dr-badge req">Required</span></p>
 			<div className="dr-row"><Input name="title_company" label="Company name" required error={e.title_company} />
-				<Input name="title_contact" label="Title officer or contact" required error={e.title_contact} autoComplete="off" /></div>
+				<Input name="title_contact" label="Title officer name" placeholder="Full name" required error={e.title_contact} autoComplete="off" /></div>
 			<div className="dr-row"><Input name="title_email" label="Email" type="email" required error={e.title_email} placeholder="officer@titleco.com" />
 				<Input name="title_phone" label="Phone" type="tel" required error={e.title_phone} placeholder="(555) 555-5555" /></div>
 			<Input name="title_website" label="Website" required error={e.title_website} placeholder="acmetitle.com" autoComplete="url" />
@@ -97,7 +97,7 @@ export function EmdSection({ errors: e, propertyType, titleMode, onTitleMode, us
 			</div>
 			{titleMode === 'chosen' && <div className="dr-party-fields">
 				<div className="dr-row"><Input name="title_company" label="Company name" required error={e.title_company} />
-					<Input name="title_contact" label="Title officer or contact" required error={e.title_contact} autoComplete="off" /></div>
+					<Input name="title_contact" label="Title officer name" placeholder="Full name" required error={e.title_contact} autoComplete="off" /></div>
 				<div className="dr-row"><Input name="title_email" label="Email" type="email" required error={e.title_email} placeholder="officer@titleco.com" />
 					<Input name="title_phone" label="Phone" type="tel" required error={e.title_phone} placeholder="(555) 555-5555" /></div>
 			<Input name="title_website" label="Website" required error={e.title_website} placeholder="acmetitle.com" autoComplete="url" />
