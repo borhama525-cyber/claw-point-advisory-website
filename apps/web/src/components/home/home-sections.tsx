@@ -6,12 +6,13 @@ import { ToolCalculator } from '@/components/calculators/tool-calculator';
 import { RequestButton, useRequest } from '@/components/request/request-provider';
 import { DealIcon } from '@/components/request/deal-icon';
 import { openContactPanel } from '@/components/contact-panel';
+import { LenderNote } from '@/components/lender-note';
 
 export function HomeHero() {
 	return <section className="hero home-hero"><div className="hero-inner">
 		<div className="hero-copy">
 			<h1>Get your deal<br /><em>moving.</em></h1>
-			<p>Short-term capital for Stack Method, Echo, double close, EMD, hard money and DSCR deals. Run the numbers, pick your structure and send it to a team that reviews every file.</p>
+			<p>Short-term capital for Stack Method, Echo, double close and EMD deals. No primary lender? We can provide one. Run the numbers, pick your structure and send it to a team that reviews every file.</p>
 			<div className="hero-buttons"><RequestButton>Get funded →</RequestButton><a href="#deal-types" className="button outline">Explore deal types</a></div>
 			<p className="fine-print">Every transaction is individually reviewed. No funding commitment is made on this website.</p>
 		</div>
@@ -19,7 +20,7 @@ export function HomeHero() {
 	</div></section>;
 }
 
-const TICKER = ['Stack Method', 'Echo Method', 'Double close', 'EMD funding', 'Hard money', 'DSCR loans', 'Funds only through escrow', 'Written terms before closing', 'Every file reviewed by a person', 'Free deal calculators'];
+const TICKER = ['Stack Method', 'Echo Method', 'Double close', 'EMD funding', 'Primary lender available', 'Funds only through escrow', 'Written terms before closing', 'Every file reviewed by a person', 'Free deal calculators'];
 
 export function Ticker() {
 	const items = [...TICKER, ...TICKER];
@@ -44,11 +45,12 @@ export function WhyBento() {
 export function DealTypesGrid() {
 	const { openDetails, openRequest } = useRequest();
 	return <section className="band deal-types" id="deal-types"><div className="tool-wrap">
-		<div className="deal-types-head"><div><p className="eyebrow">DEAL TYPES</p><h2>Six ways to get funded.</h2><p>Each structure has its own guide: what it is, when to use it, and how we fund it. Learn it, then start your request.</p></div><RequestButton className="button small">Get funded →</RequestButton></div>
+		<div className="deal-types-head"><div><p className="eyebrow">DEAL TYPES</p><h2>Four ways to get funded.</h2><p>Each structure has its own guide: what it is, when to use it, and how we fund it. Learn it, then start your request.</p></div><RequestButton className="button small">Get funded →</RequestButton></div>
 		<div className="tool-cards">{dealTypes.map(d => <article key={d.slug} className="tool-tile deal-tile">
 			<DealIcon slug={d.slug} /><h3>{d.name}</h3><p>{d.card}</p>
 			<div className="deal-tile-actions"><button type="button" className="button small outline" onClick={() => openDetails(d.slug)}>Learn more</button><button type="button" className="button small" onClick={() => openRequest(d.slug)}>Start →</button></div>
 		</article>)}</div>
+		<LenderNote />
 	</div></section>;
 }
 

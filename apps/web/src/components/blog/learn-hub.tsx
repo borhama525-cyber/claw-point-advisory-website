@@ -11,7 +11,7 @@ const readTime = (body: string[]) => Math.max(2, Math.round(body.join(' ').split
 
 const PATH = [
 	{ icon: BookOpen, step: 'Step 1', h: 'Learn the basics', p: 'What transactional funding is, who it’s for and how money moves through title.', to: `/blog/${articles[0].slug}`, cta: 'Read the basics' },
-	{ icon: Compass, step: 'Step 2', h: 'Pick your structure', p: 'Six ways to fund a deal. Find the one that matches how your deal closes.', to: '#structures', cta: 'Compare structures' },
+	{ icon: Compass, step: 'Step 2', h: 'Pick your structure', p: 'Four ways to fund a deal. Find the one that matches how your deal closes.', to: '#structures', cta: 'Compare structures' },
 	{ icon: Calculator, step: 'Step 3', h: 'Run your numbers', p: 'Use a free calculator to see the cash you need, or get back, at closing.', to: '/calculators', cta: 'Open calculators' },
 	{ icon: FileCheck2, step: 'Step 4', h: 'Send your deal', p: 'Upload your contract and we review it. You get written terms before closing.', to: '', cta: 'Submit a deal' },
 ];
@@ -21,7 +21,7 @@ const GLOSSARY: [string, string][] = [
 	['Spread', 'The difference between your purchase price and your resale price. It often repays short-term funding.'],
 	['Seller carry', 'Part of the price the seller lets you pay later through a note, instead of in cash at closing.'],
 	['EMD', 'Earnest money deposit: the good-faith money that secures a purchase contract.'],
-	['DSCR', 'Debt service coverage ratio: a property’s rent divided by its loan payment. Lenders use it to size rental loans.'],
+	['Primary lender', 'The lender that funds the largest share of the purchase, in first position. Don’t have one? We can provide one.'],
 	['ARV', 'After-repair value: what the property should be worth once the work is finished.'],
 	['LTV / LTC', 'Loan-to-value and loan-to-cost: how big the loan is compared with the property’s value or the total project cost.'],
 	['Title & escrow', 'The neutral company that holds funds, checks ownership and records the closing. Our funds only move through them.'],
@@ -50,7 +50,7 @@ export function LearnHub() {
 
 		<section className="band learn-structures" id="structures">
 			<div className="learn-wrap">
-				<div className="learn-head row"><div><p className="eyebrow">FUNDING STRUCTURES</p><h2>Six structures, <em>explained.</em></h2></div><p>Each one solves a different cash gap. Read the guide, try the calculator, then send it over.</p></div>
+				<div className="learn-head row"><div><p className="eyebrow">FUNDING STRUCTURES</p><h2>Four structures, <em>explained.</em></h2></div><p>Each one solves a different cash gap. Read the guide, try the calculator, then send it over.</p></div>
 				<div className="learn-structure-grid">{dealTypes.map(d => <article key={d.slug} className="learn-structure">
 					<p className="eyebrow">{d.eyebrow}</p><h3>{d.name}</h3><p>{d.card}</p>
 					<div className="learn-structure-links">

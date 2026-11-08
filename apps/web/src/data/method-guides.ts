@@ -1,4 +1,4 @@
-// Long-form guide for each structure, shown at /stack, /echo, /dscr and /hard-money.
+// Long-form guide for each structure, shown at /stack and /echo.
 import type { Rows } from './deal-tools';
 
 export type MathRow = { label: string; value: number | null | undefined; strong?: boolean; sep?: boolean; text?: string; format?: 'ratio' };
@@ -36,7 +36,7 @@ export const methodGuides: MethodGuide[] = [
 				'The typical Stack buyer is an investor who wants the property but would rather not lock a large down payment into it. You might be building a portfolio and prefer to spread your capital across several purchases instead of one. Or you have found a motivated seller who is open to carrying part of the price, but real cash still has to be at the table on closing day. When the seller is willing to stay invested and the numbers hold up, this structure turns “I can’t cover the down payment” into a closing date.',
 			] },
 			{ kind: 'pieces', h: 'The three pieces of the stack', intro: 'Each funding source in a Stack deal does one job.', items: [
-				['The primary loan.', 'A lender funds the largest share of the price in first position: usually a DSCR loan if you are keeping the property as a rental, or hard money if it is a flip.'],
+				['The primary loan.', 'A lender funds the largest share of the price in first position. If you don’t have a primary lender yet, we can provide one.'],
 				['The seller’s reinvestment.', 'The seller covers part of the rest, most often by carrying back a second-position note, or occasionally through a preferred equity position. Either way, the seller stays invested in the property instead of taking all their equity in cash, and that is what makes the structure work.'],
 				['Short-term cash to close.', 'Even with both loans agreed on paper, cash still has to arrive at the closing table. That is where we come in: we wire the cash to close into escrow, the deal records, and the seller’s reinvestment repays us.'],
 			] },
@@ -63,7 +63,7 @@ export const methodGuides: MethodGuide[] = [
 				['The primary lender sees the whole structure.', 'The seller carry and the source of the cash to close are disclosed to your primary lender, and we confirm the lender’s seasoning and sourcing rules before funding, not after. If a lender’s guidelines can’t accommodate the structure, the answer is a different lender.'],
 				['The seller carry has its own paperwork.', 'It is documented in its own note and addendum, not buried in the purchase contract, so your primary lender can underwrite it cleanly.'],
 				['Everything settles through licensed title and escrow.', 'Two settlement statements, written disbursement instructions, and funds that never pass through personal accounts.'],
-				['Government-backed primary loans don’t fit.', 'FHA and VA loans have strict rules on secondary financing, so Stack deals use investor financing such as DSCR, private or hard money loans.'],
+				['Government-backed primary loans don’t fit.', 'FHA and VA loans have strict rules on secondary financing, so Stack deals use investor financing from a private or investor-focused lender. We can provide one if you need it.'],
 			] },
 			{ kind: 'bullets', h: 'When it isn’t a Stack deal', items: [
 				['The seller wants every dollar at closing.', 'No seller reinvestment means no Stack. If there is a wholesaler’s spread in the deal, look at the Echo Method instead: the same down-payment funding, repaid from the spread rather than the carry.'],
@@ -109,7 +109,7 @@ export const methodGuides: MethodGuide[] = [
 				'Echo solves a problem for both people in the deal. **The wholesaler** has a real spread and a buyer who keeps stalling because they can’t cover the down payment; Echo turns “my buyer needs three more weeks” into a closing date. **The end buyer**, usually a renovator buying from a wholesaler, has a primary lender lined up but doesn’t want to drain reserves or take on second-position debt. And there is a third case: **an investor on both sides**, wholesaling a deal to their own buying entity, where Echo covers the down payment on the second leg.',
 			] },
 			{ kind: 'pieces', h: 'The two legs and three funding pieces', intro: 'A double close is two purchases back to back: the A–B leg, where the wholesaler buys from the seller, and the B–C leg, where the end buyer buys from the wholesaler at a higher price. Three pieces make the B–C leg close:', items: [
-				['The primary lender.', 'Usually a hard money or rental lender, sized as a percentage of the appraisal-supported B–C price. It brings the largest piece.'],
+				['The primary lender.', 'An investor-focused lender, sized as a percentage of the appraisal-supported B–C price. It brings the largest piece. If your buyer doesn’t have one, we can provide one.'],
 				['Our down-payment funding.', 'We wire the end buyer’s down payment and closing-cost gap to title.'],
 				['The spread.', 'The difference between the B–C and A–B prices: the wholesaler’s profit, and the source of our repayment.'],
 			] },
@@ -157,124 +157,6 @@ export const methodGuides: MethodGuide[] = [
 				['Echo or double close funding: what’s the difference?', 'Double close funding covers the wholesaler’s A–B purchase. Echo covers the end buyer’s down payment on the B–C leg. Some deals use both.'],
 				['Does the end buyer’s lender need to know?', 'Yes. The source of the down payment is disclosed to the primary lender, and the lender has to accept it. We confirm this before funding.'],
 				['What does it cost?', 'Each deal is priced individually based on its structure, timeline and risk. The fee in the calculator is an editable estimate; your written terms show the actual cost.'],
-			] },
-		],
-	},
-	{
-		slug: 'dscr', tool: 'dscr', eyebrow: 'RENTAL FINANCING', title: 'DSCR Loans',
-		metaTitle: 'DSCR Rental Loans Explained | Claw Point Advisory',
-		description: 'How DSCR rental loans are qualified on rent instead of personal income: the ratio, what moves your rate, a worked example and common questions.',
-		lead: 'Long-term rental financing where the property’s rent does the qualifying, not your tax returns. Know how lenders measure it before you make an offer.',
-		blocks: [
-			{ kind: 'text', h: 'What a DSCR loan is', body: [
-				'A DSCR loan is a long-term mortgage for rental property where the property does the qualifying. Instead of reviewing your W-2s and tax returns, the lender asks one question: does the rent cover the payment? You can usually close in an LLC, keep growing a portfolio and keep your personal income out of the file.',
-			] },
-			{ kind: 'text', h: 'Who it’s for', body: [
-				'Three kinds of investor use DSCR loans most: **the self-employed**, whose tax returns understate what they actually earn; **the portfolio builder** who has outgrown conventional lending limits; and **the investor who simply prefers** not to hand over years of personal financials to buy a rental. It is also the usual primary loan in a Stack Method purchase of a rental, and the common refinance after a flip.',
-			] },
-			{ kind: 'text', h: 'How the ratio works', body: [
-				'One fraction decides the loan: **monthly rent ÷ the full monthly housing payment** (principal, interest, taxes, insurance and any association dues, known as PITIA). A ratio of 1.0 means the rent exactly covers the payment; above 1.0, the rent carries the loan with room to spare. Run your numbers in the DSCR Calculator: it computes the ratio the way lenders do and shows the largest loan your rent supports at your target ratio.',
-			] },
-			{ kind: 'bullets', h: 'What moves your rate and terms', intro: 'DSCR loans are priced individually, and requirements vary by lender. These are the usual levers:', items: [
-				['Down payment.', 'More equity usually means better pricing and a lower coverage requirement.'],
-				['Coverage (your DSCR).', 'A stronger ratio typically earns better terms; ratios below 1.0 are possible with some lenders, at a price.'],
-				['Prepayment structure.', 'Many DSCR loans carry a step-down prepayment penalty. A longer penalty can lower the rate; a shorter one keeps you flexible.'],
-				['Purchase, refinance or cash-out.', 'Cash-out refinances are usually priced a little higher.'],
-				['Interest-only periods.', 'They lower the monthly payment and can rescue a tight ratio, usually with a small rate premium.'],
-				['Credit, property type and loan size.', 'Higher scores, simple single-family rentals and mid-size loans tend to price best.'],
-			] },
-			{ kind: 'math', h: 'See the math on a $300K rental', note: 'Lenders leave vacancy, maintenance and management out of the ratio, but they still come out of your pocket. Use the Cash flow tab in the DSCR Calculator to see both. Estimates only: exact figures come with your written terms.',
-				rows: (v, r) => [
-					{ label: 'Purchase price', value: v.price },
-					{ label: `Loan amount (${100 - v.down}% of price)`, value: r['Loan amount'] },
-					{ label: 'Monthly rent', value: v.rent },
-					{ label: 'Monthly PITIA', value: r['Monthly PITIA'], sep: true },
-					{ label: 'DSCR (rent ÷ PITIA)', value: r.DSCR, format: 'ratio', strong: true },
-					{ label: `Largest loan at ${v.target}× coverage`, value: r['Max loan at target DSCR'], sep: true },
-					{ label: 'Monthly cash flow after reserves', value: r['Monthly cash flow'] },
-					{ label: 'Cash invested (down payment + closing)', value: r['Initial cash invested'], strong: true, sep: true },
-				] },
-			{ kind: 'list', h: 'What lenders typically look for', intro: 'Every lender sets its own guidelines; these are common starting points:', items: ['A down payment of roughly 20–25% or more, with more required for lower ratios', 'A minimum credit score, with the best pricing reserved for higher scores', 'A few months of payments held in reserves', 'A minimum loan size, so very small properties can be harder to place', 'An appraisal with a market rent schedule'] },
-			{ kind: 'text', h: 'Short-term rentals', body: [
-				'Airbnb-style income can qualify, but lenders tend to count it conservatively: the appraiser’s estimate, a track record of bookings or market data, often with a discount applied. Check that your city allows short-term rentals before you rely on that income.',
-			] },
-			{ kind: 'text', h: 'Where DSCR fits in a creative deal', body: [
-				'In most Stack Method purchases, the DSCR loan is the primary lender: the base of the stack that the seller carry and short-term closing funds build on. It can also be the end buyer’s loan in an Echo, or the refinance that takes you out of a hard money loan once a flip becomes a rental. Run the whole structure in the Stack Method Calculator and check the rent coverage in the DSCR Calculator.',
-			] },
-			{ kind: 'pieces', h: 'How Claw Point Advisory handles it', items: [
-				['Send the property and its rent.', 'Actual lease or market rent, plus your purchase or refinance details.'],
-				['We match your scenario with DSCR lenders.', 'Including options for tighter ratios where they fit.'],
-				['Written terms.', 'You receive the terms in writing; closing typically follows the appraisal.'],
-			] },
-			{ kind: 'faq', h: 'Common questions about DSCR loans', items: [
-				['What’s a good DSCR?', 'Around 1.2 or higher usually opens up better pricing. Many lenders accept 1.0, and some go lower with a larger down payment.'],
-				['Can I get a DSCR loan below 1.0?', 'Some lenders offer it, usually with a larger down payment and a higher rate. Whether it makes sense depends on your plan for the property.'],
-				['Do DSCR lenders check credit?', 'Yes. Credit is used to price the loan rather than to verify income. Your score affects the rate; your rent does the qualifying.'],
-				['Can I close in an LLC?', 'Usually, yes. Closing in an entity is common with DSCR loans.'],
-				['Can I live in the property?', 'No. DSCR loans are for investment property only, and lenders check occupancy.'],
-				['Does the lender use my lease or the appraisal rent?', 'It varies by lender. Many use the lower of the actual lease and the appraiser’s market rent.'],
-				['How fast can a DSCR loan close?', 'Usually in weeks rather than days. The appraisal is often the longest step.'],
-			] },
-		],
-	},
-	{
-		slug: 'hard-money', tool: 'hard-money', eyebrow: 'SHORT-TERM LENDING', title: 'Hard Money Loans',
-		metaTitle: 'Hard Money Loans for Flips Explained | Claw Point Advisory',
-		description: 'How hard money loans are sized on purchase, rehab and after-repair value, what they really cost over a hold, a worked flip example and common questions.',
-		lead: 'Asset-based loans for flips and value-add projects, underwritten on the property and the plan, not your W-2.',
-		blocks: [
-			{ kind: 'text', h: 'What hard money is', body: [
-				'Hard money is asset-based lending: the loan is underwritten mainly on the property (its purchase price, the rehab plan and the after-repair value, or ARV) rather than on your personal income documentation. It is the standard tool for fix-and-flip purchases and value-add projects that banks move on too slowly.',
-				'The trade-off is cost. Speed and flexibility are priced into higher rates and origination points, so hard money works best on short holds with a clear exit.',
-			] },
-			{ kind: 'bullets', h: 'When to use it', items: [
-				['Fix-and-flip purchases', 'with a defined rehab budget and resale plan.'],
-				['Value-add projects', 'on a timeline a bank can’t meet.'],
-				['Bridge situations', 'before you refinance into longer-term financing such as a DSCR loan.'],
-			] },
-			{ kind: 'pieces', h: 'How the loan is sized', intro: 'Lenders size a hard money loan two ways at once, and the lower number wins:', items: [
-				['A share of the purchase.', 'Commonly a high percentage of the purchase price.'],
-				['A share of the rehab.', 'Renovation funds are often financed in full and released in draws as work is completed.'],
-				['A cap against ARV.', 'The total loan is limited to a percentage of the after-repair value. If the cap binds, you cover the difference.'],
-			] },
-			{ kind: 'math', h: 'See the math on a $300K flip', note: 'Change the hold period in the Hard Money Calculator to see how a delay affects profit: interest and holding costs grow every month. Estimates only: exact figures come with your written terms.',
-				rows: (v, r) => [
-					{ label: 'Purchase price', value: v.price },
-					{ label: 'Rehab budget', value: v.rehab },
-					{ label: 'After-repair value (ARV)', value: v.arv },
-					{ label: `Loan amount (capped at ${v.cap}% of ARV)`, value: r['Loan amount'], sep: true },
-					{ label: 'Cash invested before holding costs', value: r['Cash invested before holding costs'] },
-					{ label: `Interest and points over ${v.months} months`, value: r['Total interest and points'] },
-					{ label: 'Breakeven purchase price', value: r['Breakeven purchase price'], sep: true },
-					{ label: (r['Estimated flip profit'] ?? 0) >= 0 ? 'Estimated flip profit' : 'Estimated loss', value: Math.abs(r['Estimated flip profit'] ?? 0), strong: true, sep: true },
-				] },
-			{ kind: 'text', h: 'The numbers that decide the deal', body: [
-				'Two things decide a flip. First, **know which limit binds your loan**, because that sets how much cash you need in the deal. Second, **stress-test the hold**: a longer renovation, a lower sale price or higher selling costs can wipe out a thin margin. The breakeven purchase price is the most you can pay before the project loses money; if your offer is close to it, the deal is too tight.',
-			] },
-			{ kind: 'bullets', h: 'Doing it properly', items: [
-				['Support the ARV with real comparables.', 'The whole loan depends on it.'],
-				['Build a contingency into the rehab budget.', 'Surprises behind walls are normal.'],
-				['Agree the draw schedule up front.', 'Know what has to be finished, and inspected, before each release of funds.'],
-				['Have a backup exit.', 'If the sale stalls, a refinance into a DSCR loan can keep the project alive.'],
-			] },
-			{ kind: 'bullets', h: 'When it isn’t the right fit', items: [
-				['Keeping a stabilized rental long term?', 'Look at DSCR financing instead.'],
-				['Buying from a wholesaler with a buyer short on cash?', 'The Echo Method may fit.'],
-				['A margin that only works if everything goes right?', 'Renegotiate the price or pass.'],
-			] },
-			{ kind: 'pieces', h: 'How Claw Point Advisory handles it', items: [
-				['Send the deal.', 'Property, purchase price, rehab budget and exit plan.'],
-				['Deal-first review.', 'We review the project and set out clear terms in writing.'],
-				['Funds at closing.', 'Purchase funds at closing; rehab funds released in draws as work is completed.'],
-			] },
-			{ kind: 'list', h: 'What you’ll need', items: ['Purchase contract', 'Rehab scope and budget', 'Exit strategy (sale or refinance)', 'Entity documents'] },
-			{ kind: 'faq', h: 'Common questions about hard money', items: [
-				['How much can I borrow?', 'It depends on the purchase price, the rehab budget and the ARV cap. The Hard Money Calculator shows which limit applies to your deal.'],
-				['Do I need flipping experience?', 'Not always, but experience usually improves terms. First-time investors may need more cash in the deal.'],
-				['How are rehab funds released?', 'Usually in draws: you complete a stage of work, it is inspected, and the next tranche is released.'],
-				['What if the project runs long?', 'Most loans allow extensions, typically for a fee. Check the extension terms before you close.'],
-				['Can I refinance into a DSCR loan?', 'Yes. Converting a finished flip into a rental with a DSCR refinance is a common exit.'],
-				['What does it cost?', 'Each deal is priced individually. The rate, points and fees in the calculator are editable estimates; your written terms show the actual cost.'],
 			] },
 		],
 	},

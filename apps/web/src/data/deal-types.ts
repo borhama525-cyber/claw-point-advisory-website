@@ -1,4 +1,4 @@
-// The six funding structures: home page cards, the side panel, the "What are you funding?" picker and the footer.
+// The four funding structures: home page cards, the side panel, the "What are you funding?" picker and the footer.
 export type DealType = {
 	slug: string; name: string; eyebrow: string; card: string; picker: string;
 	what: string; when: string[]; how: string[]; need: string[];
@@ -11,9 +11,9 @@ export const dealTypes: DealType[] = [
 		card: 'A primary loan plus seller carry, stacked into one purchase. Close with little or none of your own cash, sometimes with cash back.',
 		picker: 'Primary loan + seller carry',
 		what: 'A creative-finance structure that combines a primary lender with a note the seller carries back, so you can buy with little or none of your own cash. Also called the **Morby Method**. Structured well, you can receive cash back at closing.',
-		when: ['The seller is open to carrying part of the price', 'You have a primary lender (DSCR, private or hard money) lined up for most of the purchase', 'You want to keep your cash free while closing quickly'],
+		when: ['The seller is open to carrying part of the price', 'You have a primary lender for most of the purchase, or want us to provide one', 'You want to keep your cash free while closing quickly'],
 		how: ['Send us your structure: purchase price, seller carry, primary loan amount and closing date.', 'We review the stack with your lender and title and confirm terms in writing.', 'Our funds are wired to title for closing, and escrow repays us under the agreed structure.'],
-		need: ['Signed purchase contract', 'Seller-carry terms (amount, position)', 'Primary lender term sheet or approval', 'Title or escrow contact'],
+		need: ['Signed purchase contract', 'Seller-carry terms (amount, position)', 'Primary lender term sheet or approval (or ask us to provide a lender)', 'Title or escrow contact'],
 	},
 	{
 		slug: 'echo', name: 'Echo Method', eyebrow: 'CREATIVE FINANCE', guide: '/echo', calculator: '/calculators/echo',
@@ -22,7 +22,7 @@ export const dealTypes: DealType[] = [
 		what: 'Short-term funding for the end buyer’s down payment on the second leg of a double close, repaid from the wholesaler’s spread on the same settlement statement. Funds go in and come out at one closing.',
 		when: ['You’re wholesaling and your buyer is stalling on the down payment', 'You’re buying from a wholesaler and want to keep your reserves', 'The B–C price is supported by the appraisal and the spread can cover the funding'],
 		how: ['Send both legs: the A–B and B–C contracts, your buyer’s primary lender and the closing date.', 'We confirm the spread covers the funding and fee, and issue written terms.', 'The primary lender’s funds land at title first; then we wire the down payment and are repaid from the spread on the same settlement.'],
-		need: ['A–B and B–C purchase contracts', 'Your buyer’s primary lender term sheet or approval', 'A title company comfortable with back-to-back closings'],
+		need: ['A–B and B–C purchase contracts', 'Your buyer’s primary lender term sheet or approval (or ask us to provide a lender)', 'A title company comfortable with back-to-back closings'],
 	},
 	{
 		slug: 'double-close', name: 'Double Close', eyebrow: 'TRANSACTIONAL',
@@ -41,24 +41,6 @@ export const dealTypes: DealType[] = [
 		when: ['You’re working several contracts and need EMD liquidity', 'A deposit deadline is close and your capital is committed elsewhere'],
 		how: ['Send the contract, the EMD amount and the escrow details.', 'We verify the funds and issue written terms.', 'The deposit is wired to escrow, and repaid under the agreement at closing or termination.'],
 		need: ['Signed purchase contract', 'Escrow wiring instructions', 'The contract’s terms on refunding the EMD'],
-	},
-	{
-		slug: 'hard-money', name: 'Hard Money', eyebrow: 'SHORT-TERM LENDING', guide: '/hard-money', calculator: '/calculators/hard-money',
-		card: 'Asset-based loans for flips and value-add projects, sized on the property and the plan rather than your W-2.',
-		picker: 'Fix-and-flip or value-add loan',
-		what: 'Short-term loans secured by the property, underwritten on the purchase price, the rehab budget and the after-repair value. The usual tool for flips and value-add projects that banks move on too slowly.',
-		when: ['Fix-and-flip purchases with a rehab budget', 'Value-add projects on a timeline a bank can’t meet', 'Bridge situations before longer-term financing'],
-		how: ['Send the property, purchase price, rehab budget and exit plan.', 'We review the deal and set out clear terms in writing.', 'Funds at closing; rehab funds are released in draws as work is completed.'],
-		need: ['Purchase contract and rehab scope or budget', 'Exit strategy (sale or refinance)', 'Entity documents'],
-	},
-	{
-		slug: 'dscr', name: 'DSCR', eyebrow: 'RENTAL FINANCING', guide: '/dscr', calculator: '/calculators/dscr',
-		card: 'Long-term rental financing qualified on the property’s rent, not your personal income documentation.',
-		picker: 'Long-term rental loan',
-		what: 'A long-term rental loan where the property’s rent does the qualifying. Lenders compare monthly rent with the full housing payment (PITIA) instead of reviewing your tax returns. Often the primary loan in a Stack Method purchase.',
-		when: ['You’re buying or refinancing a rental', 'Your tax returns don’t show your full income, or you hold property in an LLC', 'You want long-term financing after a flip or a Stack purchase'],
-		how: ['Send the property and its rent (actual or market).', 'We match your scenario with suitable DSCR lenders and pricing.', 'You receive written terms; closing typically follows the appraisal.'],
-		need: ['Property address and purchase contract or current loan details', 'Lease or market rent estimate', 'Entity documents if buying in an LLC'],
 	},
 ];
 

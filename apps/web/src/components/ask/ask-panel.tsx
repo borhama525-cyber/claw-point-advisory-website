@@ -8,13 +8,13 @@ type Turn = { id: number; role: 'user' | 'assistant'; content: string; title?: s
 export const SUGGESTIONS = [
 	'How does a double close work?',
 	'What do underwriters look at first?',
-	'What is a good DSCR and how is it calculated?',
+	'Can you provide a primary lender?',
 	'Stack or Echo: which one fits my deal?',
 	'What does seasoning and sourcing of funds mean?',
 	'What documents do I need to submit a deal?',
 ];
 
-const PAGE = /(\/(?:calculators(?:\/(?:stack|echo|dscr|hard-money))?|stack|echo|dscr|hard-money|funding|booking|contact))(?![\w/-])/g;
+const PAGE = /(\/(?:calculators(?:\/(?:stack|echo))?|stack|echo|funding|booking|contact))(?![\w/-])/g;
 
 /** Turns site paths the assistant mentions into links. */
 const linked = (text: string): ReactNode => text.split(PAGE).map((part, i) => (i % 2 ? <Link key={i} className="inline-link" to={part}>{part}</Link> : <Fragment key={i}>{part}</Fragment>));
@@ -105,7 +105,7 @@ export function AskTeaser() {
 	return <section className="band ask-teaser sky-bloom"><div className="tool-wrap">
 		<p className="eyebrow">ASK CLAW POINT</p>
 		<h2>Got a question? Ask anything.</h2>
-		<p className="ask-teaser-lead">General answers about transactional funding and loan underwriting, from double closes to DSCR ratios.</p>
+		<p className="ask-teaser-lead">General answers about transactional funding and loan underwriting, from double closes to the Stack Method.</p>
 		<form className="ask-box" onSubmit={e => { e.preventDefault(); go(q); }}>
 			<label htmlFor="ask-teaser-input" className="sr-only">Your question</label>
 			<textarea id="ask-teaser-input" rows={2} maxLength={500} value={q} placeholder="Ask anything… e.g. what does an underwriter check first?" onChange={e => setQ(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); go(q); } }} />

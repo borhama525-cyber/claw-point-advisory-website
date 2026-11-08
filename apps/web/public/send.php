@@ -43,7 +43,7 @@ if ($form === 'deal') {
 	$required = ['first_name' => 'first name', 'last_name' => 'last name', 'phone' => 'phone', 'address' => 'property address', 'city' => 'city', 'state' => 'state', 'zip' => 'ZIP', 'close_date' => 'close date', 'purchase_price' => 'purchase price', 'requested_funding' => 'requested funding'];
 	foreach ($required as $key => $label) if (field($key) === '') reply(422, ['ok' => false, 'error' => "Please fill in the {$label}."]);
 	if (field('consent') !== 'true') reply(422, ['ok' => false, 'error' => 'Please tick the consent box.']);
-	$types = ['stack' => 'Stack Method', 'echo' => 'Echo Method', 'double-close' => 'Double Close', 'emd' => 'EMD', 'hard-money' => 'Hard Money', 'dscr' => 'DSCR'];
+	$types = ['stack' => 'Stack Method', 'echo' => 'Echo Method', 'double-close' => 'Double Close', 'emd' => 'EMD'];
 	$type = $types[field('method', 20)] ?? 'Funding';
 	$name = oneLine(field('first_name', 100) . ' ' . field('last_name', 100));
 	$subject = "New {$type} request: {$name}";
@@ -52,7 +52,7 @@ if ($form === 'deal') {
 		'Deal type' => $type, 'Borrower' => $name, 'Email' => $email, 'Phone' => field('phone', 40),
 		'Property' => oneLine(field('address') . ', ' . field('city', 120) . ', ' . field('state', 2) . ' ' . field('zip', 10)),
 		'Target close date' => field('close_date', 20), 'Purchase price' => money(field('purchase_price')), 'Seller finance' => money(field('seller_finance')),
-		'B–C price / ARV' => money(field('resale_price')), 'Primary loan' => money(field('primary_loan')), 'Requested funding' => money(field('requested_funding')),
+		'B–C price / ARV' => money(field('resale_price')), 'Primary loan' => money(field('primary_loan')), 'Requested funding' => money(field('requested_funding')), 'Needs a primary lender' => field('needs_lender', 3) === 'Yes' ? 'Yes, please provide one' : '',
 		'Description' => field('description', 5000),
 		'Referred by' => oneLine(field('referrer_first_name', 100) . ' ' . field('referrer_last_name', 100)), 'Referrer email' => oneLine(field('referrer_email', 200)), 'Referrer phone' => field('referrer_phone', 40),
 	];

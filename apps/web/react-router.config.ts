@@ -6,7 +6,7 @@ import { articles } from './src/data/articles';
  * at build time (no Node.js server needed). Forms post to `public/send.php`, and
  * sitemap.xml / robots.txt / llms.txt are served by small PHP files (see public/.htaccess).
  */
-const CALCULATORS = ['stack', 'echo', 'dscr', 'hard-money'];
+const CALCULATORS = ['stack', 'echo'];
 
 export default {
 	appDirectory: 'src',
@@ -15,7 +15,7 @@ export default {
 	async prerender() {
 		return [
 			'/', '/funding', '/calculators', ...CALCULATORS.map(s => `/calculators/${s}`),
-			'/stack', '/echo', '/dscr', '/hard-money', '/booking', '/ask', '/contact', '/blog',
+			'/stack', '/echo', '/booking', '/ask', '/contact', '/blog',
 			...articles.map(a => `/blog/${a.slug}`),
 		];
 	},

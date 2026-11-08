@@ -55,8 +55,9 @@ export function DealRequestDialog({ open, onOpenChange, method, title, prefill, 
 					<Field label="Target close date" name="close_date" required error={e.close_date}><input id="dr-close_date" name="close_date" type="date" required /></Field>
 					<div className="dr-row"><Money label="Purchase price" name="purchase_price" value={prefill.purchase_price} required error={e.purchase_price} />
 					{method === 'stack' ? <Money label="Seller finance amount" name="seller_finance" value={prefill.seller_finance} required error={e.seller_finance} /> : <Money label={method === 'echo' || method === 'double-close' ? 'B–C sale price' : 'Estimated value or ARV'} name="resale_price" value={prefill.resale_price} error={e.resale_price} />}</div>
-					<div className="dr-row"><Money label="Primary loan amount (DSCR or other)" name="primary_loan" value={prefill.primary_loan} error={e.primary_loan} />
+					<div className="dr-row"><Money label="Primary loan amount (if you have one)" name="primary_loan" value={prefill.primary_loan} error={e.primary_loan} />
 					<Money label={method === 'emd' ? 'EMD amount' : 'Requested funding'} name="requested_funding" value={prefill.requested_funding} required error={e.requested_funding} /></div>
+					<label className="check-label dr-lender"><input type="checkbox" name="needs_lender" value="Yes" /> I need a primary lender: please provide one for this deal.</label>
 					<h3>Documents</h3>
 					<Field label="Purchase and sale agreement" name="purchase_agreement" required error={e.purchase_agreement}><input id="dr-purchase_agreement" name="purchase_agreement" type="file" required accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg" /></Field>
 					<Field label="Addendums or other documents" name="documents" error={e.documents}><input id="dr-documents" name="documents[]" type="file" multiple accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg" /></Field>

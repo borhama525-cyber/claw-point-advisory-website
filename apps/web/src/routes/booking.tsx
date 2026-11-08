@@ -13,7 +13,7 @@ export const links: Route.LinksFunction = () => [
 export function meta({matches,location}:Route.MetaArgs){return seo({matches,location},{title:'Schedule with Amira | Claw Point Advisory',description:'Book a one-hour call with Amira to talk through your real estate goals, funding needs and deal structure before you submit a funding request.',image:siteImage});}
 // Calendly's own title and duration are hidden because the panel beside it shows them. Colors apply on paid Calendly plans.
 const embed=`${CALENDLY_URL}?hide_event_type_details=1&primary_color=b3feed&text_color=141a17&background_color=fbfdfc`;
-const cover=['Your deal, your numbers and your timeline','Which structure fits: Stack, Echo, double close, EMD, hard money or DSCR','What we’d need to review it, and the next steps'];
+const cover=['Your deal, your numbers and your timeline','Which structure fits: Stack, Echo, double close or EMD, and whether you need a primary lender','What we’d need to review it, and the next steps'];
 export default function Booking(){return <section className="booking-page sky-bloom"><div className="tool-wrap booking-layout">
  <aside className="booking-card booking-info">
   <p className="eyebrow">BOOK A CALL</p>

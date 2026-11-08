@@ -6,6 +6,7 @@ import { siteImage } from '@/constants/site';
 import { fmt, toolBySlug } from '@/data/deal-tools';
 import { guideBlocks, guideBySlug, type Block } from '@/data/method-guides';
 import { ToolCta, ToolHero } from '@/components/calculators/tool-sections';
+import { LenderNote } from '@/components/lender-note';
 import { RequestButton } from '@/components/request/request-provider';
 
 export const methodMeta = (slug: string) => (args: SeoArgs) => { const g = guideBySlug(slug); return seo(args, { title: g.metaTitle, description: g.description, image: siteImage, jsonLd: { '@context': 'https://schema.org', '@type': 'Service', name: g.title, provider: { '@type': 'Organization', name: 'Claw Point Advisory' } } }); };
@@ -33,6 +34,7 @@ export function MethodPage({ slug }: { slug: string }) {
 		<ToolHero eyebrow={g.eyebrow} title={g.title} lead={g.lead}><RequestButton slug={tool.slug}>{tool.request}</RequestButton><Link to={calc} className="button outline">{tool.title}</Link></ToolHero>
 		<section className="band method-page"><div className="tool-wrap method-body">
 			{guideBlocks(slug).map(b => <GuideBlock key={b.h} b={b} v={v} rows={rows} calc={calc} tool={tool.title} />)}
+			<LenderNote slug={tool.slug} />
 			<p className="fine-print">Every transaction is individually reviewed. No funding commitment is made on this website.</p>
 			<Link className="text-link dark" to="/funding">← All funding structures</Link>
 		</div></section>

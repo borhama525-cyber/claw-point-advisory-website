@@ -29,16 +29,5 @@ export function calculate(kind, v) {
   const advance=Math.max(0,v.sale+costs-primary), fee=advance*v.fee/100;
   return [['Primary loan',primary],['B–C closing costs',costs],['Buyer funding gap',advance],['Funding fee',fee],['Repayment from spread',advance+fee],['Resale spread (B–C minus A–B)',v.sale-v.acquisition],['Spread after advance and fee',v.sale-v.acquisition-advance-fee]];
  }
- if (kind === 'dscr') {
-  const pitia=pi+expenses, cash=p*v.down/100+closing, flow=operating-pi;
-  const factor=payment(1,v.rate,v.term,Boolean(v.io));
-  return [['Loan amount',loan],['Monthly loan payment',pi],['Monthly PITIA',pitia],['DSCR',pitia>0?v.rent/pitia:null,'ratio'],['Max loan at target DSCR',factor>0?Math.max(0,v.rent/v.target-expenses)/factor:null],['Rent at target DSCR',pitia*v.target],['Monthly cash flow',flow],['Initial cash invested',cash],['Annual cash-on-cash',cash>0?flow*12/cash*100:null,'percent']];
- }
- const costLoan=p*v.purchase/100+v.rehab*v.rehabFinanced/100, cap=v.arv*v.cap/100;
- const hardLoan=Math.min(costLoan,cap), interest=hardLoan*v.rate/1200*v.months, points=hardLoan*v.points/100;
- const netSale=v.arv*(1-v.selling/100);
- const profitAt = price => { const l=Math.min(price*v.purchase/100+v.rehab*v.rehabFinanced/100,cap); return netSale-price-v.rehab-price*v.closing/100-l*(v.points/100+v.rate/1200*v.months)-v.holding*v.months; };
- let low=0, high=Math.max(netSale,0);
- for(let i=0;i<80;i++){ const mid=(low+high)/2; if(profitAt(mid)>0) low=mid; else high=mid; }
- return [['Loan amount',hardLoan],['ARV cap is limiting',cap<costLoan?1:0,'flag'],['Cash invested before holding costs',p+v.rehab+closing-hardLoan+points],['Monthly interest-only payment',hardLoan*v.rate/1200],['Total interest and points',interest+points],['Estimated flip profit',profitAt(p)],['Offer at ARV cap less rehab',Math.max(0,cap-v.rehab)],['Breakeven purchase price',profitAt(0)>=0?(low+high)/2:null]];
+ return [];
 }

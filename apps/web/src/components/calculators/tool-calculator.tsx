@@ -12,7 +12,6 @@ const tenths = (raw: string) => (/^\d+(\.\d)?$/.test(raw) ? Number(raw).toFixed(
 function prefillFor(kind: string, v: Values, r: Rows): RequestPrefill {
 	if (kind === 'stack') return { purchase_price: v.price, seller_finance: r['Seller note'] ?? undefined, primary_loan: r['Primary loan'] ?? undefined, requested_funding: r['Temporary purchase gap'] ?? undefined };
 	if (kind === 'echo') return { purchase_price: v.acquisition, resale_price: v.sale, primary_loan: r['Primary loan'] ?? undefined, requested_funding: r['Buyer funding gap'] ?? undefined };
-	if (kind === 'dscr') return { purchase_price: v.price, primary_loan: r['Loan amount'] ?? undefined };
 	return { purchase_price: v.price, resale_price: v.arv, requested_funding: r['Loan amount'] ?? undefined };
 }
 
@@ -54,7 +53,7 @@ export function ToolCalculator({ tool }: { tool: DealTool }) {
 			{active.notes?.[i] && !invalid && <p className="tc-note">{active.notes[i](v).replace(/ = .*/, '')} <small>= {active.notes[i](v).split(' = ')[1]}</small></p>}
 		</div>)}</form>
 		<div aria-live="polite" aria-atomic="true">
-			{invalid && <p className="tc-result bad" role="alert">Enter a valid number in each field. Percentages must be between 0 and 100, and price, term and target DSCR must be greater than zero.</p>}
+			{invalid && <p className="tc-result bad" role="alert">Enter a valid number in each field. Percentages must be between 0 and 100, and prices must be greater than zero.</p>}
 			{!invalid && active.statement && <dl className="tc-statement">{active.statement.map(line => <div key={line.key} className={line.strong ? 'strong' : undefined}><dt>{typeof line.label === 'function' ? line.label(v) : line.label ?? line.key}</dt><dd>{line.sign === '-' ? '− ' : ''}{display(rows[line.key])}</dd></div>)}</dl>}
 			{!invalid && <div className={`tc-result ${good ? 'good' : 'bad'}`}><span>{head.label(rows)}</span><strong>{display(head.value(rows), head.format)}</strong><small>{head.note(rows)}</small></div>}
 			{!invalid && active.rows.length > 0 && <dl className="tc-rows">{active.rows.map(label => <div key={label}><dt>{label}</dt><dd>{display(rows[label], formats[label])}</dd></div>)}</dl>}
