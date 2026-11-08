@@ -100,13 +100,16 @@ $rows = array_filter($rows, fn($v) => trim((string) $v) !== '');
 // Runs before the email so a lead is kept even if mail delivery has a problem.
 $sheet = is_file(__DIR__ . '/lead-sheet.php') ? (include __DIR__ . '/lead-sheet.php') : null;
 if (is_array($sheet) && !empty($sheet['url']) && function_exists('curl_init')) {
-	$sources = ['deal' => 'Deal request', 'enquiry' => 'Contact form', 'newsletter' => 'Newsletter (Stay in the know)'];
-	$lead = ['secret' => $sheet['secret'] ?? '', 'source' => $sources[$form], 'email' => $email,
+	$sources = ['deal' => 'Deal request', 'enquiry' => 'Contact form', 'newsletter' => 'Newsletter'];
+	$funding = ['deal' => $rows['Deal type'] ?? 'Funding', 'enquiry' => 'General enquiry', 'newsletter' => 'Newsletter'];
+	$num = fn(string $k) => (string) ((float) preg_replace('/[^0-9.]/', '', field($k)) ?: '');
+	$lead = ['secret' => $sheet['secret'] ?? '', 'source' => $sources[$form], 'funding_type' => $funding[$form], 'email' => $email,
 		'name' => $rows['Borrower'] ?? $rows['Name'] ?? '', 'phone' => $rows['Phone'] ?? '',
-		'topic' => $rows['Deal type'] ?? $rows['Topic'] ?? '', 'property_type' => $rows['Property type'] ?? '',
-		'address' => $rows['Property'] ?? '', 'close_date' => $rows['Target close date'] ?? '',
-		'purchase_price' => $rows['Purchase price'] ?? '', 'requested_funding' => $rows['Requested funding'] ?? '',
-		'needs_lender' => $rows['Needs a primary lender'] ?? '', 'message' => $rows['Description'] ?? $rows['Message'] ?? '',
+		'topic' => $form === 'enquiry' ? ($rows['Topic'] ?? '') : '', 'property_type' => $rows['Property type'] ?? '',
+		'address' => $rows['Property'] ?? '', 'close_date' => $form === 'deal' ? field('close_date', 20) : '',
+		'purchase_price' => $form === 'deal' ? $num('purchase_price') : '', 'requested_funding' => $form === 'deal' ? $num('requested_funding') : '',
+		'needs_lender' => isset($rows['Needs a primary lender']) ? 'Yes' : ($form === 'deal' ? 'No' : ''),
+		'message' => $rows['Description'] ?? $rows['Message'] ?? '',
 		'referred_by' => trim(($rows['Referred by'] ?? '') . ' ' . ($rows['Referrer email'] ?? '')), 'documents' => $rows['Documents'] ?? ''];
 	$ch = curl_init($sheet['url']);
 	curl_setopt_array($ch, [CURLOPT_POST => true, CURLOPT_POSTFIELDS => http_build_query($lead), CURLOPT_RETURNTRANSFER => true,
