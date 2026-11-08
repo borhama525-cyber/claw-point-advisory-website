@@ -6,6 +6,7 @@
  * To change where emails go, edit TO_EMAIL below.
  */
 const TO_EMAIL = 'clawpointadvisory@gmail.com';
+const LEADS_SHEET = 'https://docs.google.com/spreadsheets/d/1Kr1Ejrtb4dO89KP3XjHGKJ9K6R0NsCXw5eLgyH5QzYA/edit';
 const MAX_FILE_BYTES = 5 * 1024 * 1024;   // 5 MB per file
 const MAX_FILES = 11;                     // purchase agreement + up to 10 other documents
 const MAX_PER_HOUR = 12;                  // submissions per visitor per hour
@@ -46,7 +47,7 @@ if ($form === 'deal') {
 	$types = ['stack' => 'Stack Method', 'echo' => 'Echo Method', 'double-close' => 'Double Close', 'emd' => 'EMD'];
 	$type = $types[field('method', 20)] ?? 'Funding';
 	$name = oneLine(field('first_name', 100) . ' ' . field('last_name', 100));
-	$subject = "New {$type} request: {$name}";
+	$subject = "New funding inquiry · {$type}: {$name}";
 	$intro = "A new {$type} funding request was submitted on the website.";
 	$rows = [
 		'Deal type' => $type, 'Borrower' => $name, 'Email' => $email, 'Phone' => field('phone', 40),
@@ -60,11 +61,11 @@ if ($form === 'deal') {
 } elseif ($form === 'enquiry') {
 	if (field('message', 5000) === '') reply(422, ['ok' => false, 'error' => 'Please tell us about your transaction.']);
 	$name = oneLine(field('name', 200));
-	$subject = 'New website enquiry: ' . ($name !== '' ? $name : $email);
+	$subject = 'New website lead · Contact form: ' . ($name !== '' ? $name : $email);
 	$intro = 'A new enquiry was sent from the website’s contact form.';
 	$rows = ['Topic' => oneLine(field('topic', 80)), 'Name' => $name, 'Email' => $email, 'Phone' => field('phone', 60), 'Message' => field('message', 5000)];
 } elseif ($form === 'newsletter') {
-	$subject = "New newsletter sign-up: {$email}";
+	$subject = "New website lead · Newsletter: {$email}";
 	$intro = 'Someone signed up for updates on the website.';
 	$rows = ['Email' => $email];
 } else {
@@ -122,8 +123,8 @@ foreach ($rows as $k => $v) {
 	$cell = ($k === 'Email' || $k === 'Referrer email') ? '<a href="mailto:' . esc($v) . '">' . esc($v) . '</a>' : nl2br(esc($v));
 	$html .= '<tr><td style="padding:8px 12px 8px 0;color:#55665f;vertical-align:top;white-space:nowrap">' . esc($k) . '</td><td style="padding:8px 0;border-bottom:1px solid #e3ece9">' . $cell . '</td></tr>';
 }
-$html .= '</table><p style="font-size:12px;color:#55665f;margin-top:18px">Reply to this email to answer the sender directly. Sent automatically by the Claw Point Advisory website.</p></div>';
-$text = $intro . "\n\n" . implode("\n", array_map(fn($k, $v) => "{$k}: {$v}", array_keys($rows), $rows));
+$html .= '</table><p style="font-size:12px;color:#55665f;margin-top:18px">Reply to this email to answer the sender directly. <a href="' . LEADS_SHEET . '" style="color:#24533d;font-weight:bold">Open the Website Leads sheet</a>. Sent automatically by the Claw Point Advisory website.</p></div>';
+$text = $intro . "\n\n" . implode("\n", array_map(fn($k, $v) => "{$k}: {$v}", array_keys($rows), $rows)) . "\n\nWebsite Leads sheet: " . LEADS_SHEET;
 
 // From an address on this website's own domain (better delivery); replies go to the visitor.
 $host = preg_replace('/^www\./i', '', preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? 'localhost'));
