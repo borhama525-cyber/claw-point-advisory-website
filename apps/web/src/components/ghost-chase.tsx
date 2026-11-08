@@ -50,6 +50,8 @@ const PAGE: Record<string, string[]> = {
 };
 
 // Flat cartoon silhouettes, all on a 140x120 canvas with the ground at y≈108.
+// Just the head, for floating around: round, pointed ears, two gold eyes.
+const HEAD = 'M34,70 C34,54 39,43 45,36 C44,28 43,20 44,12 C51,16 58,22 63,28 C67,27 73,27 77,28 C82,22 89,16 96,12 C97,20 96,28 95,36 C101,43 106,54 106,70 C106,90 90,102 70,102 C50,102 34,90 34,70 Z';
 // Leaping, mid-flight (the floating pose), facing right.
 const LEAP = 'M26,60 C38,46 66,44 86,48 C94,49 99,46 102,40 C102,35 103,31 104,26 C107,29 109,31 111,32 C113,30 116,28 119,26 C120,32 122,38 123,44 C124,51 119,56 112,58 C119,60 127,62 134,63 C137,64 137,69 133,69 C124,70 113,70 104,71 C92,74 76,76 62,75 C50,76 34,78 18,84 C12,86 9,81 13,78 C19,74 23,67 26,60 Z';
 const LEAP_TAIL = 'M28,58 C15,52 9,40 14,30 C17,24 23,25 23,30';
@@ -133,7 +135,8 @@ export function GhostChase() {
 		let lastNudge = performance.now() - 30000;
 		const nudge = () => { const t = performance.now(); if (t - lastNudge < 55000) return false; lastNudge = t; say('', 0); const n = pick(NUDGES); say(n.line, 7000, n); return true; };
 		const setMode = (m: Mode, ms: number) => { mode = m; modeUntil = performance.now() + ms; k.dataset.mood = m; };
-		const setPose = (p: Pose) => { if (pose !== p) { pose = p; svg.dataset.pose = p; } };
+		let morphTimer = 0;
+		const setPose = (p: Pose) => { if (pose !== p) { pose = p; svg.dataset.pose = p; svg.classList.add('gc-morph'); clearTimeout(morphTimer); morphTimer = window.setTimeout(() => svg.classList.remove('gc-morph'), 460); } };
 
 		const napSpot = () => {
 			const list = Array.from(document.querySelectorAll('main h1, main h2, main .button, main .tip-box, main .learn-steps li, main .network-group, main .contact-way, main .tool-tile, main .calculator, main .learn-structure, main .learn-article'))
@@ -334,12 +337,15 @@ export function GhostChase() {
 		{on && <div className="ghost-chase" aria-hidden="true">
 			<div ref={kitty} className="gc-kitty" style={{ width: KW, height: KH }}>
 				<svg ref={kSvg} viewBox="0 0 140 120" overflow="visible" data-pose="head">
+					<defs><filter id="gc-goo" x="-25%" y="-25%" width="150%" height="150%"><feGaussianBlur in="SourceGraphic" stdDeviation="3.6" result="b" /><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8" /></filter></defs>
+					<g className="gc-poses">
 					{/* The black cat from the intro: flat silhouette, one gold eye, warm shadow. */}
 					<g className="gc-pose gc-pose-head">
-						<ellipse className="gc-shadow" cx="66" cy="109" rx="38" ry="5" />
-						<path d={SIT_TAIL} fill="none" stroke={BODY} strokeWidth="7" strokeLinecap="round" />
-						<path d={SIT} fill={BODY} stroke={BODY} strokeWidth="1.4" strokeLinejoin="round" />
-						<path className="gc-eye" d="M93.5,45 C95.5,41 100.5,41 102.5,44 C100.5,47 95.5,48 93.5,45 Z" /><ellipse cx="98" cy="44.5" rx=".9" ry="2.4" fill="#0d0d0d" />
+						<path d={HEAD} fill={BODY} stroke={BODY} strokeWidth="1.4" strokeLinejoin="round" />
+						<g className="gc-eyes">
+							<path className="gc-eye" d="M46,66 C49,59 58,58 63,65 C58,71 50,72 46,66 Z M94,66 C91,59 82,58 77,65 C82,71 90,72 94,66 Z" />
+							<ellipse cx="55" cy="65.5" rx="1.6" ry="4.6" fill="#0d0d0d" /><ellipse cx="85" cy="65.5" rx="1.6" ry="4.6" fill="#0d0d0d" />
+						</g>
 					</g>
 					<g className="gc-pose gc-pose-sit">
 						<ellipse className="gc-shadow" cx="66" cy="109" rx="38" ry="5" />
@@ -374,6 +380,7 @@ export function GhostChase() {
 						<path d={ARCH_TAIL} fill="none" stroke={BODY} strokeWidth="7" strokeLinecap="round" />
 						<path d={ARCH} fill={BODY} stroke={BODY} strokeWidth="1.4" strokeLinejoin="round" />
 						<path className="gc-eye" d="M112.5,53 C114.5,49 119.5,49 121.5,52 C119.5,55 114.5,56 112.5,53 Z" /><ellipse cx="117" cy="52.5" rx=".9" ry="2.4" fill="#0d0d0d" />
+					</g>
 					</g>
 				</svg>
 			</div>
