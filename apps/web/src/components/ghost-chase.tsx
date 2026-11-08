@@ -45,7 +45,7 @@ const PAGE: Record<string, string[]> = {
 	'/calculators': ['Calculators! My kind of toys.'],
 	'/network': ['Join the pack! We love new friends.'],
 	'/contact': ['Say hi! My humans reply fast.'],
-	'/reviews': ['Worked with us? Tell people how it went!'],
+	'/reviews': ['Tell the team how we did. It stays private!'],
 	'/booking': ['Pick a time. Amira and Adam are lovely.'],
 	'/ask': ['Ask away! I know a few things.'],
 };
