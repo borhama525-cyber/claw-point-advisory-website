@@ -100,10 +100,12 @@ export function DealRequestDialog({ open, onOpenChange, method, title, prefill, 
 					<Field label="State" name="state" required error={e.state}><select id="dr-state" name="state" autoComplete="address-level1" required defaultValue="" onChange={ev => { setUsState(ev.target.value); if (SEPARATE_ESCROW_STATES.includes(ev.target.value) && escrowMode === 'same') setEscrowMode('have'); }}><option value="" disabled>Select</option>{STATES.map(s => <option key={s}>{s}</option>)}</select></Field>
 					<Field label="ZIP" name="zip" required error={e.zip}><input id="dr-zip" name="zip" autoComplete="postal-code" inputMode="numeric" required pattern="\d{5}(-\d{4})?" maxLength={10} /></Field></div>
 					<Field label="Target close date" name="close_date" required error={e.close_date}><input id="dr-close_date" name="close_date" type="date" required /></Field>
+					{isEmd ? <div className="dr-row"><Money label="Purchase price" name="purchase_price" value={prefill.purchase_price} required error={e.purchase_price} />
+					<Money label="EMD amount" name="requested_funding" value={prefill.requested_funding} required error={e.requested_funding} /></div> : <>
 					<div className="dr-row"><Money label="Purchase price" name="purchase_price" value={prefill.purchase_price} required error={e.purchase_price} />
 					{method === 'stack' ? <Money label="Seller finance amount" name="seller_finance" value={prefill.seller_finance} required error={e.seller_finance} /> : <Money label={method === 'echo' || method === 'double-close' ? 'B–C sale price' : 'Estimated value or ARV'} name="resale_price" value={prefill.resale_price} error={e.resale_price} />}</div>
 					<div className="dr-row"><Money label="Primary loan amount (if you have one)" name="primary_loan" value={prefill.primary_loan} error={e.primary_loan} />
-					<Money label={method === 'emd' ? 'EMD amount' : 'Requested funding'} name="requested_funding" value={prefill.requested_funding} required error={e.requested_funding} /></div>
+					<Money label="Requested funding" name="requested_funding" value={prefill.requested_funding} required error={e.requested_funding} /></div></>}
 					{!docs.some(d => d.lender) && !isDoubleClose && !isEmd && <label className="check-label dr-lender"><input type="checkbox" name="needs_lender" value="Yes" checked={needsLender} onChange={ev => setNeedsLender(ev.target.checked)} /> I need a primary lender: please provide one for this deal.</label>}
 					{isEmd && <EmdSection errors={e} propertyType={propertyType} titleMode={titleMode} onTitleMode={setTitleMode} />}
 					{isDoubleClose && <TitleEscrowSection errors={e} usState={usState} mode={escrowMode} onMode={setEscrowMode} />}
