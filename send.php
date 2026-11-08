@@ -76,9 +76,9 @@ if ($form === 'deal') {
 $attachments = [];
 if ($form === 'deal') {
 	// Paperwork each funding type must include (keep in step with src/data/required-docs.ts).
-	// Documents marked 'lender' are waived when the borrower asks us to provide a primary lender.
+	// Keys ending in * are waived when the borrower asks us to provide a primary lender; keys ending in ? are optional.
 	$required = [
-		'stack' => ['contract' => 'Signed purchase contract', 'seller_terms' => 'Seller-carry terms', 'lender_terms*' => 'Primary lender term sheet or approval'],
+		'stack' => ['lender_loi*' => 'Primary lender LOI', 'contract?' => 'Purchase contract (PSA)', 'seller_terms?' => 'Seller-carry terms'],
 		'echo' => ['ab_contract' => 'A–B purchase contract', 'bc_contract' => 'B–C purchase contract', 'lender_terms*' => 'End buyer’s lender term sheet or approval'],
 		'double-close' => ['ab_contract' => 'A–B purchase contract', 'bc_contract' => 'B–C purchase contract', 'buyer_funds' => 'End buyer proof of funds or lender approval'],
 		'emd' => ['contract' => 'Signed purchase contract'],
@@ -86,11 +86,12 @@ if ($form === 'deal') {
 	$needsLender = field('needs_lender', 3) === 'Yes';
 	$files = []; $docList = []; $missing = [];
 	foreach ($required as $key => $label) {
-		$lenderDoc = str_ends_with($key, '*'); $key = rtrim($key, '*');
+		$lenderDoc = str_ends_with($key, '*'); $optional = str_ends_with($key, '?'); $key = rtrim($key, '*?');
 		$f = $_FILES["doc_{$key}"] ?? null;
 		$has = $f && ($f['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
 		if ($has) { $files[] = $f + ['label' => $label]; $docList[] = "✓ {$label}"; }
 		elseif ($lenderDoc && $needsLender) $docList[] = "– {$label}: not needed, we provide the lender";
+		elseif ($optional) $docList[] = "– {$label}: not sent yet";
 		else $missing[] = $label;
 	}
 	if ($missing) reply(422, ['ok' => false, 'error' => 'Please attach the required documents: ' . implode(', ', $missing) . '.']);
