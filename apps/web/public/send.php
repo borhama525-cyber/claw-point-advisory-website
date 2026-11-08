@@ -95,6 +95,25 @@ if ($form === 'deal') {
 }
 
 $rows = array_filter($rows, fn($v) => trim((string) $v) !== '');
+
+// Save the lead to the Google Sheet ("Website Leads" tab) when lead-sheet.php is set up.
+// Runs before the email so a lead is kept even if mail delivery has a problem.
+$sheet = is_file(__DIR__ . '/lead-sheet.php') ? (include __DIR__ . '/lead-sheet.php') : null;
+if (is_array($sheet) && !empty($sheet['url']) && function_exists('curl_init')) {
+	$sources = ['deal' => 'Deal request', 'enquiry' => 'Contact form', 'newsletter' => 'Newsletter (Stay in the know)'];
+	$lead = ['secret' => $sheet['secret'] ?? '', 'source' => $sources[$form], 'email' => $email,
+		'name' => $rows['Borrower'] ?? $rows['Name'] ?? '', 'phone' => $rows['Phone'] ?? '',
+		'topic' => $rows['Deal type'] ?? $rows['Topic'] ?? '', 'property_type' => $rows['Property type'] ?? '',
+		'address' => $rows['Property'] ?? '', 'close_date' => $rows['Target close date'] ?? '',
+		'purchase_price' => $rows['Purchase price'] ?? '', 'requested_funding' => $rows['Requested funding'] ?? '',
+		'needs_lender' => $rows['Needs a primary lender'] ?? '', 'message' => $rows['Description'] ?? $rows['Message'] ?? '',
+		'referred_by' => trim(($rows['Referred by'] ?? '') . ' ' . ($rows['Referrer email'] ?? '')), 'documents' => $rows['Documents'] ?? ''];
+	$ch = curl_init($sheet['url']);
+	curl_setopt_array($ch, [CURLOPT_POST => true, CURLOPT_POSTFIELDS => http_build_query($lead), CURLOPT_RETURNTRANSFER => true,
+		CURLOPT_FOLLOWLOCATION => false, CURLOPT_CONNECTTIMEOUT => 4, CURLOPT_TIMEOUT => 8]);
+	curl_exec($ch);
+}
+
 $html = '<div style="font-family:Arial,sans-serif;color:#141a17;max-width:620px"><p style="font-size:15px">' . esc($intro) . '</p><table style="border-collapse:collapse;width:100%;font-size:14px">';
 foreach ($rows as $k => $v) {
 	$cell = ($k === 'Email' || $k === 'Referrer email') ? '<a href="mailto:' . esc($v) . '">' . esc($v) . '</a>' : nl2br(esc($v));

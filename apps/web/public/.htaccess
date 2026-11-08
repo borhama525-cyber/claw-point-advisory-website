@@ -21,10 +21,10 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ /__spa-fallback.html [L]
 </IfModule>
 
-# Hide the shared helper file
-<Files "site-origin.php">
+# Hide the helper and private settings files
+<FilesMatch "^(site-origin|lead-sheet)\.php$">
 	Require all denied
-</Files>
+</FilesMatch>
 
 # Cache built assets (their file names change on every build)
 <IfModule mod_headers.c>
