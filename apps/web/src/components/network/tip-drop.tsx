@@ -1,16 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router';
-import { Lightbulb } from 'lucide-react';
+import { ArrowUpRight, Lightbulb } from 'lucide-react';
 import { starterTips, type Tip } from '@/data/tips';
 
 const TZ = 'America/New_York';
-const dayKey = (d: Date) => d.toLocaleDateString('en-CA', { timeZone: TZ });
 const parse = (s: string) => { const d = new Date(/T\d/.test(s) ? s : `${s}T12:00`); return Number.isNaN(d.getTime()) ? null : d; };
-const timeOf = (s: string) => (/T\d/.test(s) ? new Date(s).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '');
-const daysBetween = (a: string, b: string) => Math.round((Date.parse(`${a}T00:00Z`) - Date.parse(`${b}T00:00Z`)) / 86400000);
-const groupLabel = (n: number) => (n <= 0 ? 'Today' : n === 1 ? '1 day ago' : `${n} days ago`);
+const ago = (s: string, now: number) => {
+	const d = parse(s); if (!d) return '';
+	const mins = Math.round((now - d.getTime()) / 60000);
+	if (mins < 60) return mins <= 1 ? 'just now' : `${mins} min ago`;
+	const hrs = Math.round(mins / 60); if (hrs < 24) return `${hrs}h ago`;
+	const days = Math.round(hrs / 24); if (days < 7) return days === 1 ? 'yesterday' : `${days} days ago`;
+	return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: TZ });
+};
 
-/** "Tip drop": one bold box with a live badge and a slowly scrolling feed of tips grouped by day. */
+/** "Tip drop": one bold box with a live badge and a slowly scrolling feed of fresh lending headlines and team tips. */
 export function TipDrop() {
 	const [tips, setTips] = useState<Tip[]>(starterTips);
 	const [live, setLive] = useState(false);
@@ -29,19 +33,9 @@ export function TipDrop() {
 		return () => { stop = true; window.clearInterval(id); };
 	}, []);
 
-	// Start from the newest tip's day so the pre-built page and the first browser render match, then use the real date.
-	const [today, setToday] = useState(() => starterTips[0].date.slice(0, 10));
-	useEffect(() => { setToday(dayKey(new Date())); }, []);
-	const groups = useMemo(() => {
-		const out: { label: string; items: Tip[] }[] = [];
-		for (const t of tips) {
-			const d = parse(t.date);
-			const label = d ? groupLabel(daysBetween(today, dayKey(d))) : 'Earlier';
-			const last = out[out.length - 1];
-			if (last?.label === label) last.items.push(t); else out.push({ label, items: [t] });
-		}
-		return out;
-	}, [tips, today]);
+	// A fixed "now" for the pre-built page, then the real clock once the browser takes over.
+	const [now, setNow] = useState(() => Date.parse(`${starterTips[0].date}:00`) || 0);
+	useEffect(() => { setNow(Date.now()); const id = window.setInterval(() => setNow(Date.now()), 60000); return () => window.clearInterval(id); }, []);
 
 	// Gentle auto-scroll that loops; pauses while the visitor hovers, touches or scrolls it.
 	useEffect(() => {
@@ -64,8 +58,7 @@ export function TipDrop() {
 		};
 		raf = requestAnimationFrame(step);
 		return () => cancelAnimationFrame(raf);
-	}, [groups]);
-	let n = 0;
+	}, [tips]);
 	const pause = () => { hold.current = true; };
 	const resume = () => { hold.current = false; };
 
@@ -73,7 +66,7 @@ export function TipDrop() {
 		<div className="tip-intro">
 			<p className="eyebrow">TIP DROP</p>
 			<h2>Tips and tricks, <em>live.</em></h2>
-			<p>Quick, practical lending tips from Amira and Adam on underwriting, closing, creative finance and networking. New ones drop into the feed as we post them.</p>
+			<p>Fresh reads on lending, creative finance, wholesaling and closing, pulled in automatically from BiggerPockets and the news, plus tips straight from Amira and Adam. Tap any headline to read it.</p>
 			<p className="tip-note">General information to help you prepare, not financial or legal advice. Have a question? <Link to="/ask">Ask us</Link> or <Link to="/booking">book a call</Link>.</p>
 		</div>
 
@@ -85,17 +78,15 @@ export function TipDrop() {
 				<span className={`tip-pill${live ? ' is-live' : ''}`}><span className="tip-dot" aria-hidden="true" /> Live</span>
 			</div>
 			<div ref={feed} className="tip-scroll" tabIndex={0} aria-label="Lending tips" onMouseEnter={pause} onMouseLeave={resume} onTouchStart={pause} onTouchEnd={resume} onFocus={pause} onBlur={resume} onWheel={pause}>
-				{groups.map(g => <div key={g.label} className="tip-group">
-					<p className={`tip-day${g.label === 'Today' ? ' is-today' : ''}`}><span>{g.label}</span></p>
-					{g.items.map(t => { n += 1; return <article key={t.date + t.tip} className="tip-item">
-						<span className="tip-num" aria-hidden="true">{String(n).padStart(2, '0')}</span>
-						<span className="tip-tag">{t.category}</span>
-						<p className="tip-text">{t.tip}</p>
-						<p className="tip-meta"><span className="tip-avatar">{(t.by || 'C')[0].toUpperCase()}</span>{t.by || 'Claw Point'}{timeOf(t.date) && <> <i>·</i> {timeOf(t.date)}</>}</p>
+				{tips.map((t, i) => { const meta = <p className="tip-meta"><span className="tip-avatar">{(t.by || 'C')[0].toUpperCase()}</span>{t.by || 'Claw Point'}{ago(t.date, now) && <> <i>·</i> {ago(t.date, now)}</>}</p>;
+					return <article key={t.date + t.tip} className={`tip-item${t.url ? ' is-article' : ''}`}>
+						<span className="tip-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+						<span className="tip-tag">{t.category}{t.url ? '' : ' · From the team'}</span>
+						{t.url ? <a className="tip-text tip-link" href={t.url} target="_blank" rel="noopener noreferrer">{t.tip} <ArrowUpRight size={16} /></a> : <p className="tip-text">{t.tip}</p>}
+						{meta}
 					</article>; })}
-				</div>)}
 			</div>
-			<p className="tip-foot">Straight from the <Link to="/network">Claw Point team</Link></p>
+			<p className="tip-foot">Fresh from BiggerPockets, the news and the <Link to="/network">Claw Point team</Link></p>
 		</div>
 	</div></section>;
 }

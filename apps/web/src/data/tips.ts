@@ -1,6 +1,7 @@
-// Starter "Tip Drop" tips, shown until the Tip Drops tab of the leads sheet is connected (public/tips.php).
-// They match the first rows of that tab.
-export type Tip = { date: string; category: string; tip: string; by: string };
+// Starter "Tip drop" tips, shown until public/tips.php answers (for example while developing locally).
+// They match the first rows of the Tip Drops tab in the leads sheet.
+/** `url` and `kind: 'article'` mark a headline pulled from a public feed (BiggerPockets, news); team tips have neither. */
+export type Tip = { date: string; category: string; tip: string; by: string; url?: string; kind?: 'article' | 'team' };
 
 export const starterTips: Tip[] = [
 	{ date: '2026-11-08T12:50', category: 'Networking', tip: 'A great TC or title officer is worth more than a lower fee. Ask who they close with every week.', by: 'Adam' },

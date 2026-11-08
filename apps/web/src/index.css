@@ -936,3 +936,7 @@ h1 em,h2 em{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-
 @media(max-width:960px){.tip-layout{grid-template-columns:1fr;gap:28px}.tip-box{justify-self:stretch;max-width:none}}
 @media(max-width:480px){.tip-box{padding:20px 16px 14px;border-radius:24px}.tip-box-head h3{font-size:32px}.tip-scroll{height:430px}.tip-text{font-size:16px}}
 @media(prefers-reduced-motion:reduce){.tip-dot:after,.tip-item,.tip-box-glow{animation:none}}
+.tip-link{display:block;color:#fff;text-decoration:none;transition:color .2s}
+.tip-link svg{display:inline;vertical-align:-2px;color:var(--mimosa);opacity:.75;transition:transform .2s,opacity .2s}
+.tip-item.is-article:hover .tip-link{color:#fdf6d3}.tip-item.is-article:hover .tip-link svg{transform:translate(2px,-2px);opacity:1}
+.tip-link:focus-visible{outline:2px solid var(--mimosa);outline-offset:4px;border-radius:6px}
