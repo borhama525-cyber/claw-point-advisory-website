@@ -1,12 +1,13 @@
 // Paperwork each funding type must include before a deal request can be sent.
 // Keep in step with REQUIRED_DOCS in public/send.php, which checks the same list on the server.
-export type RequiredDoc = { key: string; label: string; hint: string; lender?: boolean };
+// lender: waived when the borrower asks us to provide a primary lender. optional: shown, never required.
+export type RequiredDoc = { key: string; label: string; hint: string; lender?: boolean; optional?: boolean };
 
 export const requiredDocs: Record<string, RequiredDoc[]> = {
 	stack: [
-		{ key: 'contract', label: 'Signed purchase contract', hint: 'The full purchase and sale agreement, signed.' },
-		{ key: 'seller_terms', label: 'Seller-carry terms', hint: 'Seller finance addendum, note terms or term sheet.' },
-		{ key: 'lender_terms', label: 'Primary lender term sheet or approval', hint: 'From the lender funding the largest share of the price.', lender: true },
+		{ key: 'lender_loi', label: 'Primary lender LOI', hint: 'Letter of intent from the lender funding the largest share of the price.', lender: true },
+		{ key: 'contract', label: 'Purchase contract (PSA), if you have one', hint: 'Not needed yet: Stack terms are usually still being built.', optional: true },
+		{ key: 'seller_terms', label: 'Seller-carry terms, if drafted', hint: 'Seller finance addendum, note terms or a term sheet.', optional: true },
 	],
 	echo: [
 		{ key: 'ab_contract', label: 'A–B purchase contract', hint: 'Your contract with the seller.' },

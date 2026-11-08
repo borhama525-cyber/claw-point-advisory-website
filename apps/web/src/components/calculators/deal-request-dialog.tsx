@@ -68,20 +68,20 @@ export function DealRequestDialog({ open, onOpenChange, method, title, prefill, 
 					<Money label={method === 'emd' ? 'EMD amount' : 'Requested funding'} name="requested_funding" value={prefill.requested_funding} required error={e.requested_funding} /></div>
 					{!docs.some(d => d.lender) && <label className="check-label dr-lender"><input type="checkbox" name="needs_lender" value="Yes" checked={needsLender} onChange={ev => setNeedsLender(ev.target.checked)} /> I need a primary lender: please provide one for this deal.</label>}
 					<h3>Required documents</h3>
-					<p className="dr-hint dr-docs-intro"><FileCheck2 size={16} /> Attach each document marked <strong>Required</strong>. Your request can’t be sent without them.</p>
+					<p className="dr-hint dr-docs-intro"><FileCheck2 size={16} /> Attach each document marked <strong>Required</strong>. Your request can’t be sent without them.{docs.some(d => d.optional) && ' Optional documents can follow later.'}</p>
 					<div className="dr-docs">{docs.map(d => {
-						const req = !(d.lender && needsLender);
-						return <div key={d.key} className={`dr-field dr-doc ${req ? 'is-required' : 'is-waived'}`}>
+						const req = !d.optional && !(d.lender && needsLender);
+						return <div key={d.key} className={`dr-field dr-doc ${req ? 'is-required' : d.optional ? 'is-optional' : 'is-waived'}`}>
 							<label htmlFor={`dr-doc_${d.key}`}><span>{d.label}{req && ' *'}</span></label>
 							{d.lender && <div className="dr-lender-choice" role="radiogroup" aria-label="Primary lender">
-								<label className={needsLender ? '' : 'on'}><input type="radio" name="lender_choice" checked={!needsLender} onChange={() => setNeedsLender(false)} /> I have a primary lender <small>Upload their term sheet or approval</small></label>
+								<label className={needsLender ? '' : 'on'}><input type="radio" name="lender_choice" checked={!needsLender} onChange={() => setNeedsLender(false)} /> I have a primary lender <small>{d.key === 'lender_loi' ? 'Upload their LOI' : 'Upload their term sheet or approval'}</small></label>
 								<label className={needsLender ? 'on' : ''}><input type="radio" name="lender_choice" checked={needsLender} onChange={() => setNeedsLender(true)} /> I need a primary lender <small>We’ll provide one for this deal</small></label>
 							</div>}
 							{d.lender && needsLender && <input type="hidden" name="needs_lender" value="Yes" />}
-							{req ? <>
+							{req || d.optional ? <>
 								{!d.lender && <small className="dr-doc-hint">{d.hint}</small>}
-								<input id={`dr-doc_${d.key}`} name={`doc_${d.key}`} type="file" required accept={ACCEPT} />
-							</> : <small className="dr-doc-hint">No term sheet needed. We’ll provide your primary lender.</small>}
+								<input id={`dr-doc_${d.key}`} name={`doc_${d.key}`} type="file" required={req} accept={ACCEPT} />
+							</> : <small className="dr-doc-hint">No lender document needed. We’ll provide your primary lender.</small>}
 							{e[`doc_${d.key}`] && <em className="dr-error">{e[`doc_${d.key}`]}</em>}
 						</div>;
 					})}</div>
