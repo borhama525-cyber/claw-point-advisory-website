@@ -940,3 +940,8 @@ h1 em,h2 em{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-
 .tip-link svg{display:inline;vertical-align:-2px;color:var(--mimosa);opacity:.75;transition:transform .2s,opacity .2s}
 .tip-item.is-article:hover .tip-link{color:#fdf6d3}.tip-item.is-article:hover .tip-link svg{transform:translate(2px,-2px);opacity:1}
 .tip-link:focus-visible{outline:2px solid var(--mimosa);outline-offset:4px;border-radius:6px}
+/* Network role bubbles: faint glow on hover */
+.network-roles .contact-topics label{transition:background .25s,border-color .25s,color .25s,box-shadow .35s ease,transform .25s cubic-bezier(.2,.8,.2,1)}
+.network-roles .contact-topics label:hover{border-color:var(--t,var(--leaf));box-shadow:0 0 0 4px color-mix(in srgb,var(--t,#24533d) 12%,transparent),0 6px 18px color-mix(in srgb,var(--t,#24533d) 22%,transparent);transform:translateY(-1px)}
+.network-roles .contact-topics label.on:hover{box-shadow:0 0 0 4px color-mix(in srgb,var(--t,#24533d) 18%,transparent),0 8px 22px color-mix(in srgb,var(--t,#24533d) 32%,transparent)}
+@media(prefers-reduced-motion:reduce){.network-roles .contact-topics label:hover{transform:none}}
