@@ -14,7 +14,7 @@ import { openContactPanel } from '@/components/contact-panel';
 
 const KEY = 'clawpoint:ghost-chase';
 const MET = 'clawpoint:kitty-met';
-const BODY = '#141414'; // Claw Point deep green
+const BODY = 'url(#gc-aurora)'; // Claw Point deep green
 const CELEBRATE = 'clawpoint:celebrate';
 const KW = 66, KH = 57;
 
@@ -77,7 +77,7 @@ const NUDGES: Nudge[] = [
 ];
 
 const SIDE_BODY = 'M32,80 C28,68 38,58 54,57 C68,56 80,57 89,59 C89,54 90,49 91,44 C90,37 90,30 91,23 C95,27 98,31 100,35 C103,34 106,34 109,35 C111,31 114,27 118,24 C118,31 117,37 115,42 C119,47 120,54 116,59 C112,64 105,66 99,66 C99,73 97,80 93,86 C77,92 51,92 41,88 C35,86 32,84 32,80 Z';
-const SIDE_TAIL = 'M34,76 C20,74 14,62 19,52 C23,45 19,38 14,40';
+const SIDE_TAIL = 'M36,74 C26,66 23,52 25,41 C26,34 32,32 34,37';
 
 type Mode = 'float' | 'walk' | 'nap' | 'bully' | 'visit' | 'hiss' | 'party' | 'pounce';
 type Pose = 'head' | 'leap' | 'walk' | 'loaf' | 'sit' | 'puff';
@@ -337,49 +337,57 @@ export function GhostChase() {
 		{on && <div className="ghost-chase" aria-hidden="true">
 			<div ref={kitty} className="gc-kitty" style={{ width: KW, height: KH }}>
 				<svg ref={kSvg} viewBox="0 0 140 120" overflow="visible" data-pose="head">
-					<defs><filter id="gc-goo" x="-25%" y="-25%" width="150%" height="150%"><feGaussianBlur in="SourceGraphic" stdDeviation="3.6" result="b" /><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8" /></filter></defs>
+					<defs>
+						<linearGradient id="gc-aurora" gradientUnits="userSpaceOnUse" x1="20" y1="20" x2="120" y2="110">
+							<stop offset="0" stopColor="#52f2a4" /><stop offset=".35" stopColor="#35d8bf" /><stop offset=".58" stopColor="#8a86ff" /><stop offset=".8" stopColor="#3fe6a6" /><stop offset="1" stopColor="#62cfff" />
+							<animateTransform attributeName="gradientTransform" type="rotate" values="0 70 66;360 70 66" dur="9s" repeatCount="indefinite" />
+						</linearGradient>
+						<radialGradient id="gc-core" gradientUnits="userSpaceOnUse" cx="68" cy="70" r="32">
+							<stop offset="0" stopColor="#020c07" stopOpacity=".95" /><stop offset=".4" stopColor="#04170f" stopOpacity=".7" /><stop offset="1" stopColor="#04170f" stopOpacity="0" />
+							<animate attributeName="r" values="27;35;27" dur="4.2s" repeatCount="indefinite" />
+						</radialGradient>
+						<filter id="gc-soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.5" /></filter>
+						<filter id="gc-goo" x="-25%" y="-25%" width="150%" height="150%"><feGaussianBlur in="SourceGraphic" stdDeviation="3.6" result="b" /><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8" /></filter>
+					</defs>
 					<g className="gc-poses">
-					{/* The black cat from the intro: flat silhouette, one gold eye, warm shadow. */}
+					{/* A soft glowing cat: aurora gradient, dark core, no face. */}
 					<g className="gc-pose gc-pose-head">
 						<path d={HEAD} fill={BODY} stroke={BODY} strokeWidth="1.4" strokeLinejoin="round" />
-						<g className="gc-eyes">
-							<path className="gc-eye" d="M46,66 C49,59 58,58 63,65 C58,71 50,72 46,66 Z M94,66 C91,59 82,58 77,65 C82,71 90,72 94,66 Z" />
-							<ellipse cx="55" cy="65.5" rx="1.6" ry="4.6" fill="#0d0d0d" /><ellipse cx="85" cy="65.5" rx="1.6" ry="4.6" fill="#0d0d0d" />
-						</g>
+						<path d={HEAD} fill="url(#gc-core)" />
 					</g>
 					<g className="gc-pose gc-pose-sit">
 						<ellipse className="gc-shadow" cx="66" cy="109" rx="38" ry="5" />
-						<path d={SIT_TAIL} fill="none" stroke={BODY} strokeWidth="7" strokeLinecap="round" />
+						<path d={SIT_TAIL} fill="none" stroke={BODY} strokeWidth="8" strokeLinecap="round" />
 						<path d={SIT} fill={BODY} stroke={BODY} strokeWidth="1.4" strokeLinejoin="round" />
-						<path className="gc-eye" d="M93.5,45 C95.5,41 100.5,41 102.5,44 C100.5,47 95.5,48 93.5,45 Z" /><ellipse cx="98" cy="44.5" rx=".9" ry="2.4" fill="#0d0d0d" />
+						<path d={SIT} fill="url(#gc-core)" />
 					</g>
 					<g className="gc-pose gc-pose-leap">
 						<ellipse className="gc-shadow" cx="72" cy="112" rx="34" ry="5" />
-						<path d={LEAP_TAIL} fill="none" stroke={BODY} strokeWidth="7" strokeLinecap="round" />
+						<path d={LEAP_TAIL} fill="none" stroke={BODY} strokeWidth="8" strokeLinecap="round" />
 						<path d={LEAP} fill={BODY} stroke={BODY} strokeWidth="1.4" strokeLinejoin="round" />
-						<path className="gc-eye" d="M109.5,42 C111.5,38 116.5,38 118.5,41 C116.5,44 111.5,45 109.5,42 Z" /><ellipse cx="114" cy="41.5" rx=".9" ry="2.4" fill="#0d0d0d" />
+						<path d={LEAP} fill="url(#gc-core)" />
 					</g>
 					<g className="gc-pose gc-pose-walk">
 						<ellipse className="gc-shadow" cx="72" cy="107" rx="42" ry="5" />
-						<path ref={tail} d={SIDE_TAIL} fill="none" stroke={BODY} strokeWidth="7" strokeLinecap="round" />
-						<g ref={legs} stroke={BODY} strokeWidth="9" strokeLinecap="round">
+						<path ref={tail} d={SIDE_TAIL} fill="none" stroke={BODY} strokeWidth="8" strokeLinecap="round" />
+						<g ref={legs} stroke={BODY} strokeWidth="11" strokeLinecap="round">
 							<line data-x="42" x1="42" y1="82" x2="42" y2="104" /><line data-x="51" x1="51" y1="84" x2="51" y2="104" />
 							<line data-x="82" x1="82" y1="82" x2="82" y2="104" /><line data-x="90" x1="90" y1="80" x2="90" y2="104" />
 						</g>
 						<path d={SIDE_BODY} fill={BODY} stroke={BODY} strokeWidth="1.4" strokeLinejoin="round" />
-						<path className="gc-eye" d="M104.5,48 C106.5,44 111.5,44 113.5,47 C111.5,50 106.5,51 104.5,48 Z" /><ellipse cx="109" cy="47.5" rx=".9" ry="2.4" fill="#0d0d0d" />
+						<path d={SIDE_BODY} fill="url(#gc-core)" />
 					</g>
 					<g className="gc-pose gc-pose-loaf">
 						<ellipse className="gc-shadow" cx="70" cy="108" rx="52" ry="5" />
-						<path d={NAP_TAIL} fill="none" stroke={BODY} strokeWidth="7" strokeLinecap="round" />
+						<path d={NAP_TAIL} fill="none" stroke={BODY} strokeWidth="8" strokeLinecap="round" />
 						<path d={NAP} fill={BODY} stroke={BODY} strokeWidth="1.4" strokeLinejoin="round" />
-						<path d="M95,66 Q99,69 103,66" fill="none" stroke="#dcc64a" strokeWidth="1.6" strokeLinecap="round" />
+						<path d={NAP} fill="url(#gc-core)" />
 					</g>
 					<g className="gc-pose gc-pose-puff">
 						<ellipse className="gc-shadow" cx="68" cy="106" rx="46" ry="5" />
-						<path d={ARCH_TAIL} fill="none" stroke={BODY} strokeWidth="7" strokeLinecap="round" />
+						<path d={ARCH_TAIL} fill="none" stroke={BODY} strokeWidth="8" strokeLinecap="round" />
 						<path d={ARCH} fill={BODY} stroke={BODY} strokeWidth="1.4" strokeLinejoin="round" />
-						<path className="gc-eye" d="M112.5,53 C114.5,49 119.5,49 121.5,52 C119.5,55 114.5,56 112.5,53 Z" /><ellipse cx="117" cy="52.5" rx=".9" ry="2.4" fill="#0d0d0d" />
+						<path d={ARCH} fill="url(#gc-core)" />
 					</g>
 					</g>
 				</svg>
