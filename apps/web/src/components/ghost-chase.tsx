@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { Ghost } from 'lucide-react';
+import { useNavigate } from 'react-router';
+import { Cat } from 'lucide-react';
+import { useRequest } from '@/components/request/request-provider';
+import { openContactPanel } from '@/components/contact-panel';
 
 // A little scene in the margins, just for fun.
 // The phantom kitty has moods: she floats around, walks along the edge under the header, naps on
@@ -10,16 +13,19 @@ import { Ghost } from 'lucide-react';
 // for visitors who prefer reduced motion.
 
 const KEY = 'clawpoint:ghost-chase';
+const MET = 'clawpoint:kitty-met';
+const BODY = '#173a2a'; // Claw Point deep green
 const CELEBRATE = 'clawpoint:celebrate';
 const KW = 66, KH = 57;
 
 const pick = <T,>(list: T[]) => list[Math.floor(Math.random() * list.length)];
 const readPref = () => { try { return localStorage.getItem(KEY); } catch { return null; } };
 const writePref = (v: string) => { try { localStorage.setItem(KEY, v); } catch { /* storage blocked */ } };
+const firstVisit = () => { try { if (localStorage.getItem(MET)) return false; localStorage.setItem(MET, '1'); return true; } catch { return false; } };
 
 const SAY = {
-	idle: ['Mrrp.', 'Got any deals for me?', 'EMD? Earnest Meow Deposit.', '*judges your spreadsheet*', 'I closed on a cardboard box once.', 'Is that a double close? Twice the treats.'],
-	hiss: ['Hsss! No poking!', 'Hsss! Paws off!', 'Rude. Hsss!', 'Personal space! Hsss!'],
+	idle: ['Mrrp! Happy to see you.', 'EMD? Earnest Meow Deposit.', 'I closed on a cardboard box once.', 'Is that a double close? Twice the treats.', 'Take your time, I’ll be here.', 'Every deal gets a real human. And a cat.'],
+	hiss: ['Hsss! No poking!', 'Hsss! Paws off!', 'Hsss! …okay, hi.', 'Personal space! Hsss!'],
 	napWake: ['Hsss! I was napping!', 'Five more minutes…', 'Mrrf. Fine, I’m up.'],
 	napStart: ['*yawn*', 'Nap o’clock.', 'Wake me at closing.'],
 	bully: ['Boop.', 'Mine now.', 'Too slow, logo!', 'Tag, you’re it!', 'Nice cap. Boop.'],
@@ -31,21 +37,32 @@ const SAY = {
 	pounce: ['Sparkle! Mine!', '*wiggle wiggle*', 'Got it!', 'Pounce!'],
 };
 const PAGE: Record<string, string[]> = {
-	'/': ['Welcome! Don’t touch me.', 'Hi. I live here now.'],
+	'/': ['Welcome to Claw Point!', 'Hi! Let’s get your deal moving.'],
 	'/blog': ['Learning time!', 'Study hard, human.'],
 	'/stack': ['Stack Method? Fancy.', 'Stack the treats too, please.'],
 	'/echo': ['Echo… echo… meow.'],
 	'/funding': ['Show me the money.'],
 	'/calculators': ['Calculators! My kind of toys.'],
-	'/network': ['Making friends? Not with the logo.'],
-	'/contact': ['Say hi for me.'],
-	'/booking': ['Book a call. I’ll nap through it.'],
-	'/ask': ['Ask me anything. I’ll ignore it.'],
+	'/network': ['Join the pack! We love new friends.'],
+	'/contact': ['Say hi! My humans reply fast.'],
+	'/booking': ['Pick a time. Amira’s lovely.'],
+	'/ask': ['Ask away! I know a few things.'],
 };
 
 // The kitty's head for the floating pose (viewBox 0 0 140 120).
 const HEAD = 'M24,46 C18,40 14,30 13,20 C22,22 32,27 40,33 C47,30 55,29 62,30 C68,22 76,14 86,10 C88,22 88,33 85,42 C94,52 98,64 96,76 C93,96 76,106 56,106 C36,106 20,96 17,78 C15,66 18,55 24,46 Z';
 const PUFF = Array.from({ length: 26 }, (_, i) => { const a = (i / 26) * Math.PI * 2, r = i % 2 ? 50 : 63; return `${(67 + Math.cos(a) * r).toFixed(1)},${(64 + Math.sin(a) * r * 0.92).toFixed(1)}`; }).join(' ');
+
+// Friendly nudges with a button, so visitors can act on them right away.
+type Nudge = { line: string; label: string; go: 'deal' | 'booking' | 'chat' | 'funding' | 'network' };
+const NUDGES: Nudge[] = [
+	{ line: 'Got a deal? My humans fund those.', label: 'Submit a deal', go: 'deal' },
+	{ line: 'Amira’s really nice. Book a quick call?', label: 'Book a call', go: 'booking' },
+	{ line: 'Stuck on a structure? Text the team.', label: 'Text the team', go: 'chat' },
+	{ line: 'No primary lender? We can provide one.', label: 'Start a request', go: 'deal' },
+	{ line: 'We fund in all 50 states. I nap in all 50.', label: 'See funding', go: 'funding' },
+	{ line: 'Want to work together? Join the network!', label: 'Join the network', go: 'network' },
+];
 
 type Mode = 'float' | 'walk' | 'nap' | 'bully' | 'visit' | 'hiss' | 'party' | 'pounce';
 type Pose = 'head' | 'walk' | 'loaf' | 'sit' | 'puff';
@@ -53,6 +70,10 @@ type Pose = 'head' | 'walk' | 'loaf' | 'sit' | 'puff';
 export function GhostChase() {
 	const [on, setOn] = useState(false);
 	const [ready, setReady] = useState(false);
+	const navigate = useNavigate();
+	const { openPicker } = useRequest();
+	const act = useRef<(go: Nudge['go']) => void>(() => {});
+	act.current = go => { if (go === 'deal') openPicker(); else if (go === 'chat') openContactPanel(); else navigate(`/${go}`); };
 	const kitty = useRef<HTMLDivElement>(null);
 	const kSvg = useRef<SVGSVGElement>(null);
 	const kEyes = useRef<SVGGElement>(null);
@@ -82,11 +103,23 @@ export function GhostChase() {
 		const jump = { phase: '' as '' | 'crouch' | 'leap' | 'land', t0: 0, sx: 0, sy: 0, ex: 0, ey: 0, dur: 700 };
 		let sq = { x: 1, y: 1 };
 		const ptr = { x: -999, y: -999, t: 0 };
+		let lastPathSeen = false;
 		let lastPath = '', lastScrollY = scrollY, lastScrollT = performance.now(), lastMathAt = 0, lastScrollTalk = 0;
 
 		// Speech bubbles: one line at a time each, fading out on their own.
 		let kSayUntil = 0;
-		const say = (line: string, ms = 2600) => { const el = kBubble.current; if (!el) return; el.textContent = line; el.classList.add('show'); kSayUntil = performance.now() + ms; };
+		const say = (line: string, ms = 2600, nudge?: Nudge) => {
+			const el = kBubble.current; if (!el) return;
+			el.replaceChildren(document.createTextNode(line));
+			if (nudge) {
+				const btn = Object.assign(document.createElement('button'), { type: 'button', className: 'gc-cta', textContent: `${nudge.label} →` });
+				btn.addEventListener('click', () => { el.classList.remove('show', 'has-cta'); kSayUntil = 0; act.current(nudge.go); });
+				el.append(btn);
+			}
+			el.classList.toggle('has-cta', Boolean(nudge)); el.classList.add('show'); kSayUntil = performance.now() + ms;
+		};
+		let lastNudge = performance.now() - 30000;
+		const nudge = () => { const t = performance.now(); if (t - lastNudge < 55000) return false; lastNudge = t; say('', 0); const n = pick(NUDGES); say(n.line, 7000, n); return true; };
 		const setMode = (m: Mode, ms: number) => { mode = m; modeUntil = performance.now() + ms; k.dataset.mood = m; };
 		const setPose = (p: Pose) => { if (pose !== p) { pose = p; svg.dataset.pose = p; } };
 
@@ -102,7 +135,7 @@ export function GhostChase() {
 		}
 		// Visitor events the kitty reacts to.
 		const onPointer = (e: PointerEvent) => { ptr.x = e.clientX; ptr.y = e.clientY; ptr.t = performance.now(); };
-		const onDown = (e: PointerEvent) => { onPointer(e); const cx = kp.x + KW / 2, cy = kp.y + KH / 2; if (Math.hypot(e.clientX - cx, e.clientY - cy) < 70) poke(); };
+		const onDown = (e: PointerEvent) => { onPointer(e); if ((e.target as Element)?.closest?.('.gc-bubble')) return; const cx = kp.x + KW / 2, cy = kp.y + KH / 2; if (Math.hypot(e.clientX - cx, e.clientY - cy) < 70) poke(); };
 		const onFocus = (e: FocusEvent) => {
 			const el = e.target as Element;
 			if (!el.matches?.('input, textarea, select') || el.closest('.ghost-chase')) return;
@@ -152,14 +185,16 @@ export function GhostChase() {
 			if (location.pathname !== lastPath) {
 				lastPath = location.pathname;
 				const key = lastPath === '/' ? '/' : Object.keys(PAGE).find(p => p !== '/' && lastPath.startsWith(p));
-				if (key) window.setTimeout(() => say(pick(PAGE[key])), 900);
+				const hello = !lastPathSeen && firstVisit(); lastPathSeen = true;
+				if (hello) window.setTimeout(() => say('Hi, I’m Clawdia! Welcome to Claw Point.', 4200), 900);
+				else if (key) window.setTimeout(() => say(pick(PAGE[key])), 900);
 			}
 			const sdt = (t - lastScrollT) / 1000;
 			if (sdt > 0.15) { const speed = Math.abs(scrollY - lastScrollY) / sdt; if (speed > 2400 && t - lastScrollTalk > 12000 && mode !== 'nap') { lastScrollTalk = t; say(pick(SAY.scroll), 1500); } lastScrollY = scrollY; lastScrollT = t; }
 
 			// Poked by the cursor? (a moving pointer right on top of her)
 			const cx = kp.x + KW / 2, cy = kp.y + KH / 2;
-			if (t - ptr.t < 120 && Math.hypot(ptr.x - cx, ptr.y - cy) < 34 && mode !== 'hiss' && t - pokedAt > 7000) poke();
+			if (t - ptr.t < 120 && Math.hypot(ptr.x - cx, ptr.y - cy) < 34 && mode !== 'hiss' && t - pokedAt > 7000 && !kBubble.current?.classList.contains('has-cta')) poke();
 
 			// Pick the next mood when the current one runs out.
 			if (t > modeUntil && mode !== 'nap' && mode !== 'visit') {
@@ -170,7 +205,7 @@ export function GhostChase() {
 					else if (r < 0.4) { setMode('walk', 30000); walkDir = kp.x < w / 2 ? 1 : -1; if (Math.random() < 0.5) say(pick(SAY.walk)); }
 					else if (r < 0.58) { napEl = napSpot(); if (napEl) { const rr = napEl.getBoundingClientRect(); napOff = rand(0, Math.max(0, Math.min(rr.width, 420) - KW)); setMode('nap', rand(11000, 17000)); } else setMode('float', 6000); }
 					else if (r < 0.74) setMode('bully', 14000);
-					else { setMode('float', rand(7000, 11000)); if (Math.random() < 0.35) say(pick(SAY.idle)); }
+					else { setMode('float', rand(7000, 11000)); if (!nudge() && Math.random() < 0.35) say(pick(SAY.idle)); }
 				}
 			}
 
@@ -290,38 +325,40 @@ export function GhostChase() {
 			<div ref={kitty} className="gc-kitty" style={{ width: KW, height: KH }}>
 				<svg ref={kSvg} viewBox="0 0 140 120" overflow="visible" data-pose="head">
 					<defs>
-						<linearGradient id="gc-iri" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#ff8ad8" /><stop offset=".5" stopColor="#b48cff" /><stop offset="1" stopColor="#5fd3ff" /></linearGradient>
+						<linearGradient id="gc-iri" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#dcc64a" /><stop offset=".5" stopColor="#e2806f" /><stop offset="1" stopColor="#9cc3c6" /></linearGradient>
 						<filter id="gc-soft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2.2" /></filter>
 						<filter id="gc-halo" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="9" /></filter>
 						<filter id="gc-rim" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4.5" /></filter>
 					</defs>
 					{/* Floating head (also the base of the puffed-up hiss) */}
 					<g className="gc-pose gc-pose-head" transform="translate(12 4) scale(.95)">
-						<polygon className="gc-puff" points={PUFF} fill="#050505" filter="url(#gc-soft)" transform="translate(-6 -4)" />
-						<path d={HEAD} fill="#000" opacity=".35" filter="url(#gc-halo)" transform="translate(0 4) scale(1.06) translate(-3 -3)" />
+						<polygon className="gc-puff" points={PUFF} fill={BODY} filter="url(#gc-soft)" transform="translate(-6 -4)" />
+						<path d={HEAD} fill="#24533d" opacity=".35" filter="url(#gc-halo)" transform="translate(0 4) scale(1.06) translate(-3 -3)" />
 						<path className="gc-rim" d={HEAD} fill="url(#gc-iri)" filter="url(#gc-rim)" transform="translate(8 9)" />
-						<path d={HEAD} fill="#050505" filter="url(#gc-soft)" />
-						<g ref={kEyes}><circle cx="44" cy="74" r="7.5" fill="#fff" /><circle cx="73" cy="62" r="7.5" fill="#fff" /></g>
+						<path d={HEAD} fill={BODY} filter="url(#gc-soft)" />
+						<g ref={kEyes}><circle cx="44" cy="74" r="7.5" fill="#fff7dc" /><circle cx="73" cy="62" r="7.5" fill="#fff7dc" /><circle cx="46.5" cy="71.5" r="2.2" fill="#dcc64a" /><circle cx="75.5" cy="59.5" r="2.2" fill="#dcc64a" /></g>
+						<path d="M26,94 Q56,110 88,90" fill="none" stroke="#dcc64a" strokeWidth="6" strokeLinecap="round" />
+						<circle cx="57" cy="104" r="6" fill="#dcc64a" /><circle cx="57" cy="104" r="2.2" fill="#a88f1e" />
 						<g className="gc-fangs"><path d="M46,88 Q58,98 70,86" fill="#ff6f91" /><path d="M50,89 l3,6 l3,-5 Z M62,89 l3,5 l3,-6 Z" fill="#fff" /></g>
 					</g>
 					{/* Walking along the edge (side view) */}
 					<g className="gc-pose gc-pose-walk">
 						<g className="gc-rim" filter="url(#gc-rim)" transform="translate(5 6)"><ellipse cx="64" cy="76" rx="38" ry="19" fill="url(#gc-iri)" /><circle cx="104" cy="58" r="18" fill="url(#gc-iri)" /></g>
-						<path ref={tail} d="M30,72 C12,62 12,38 26,32" fill="none" stroke="#050505" strokeWidth="8" strokeLinecap="round" filter="url(#gc-soft)" />
-						<g ref={legs} stroke="#050505" strokeWidth="7" strokeLinecap="round" filter="url(#gc-soft)">
+						<path ref={tail} d="M30,72 C12,62 12,38 26,32" fill="none" stroke={BODY} strokeWidth="8" strokeLinecap="round" filter="url(#gc-soft)" />
+						<g ref={legs} stroke={BODY} strokeWidth="7" strokeLinecap="round" filter="url(#gc-soft)">
 							<line data-x="44" x1="44" y1="84" x2="44" y2="106" /><line data-x="54" x1="54" y1="84" x2="54" y2="106" />
 							<line data-x="78" x1="78" y1="84" x2="78" y2="106" /><line data-x="88" x1="88" y1="84" x2="88" y2="106" />
 						</g>
-						<g fill="#050505" filter="url(#gc-soft)"><ellipse cx="64" cy="76" rx="38" ry="19" /><circle cx="104" cy="58" r="18" /><path d="M92,46 L94,28 L104,42 Z M106,42 L116,28 L118,48 Z" /></g>
-						<circle cx="110" cy="57" r="4.2" fill="#fff" />
+						<g fill={BODY} filter="url(#gc-soft)"><ellipse cx="64" cy="76" rx="38" ry="19" /><circle cx="104" cy="58" r="18" /><path d="M92,46 L94,28 L104,42 Z M106,42 L116,28 L118,48 Z" /></g>
+						<circle cx="110" cy="57" r="4.2" fill="#fff7dc" /><path d="M93,72 Q102,80 114,70" fill="none" stroke="#dcc64a" strokeWidth="4.5" strokeLinecap="round" />
 					</g>
 					{/* Loaf: napping (closed eyes) or sitting and watching (open eyes) */}
 					<g className="gc-pose gc-pose-loaf">
 						<g className="gc-rim" filter="url(#gc-rim)" transform="translate(5 6)"><ellipse cx="68" cy="88" rx="44" ry="24" fill="url(#gc-iri)" /></g>
-						<path d="M28,96 C24,112 72,116 96,106" fill="none" stroke="#050505" strokeWidth="8" strokeLinecap="round" filter="url(#gc-soft)" />
-						<g fill="#050505" filter="url(#gc-soft)"><ellipse cx="68" cy="88" rx="44" ry="24" /><circle cx="96" cy="68" r="21" /><path d="M80,58 L82,38 L94,52 Z M98,50 L112,38 L114,60 Z" /></g>
-						<g className="gc-sleepy" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round"><path d="M86,70 q4,4 8,0" /><path d="M100,68 q4,4 8,0" /></g>
-						<g className="gc-awake" fill="#fff"><circle cx="90" cy="69" r="4.6" /><circle cx="104" cy="66" r="4.6" /></g>
+						<path d="M28,96 C24,112 72,116 96,106" fill="none" stroke={BODY} strokeWidth="8" strokeLinecap="round" filter="url(#gc-soft)" />
+						<g fill={BODY} filter="url(#gc-soft)"><ellipse cx="68" cy="88" rx="44" ry="24" /><circle cx="96" cy="68" r="21" /><path d="M80,58 L82,38 L94,52 Z M98,50 L112,38 L114,60 Z" /></g>
+						<g className="gc-sleepy" fill="none" stroke="#fff7dc" strokeWidth="3" strokeLinecap="round"><path d="M86,70 q4,4 8,0" /><path d="M100,68 q4,4 8,0" /></g>
+						<g className="gc-awake" fill="#fff7dc"><circle cx="90" cy="69" r="4.6" /><circle cx="104" cy="66" r="4.6" /></g>
 					</g>
 				</svg>
 			</div>
@@ -329,8 +366,8 @@ export function GhostChase() {
 			<div ref={zzz} className="gc-zzz"><span>z</span><span>z</span><span>Z</span></div>
 			<div ref={kBubble} className="gc-bubble" />
 		</div>}
-		<button type="button" className={`gc-toggle${on ? ' is-on' : ''}`} onClick={toggle} aria-pressed={on} title={on ? 'Hide the phantom kitty' : 'Show the phantom kitty'}>
-			<Ghost size={16} /><span className="sr-only">{on ? 'Hide the phantom kitty' : 'Show the phantom kitty'}</span>
+		<button type="button" className={`gc-toggle${on ? ' is-on' : ''}`} onClick={toggle} aria-pressed={on} title={on ? 'Hide Clawdia' : 'Show Clawdia'}>
+			<Cat size={16} /><span className="sr-only">{on ? 'Hide Clawdia' : 'Show Clawdia'}</span>
 		</button>
 	</>;
 }
