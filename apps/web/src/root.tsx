@@ -15,6 +15,7 @@ import { SiteFooter } from '@/components/site-footer';
 import { CookieBanner } from '@/components/cookie-banner';
 import { RequestProvider } from '@/components/request/request-provider';
 import { ContactPanel } from '@/components/contact-panel';
+import { GhostChase } from '@/components/ghost-chase';
 
 export const links: Route.LinksFunction = () => [
 	{ rel: 'stylesheet', href: stylesheet },
@@ -55,7 +56,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-	return <RequestProvider><SiteHeader /><main><Outlet /></main><SiteFooter /><ContactPanel /></RequestProvider>;
+	return <RequestProvider><SiteHeader /><main><Outlet /></main><SiteFooter /><ContactPanel /><GhostChase /></RequestProvider>;
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
