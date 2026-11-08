@@ -737,3 +737,5 @@ h1 em,h2 em{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-
 @media(max-width:560px){.dr-lender-choice{grid-template-columns:1fr}}
 .dr-doc.is-optional{border-style:dashed;border-color:#d9e6e2}
 .dr-doc.is-optional>label>span:after{content:'Optional';margin-left:8px;font-size:10px;font-weight:800;letter-spacing:.08em;background:var(--mist);color:var(--quiet);border-radius:20px;padding:2px 8px}
+.dr-doc.is-optional>span:after{content:'Optional';margin-left:8px;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;background:var(--mist);color:var(--quiet);border-radius:20px;padding:2px 8px}
+.dr-lender-choice{margin:0 0 12px}

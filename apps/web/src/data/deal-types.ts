@@ -13,7 +13,7 @@ export const dealTypes: DealType[] = [
 		what: 'A creative-finance structure that combines a primary lender with a note the seller carries back, so you can buy with little or none of your own cash. Also called the **Morby Method**. Structured well, you can receive cash back at closing.',
 		when: ['The seller is open to carrying part of the price', 'You have a primary lender for most of the purchase, or want us to provide one', 'You want to keep your cash free while closing quickly'],
 		how: ['Send us your structure: purchase price, seller carry, primary loan amount and closing date.', 'We review the stack with your lender and title and confirm terms in writing.', 'Our funds are wired to title for closing, and escrow repays us under the agreed structure.'],
-		need: ['An LOI from your primary lender (or ask us to provide a lender)', 'The purchase contract and seller-carry terms once they’re drafted', 'Title or escrow contact'],
+		need: ['Purchase contract (PSA)', 'LOI (letter of intent)', 'Your primary lender’s term sheet (or ask us to provide a lender)', 'Seller-carry terms, if drafted'],
 	},
 	{
 		slug: 'echo', name: 'Echo Method', eyebrow: 'CREATIVE FINANCE', guide: '/echo', calculator: '/calculators/echo',

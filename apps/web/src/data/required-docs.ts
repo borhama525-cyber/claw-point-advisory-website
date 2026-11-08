@@ -1,12 +1,15 @@
 // Paperwork each funding type must include before a deal request can be sent.
 // Keep in step with REQUIRED_DOCS in public/send.php, which checks the same list on the server.
-// lender: waived when the borrower asks us to provide a primary lender. optional: shown, never required.
-export type RequiredDoc = { key: string; label: string; hint: string; lender?: boolean; optional?: boolean };
+// lender: the primary lender's own document, not needed when the borrower asks us to provide a lender.
+// withLender: required when the borrower has their own lender, optional when we provide one.
+// optional: shown, never required.
+export type RequiredDoc = { key: string; label: string; hint: string; lender?: boolean; withLender?: boolean; optional?: boolean };
 
 export const requiredDocs: Record<string, RequiredDoc[]> = {
 	stack: [
-		{ key: 'lender_loi', label: 'Primary lender LOI', hint: 'Letter of intent from the lender funding the largest share of the price.', lender: true },
-		{ key: 'contract', label: 'Purchase contract (PSA), if you have one', hint: 'Not needed yet: Stack terms are usually still being built.', optional: true },
+		{ key: 'psa', label: 'Purchase contract (PSA)', hint: 'The purchase and sale agreement with the seller.', withLender: true },
+		{ key: 'lender_terms', label: 'Primary lender term sheet', hint: 'Term sheet from the lender funding the largest share of the price.', lender: true },
+		{ key: 'loi', label: 'LOI (letter of intent)', hint: 'The LOI setting out the deal terms.', withLender: true },
 		{ key: 'seller_terms', label: 'Seller-carry terms, if drafted', hint: 'Seller finance addendum, note terms or a term sheet.', optional: true },
 	],
 	echo: [
