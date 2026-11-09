@@ -1,5 +1,5 @@
 Claw Point Advisory website
-Version: November 9, 2026 (UPDATE 5: Amira and Adam = Founders & Managing Partners)
+Version: November 9, 2026 (UPDATE 5b: titles only in Google data, not shown on the page)
 
 If you can read this page, the new version is uploaded. It includes:
 - Canonical links, www redirect, real 404s, fixed sitemap, business details for Google
