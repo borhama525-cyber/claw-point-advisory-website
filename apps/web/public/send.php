@@ -224,7 +224,8 @@ if ($form === 'deal') {
 
 $rows = array_filter($rows, fn($v) => trim((string) $v) !== '');
 
-// Save the lead to the Google Sheet ("Website Leads" tab) when lead-sheet.php is set up.
+// Save the lead to the Deal Flow Lead Tracker when lead-sheet.php is set up: funding requests, contact
+// messages and newsletter sign-ups go to "Website Leads", network sign-ups to "Website Network", reviews to "Reviews".
 // Runs before the email so a lead is kept even if mail delivery has a problem.
 $sheet = is_file(__DIR__ . '/lead-sheet.php') ? (include __DIR__ . '/lead-sheet.php') : null;
 if (is_array($sheet) && !empty($sheet['url']) && function_exists('curl_init')) {
@@ -232,6 +233,11 @@ if (is_array($sheet) && !empty($sheet['url']) && function_exists('curl_init')) {
 		// Reviews are private: they go to their own tab and are never shown on the site.
 		$lead = ['secret' => $sheet['secret'] ?? '', 'kind' => 'review', 'name' => $rows['Name'], 'email' => $email, 'role' => $rows['Role / company'] ?? '',
 			'deal' => $rows['Deal type'] ?? '', 'rating' => (string) $rating, 'review' => $rows['Review'], 'ref' => $rows['Closed deal ref'] ?? ''];
+	} elseif ($form === 'network') {
+		// Network sign-ups have their own tab ("Website Network").
+		$lead = ['secret' => $sheet['secret'] ?? '', 'kind' => 'network', 'name' => $rows['Name'] ?? '', 'company' => $rows['Company'] ?? '', 'email' => $email,
+			'phone' => $rows['Phone'] ?? '', 'role' => $rows['Role'] ?? '', 'markets' => $rows['Markets'] ?? '', 'assets' => $rows['Asset types'] ?? '',
+			'message' => $rows['How they want to work with us'] ?? '', 'website' => $rows['Website'] ?? '', 'social' => $rows['LinkedIn / Instagram'] ?? ''];
 	} else {
 		$sources = ['deal' => 'Deal request', 'enquiry' => 'Contact form', 'newsletter' => 'Newsletter', 'network' => 'Network list'];
 		$funding = ['deal' => $rows['Deal type'] ?? 'Funding', 'enquiry' => 'General enquiry', 'newsletter' => 'Newsletter', 'network' => 'Network'];
