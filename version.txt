@@ -1,5 +1,5 @@
 Claw Point Advisory website
-Version: November 9, 2026 (UPDATE 2: new icon, blog design, team & reviews)
+Version: November 9, 2026 (UPDATE 3: quieter Clawdia)
 
 If you can read this page, the new version is uploaded. It includes:
 - Canonical links, www redirect, real 404s, fixed sitemap, business details for Google
@@ -8,3 +8,4 @@ If you can read this page, the new version is uploaded. It includes:
 - Team: Amira's Google Voice number on the Contact page and Team chat only
 - LinkedIn for Amira Borham and Adam Weiss (Facebook removed)
 - "Leave a review" removed from the footer; the review page only works from the after-closing link
+- Clawdia is quieter: says hello once, reacts when poked or when a deal is sent; no pouncing, no chatter or pop-up promos
