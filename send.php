@@ -78,7 +78,7 @@ $rows = []; $subject = ''; $intro = '';
 if ($form === 'deal') {
 	$required = ['first_name' => 'first name', 'last_name' => 'last name', 'phone' => 'phone', 'address' => 'property address', 'city' => 'city', 'state' => 'state', 'zip' => 'ZIP', 'property_type' => 'property type', 'close_date' => 'close date', 'purchase_price' => 'purchase price', 'requested_funding' => 'requested funding'];
 	foreach ($required as $key => $label) if (field($key) === '') reply(422, ['ok' => false, 'error' => "Please fill in the {$label}."]);
-	if (field('consent') !== 'true') reply(422, ['ok' => false, 'error' => 'Please tick the consent box.']);
+	if (field('consent') !== 'true') reply(422, ['ok' => false, 'error' => 'Please click the consent box.']);
 	$types = ['stack' => 'Stack Method', 'echo' => 'Echo Method', 'double-close' => 'Double Close', 'emd' => 'EMD'];
 	$type = $types[field('method', 20)] ?? 'Funding';
 	$name = oneLine(field('first_name', 100) . ' ' . field('last_name', 100));
@@ -135,7 +135,7 @@ if ($form === 'deal') {
 	if (field('message', 5000) === '') reply(422, ['ok' => false, 'error' => 'Please tell us about your transaction.']);
 	$name = oneLine(field('name', 200));
 	$subject = 'New website lead · Contact form: ' . ($name !== '' ? $name : $email);
-	$intro = 'A new enquiry was sent from the website’s contact form.';
+	$intro = 'A new inquiry was sent from the website’s contact form.';
 	$rows = ['Topic' => oneLine(field('topic', 80)), 'Name' => $name, 'Email' => $email, 'Phone' => field('phone', 60), 'Message' => field('message', 5000)];
 } elseif ($form === 'network') {
 	// Keep in step with src/data/network.ts.
@@ -146,7 +146,7 @@ if ($form === 'deal') {
 	if (in_array('Other', $roles, true)) $roles[array_search('Other', $roles, true)] = 'Other: ' . (oneLine(field('role_other', 100)) ?: 'not specified');
 	$name = oneLine(field('name', 200));
 	if ($name === '' || field('phone', 60) === '' || field('markets', 300) === '') reply(422, ['ok' => false, 'error' => 'Please add your name, phone and markets.']);
-	if (field('consent') !== 'true') reply(422, ['ok' => false, 'error' => 'Please tick the consent box.']);
+	if (field('consent') !== 'true') reply(422, ['ok' => false, 'error' => 'Please click the consent box.']);
 	$subject = 'New website lead · Network: ' . $name . ' (' . implode(', ', array_map(fn($r) => explode(' (', $r)[0], $roles)) . ')';
 	$intro = 'Someone joined the network list on the website.';
 	$rows = ['Role' => implode(', ', $roles), 'Name' => $name, 'Company' => oneLine(field('company', 200)), 'Email' => $email, 'Phone' => field('phone', 60),
@@ -240,7 +240,7 @@ if (is_array($sheet) && !empty($sheet['url']) && function_exists('curl_init')) {
 			'message' => $rows['How they want to work with us'] ?? '', 'website' => $rows['Website'] ?? '', 'social' => $rows['LinkedIn / Instagram'] ?? ''];
 	} else {
 		$sources = ['deal' => 'Deal request', 'enquiry' => 'Contact form', 'newsletter' => 'Newsletter', 'network' => 'Network list'];
-		$funding = ['deal' => $rows['Deal type'] ?? 'Funding', 'enquiry' => 'General enquiry', 'newsletter' => 'Newsletter', 'network' => 'Network'];
+		$funding = ['deal' => $rows['Deal type'] ?? 'Funding', 'enquiry' => 'General inquiry', 'newsletter' => 'Newsletter', 'network' => 'Network'];
 		$num = fn(string $k) => (string) ((float) preg_replace('/[^0-9.]/', '', field($k)) ?: '');
 		$lead = ['secret' => $sheet['secret'] ?? '', 'source' => $sources[$form], 'funding_type' => $funding[$form], 'email' => $email,
 			'name' => $rows['Borrower'] ?? $rows['Name'] ?? '', 'phone' => $rows['Phone'] ?? '',

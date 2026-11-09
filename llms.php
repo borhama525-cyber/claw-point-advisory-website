@@ -8,4 +8,4 @@ echo "# Claw Point Advisory\n\n> Real estate transactional funding nationwide: S
 	. "- [Guides]({$o}/stack): Stack Method and [Echo]({$o}/echo).\n"
 	. "- [Ask]({$o}/ask): Answers to common funding and underwriting questions.\n"
 	. "- [Book a call]({$o}/booking): Schedule with Amira.\n"
-	. "- [Contact]({$o}/contact): Send an enquiry.\n";
+	. "- [Contact]({$o}/contact): Send an inquiry.\n";
