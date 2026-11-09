@@ -24,6 +24,38 @@ function oneLine(string $v): string { return trim(preg_replace('/[\r\n\t]+/', ' 
 function esc(string $v): string { return htmlspecialchars($v, ENT_QUOTES, 'UTF-8'); }
 function money(string $v): string { $n = (float) preg_replace('/[^0-9.]/', '', $v); return $n > 0 ? '$' . number_format($n) : ''; }
 
+/**
+ * Sends through the domain mailbox over authenticated SMTP when smtp-settings.php exists (so the mail is
+ * DKIM-signed and lands in the inbox); otherwise falls back to PHP mail(). smtp-settings.php is created on
+ * the server only (never in the code repository) and returns ['host', 'port', 'user', 'pass'].
+ */
+function deliver(string $to, string $cc, string $subject, string $headers, string $body, string $from): bool {
+	$smtp = is_file(__DIR__ . '/smtp-settings.php') ? (include __DIR__ . '/smtp-settings.php') : null;
+	if (!is_array($smtp) || empty($smtp['user']) || empty($smtp['pass'])) {
+		return @mail($to, $subject, $body, ($cc !== '' ? "Cc: {$cc}\r\n" : '') . $headers, '-f' . $from);
+	}
+	$target = str_contains($smtp['host'] ?? '', '://') ? $smtp['host'] : 'ssl://' . ($smtp['host'] ?? 'smtp.hostinger.com') . ':' . (int) ($smtp['port'] ?? 465); // a full URL (e.g. tcp://127.0.0.1:2525) is for local testing
+	$fp = @stream_socket_client($target, $errno, $errstr, 10);
+	if (!$fp) return @mail($to, $subject, $body, ($cc !== '' ? "Cc: {$cc}\r\n" : '') . $headers, '-f' . $from);
+	stream_set_timeout($fp, 10);
+	$read = function () use ($fp): string { $out = ''; while (($line = fgets($fp, 515)) !== false) { $out .= $line; if (isset($line[3]) && $line[3] === ' ') break; } return $out; };
+	$cmd = function (string $c, array $ok) use ($fp, $read): bool { fwrite($fp, $c . "\r\n"); return in_array((int) substr($read(), 0, 3), $ok, true); };
+	$ok = in_array((int) substr($read(), 0, 3), [220], true)
+		&& $cmd('EHLO ' . (preg_replace('/[^A-Za-z0-9.-]/', '', $_SERVER['HTTP_HOST'] ?? 'localhost') ?: 'localhost'), [250])
+		&& $cmd('AUTH LOGIN', [334]) && $cmd(base64_encode($smtp['user']), [334]) && $cmd(base64_encode($smtp['pass']), [235])
+		&& $cmd('MAIL FROM:<' . $smtp['user'] . '>', [250])
+		&& $cmd('RCPT TO:<' . $to . '>', [250, 251])
+		&& ($cc === '' || $cmd('RCPT TO:<' . $cc . '>', [250, 251]))
+		&& $cmd('DATA', [354]);
+	if ($ok) {
+		$msg = 'To: ' . $to . "\r\n" . ($cc !== '' ? 'Cc: ' . $cc . "\r\n" : '') . 'Subject: ' . $subject . "\r\n" . 'Date: ' . date('r') . "\r\n"
+			. 'Message-ID: <' . bin2hex(random_bytes(12)) . '@' . substr(strrchr($smtp['user'], '@'), 1) . ">\r\n" . $headers . "\r\n\r\n" . $body;
+		$ok = $cmd(preg_replace('/^\./m', '..', str_replace(["\r\n", "\r", "\n"], ["\n", "\n", "\r\n"], $msg)) . "\r\n.", [250]);
+	}
+	$cmd('QUIT', [221]); fclose($fp);
+	return $ok;
+}
+
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') reply(405, ['ok' => false, 'error' => 'Use POST.']);
 if (empty($_POST) && (int) ($_SERVER['CONTENT_LENGTH'] ?? 0) > 0) reply(413, ['ok' => false, 'error' => 'The files are too large. Please keep each file under 5 MB.']);
 
@@ -247,7 +279,7 @@ foreach ($attachments as $a) {
 $body .= "--{$boundary}--";
 
 $encodedSubject = '=?UTF-8?B?' . base64_encode(oneLine($subject)) . '?=';
-$sent = @mail(TO_EMAIL, $encodedSubject, $body, $headers, '-f' . $from);
+$sent = deliver(TO_EMAIL, '', $encodedSubject, $headers, $body, $from);
 if (!$sent) reply(502, ['ok' => false, 'error' => 'We couldn’t send your message right now. Please email clawpointadvisory@gmail.com or try again.']);
 
 // Confirmation email to the person who submitted: network sign-ups and deal requests.
@@ -298,13 +330,12 @@ if ($form === 'deal' || $form === 'network') {
 	$cHeaders = implode("\r\n", array_filter([
 		'From: Claw Point Advisory <' . $from . '>',
 		'Reply-To: ' . TO_EMAIL,
-		$cc !== '' ? 'Cc: ' . $cc : '',
 		'MIME-Version: 1.0',
 		'Content-Type: multipart/alternative; boundary="' . $cAlt . '"',
 	]));
 	$cBody = "--{$cAlt}\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . chunk_split(base64_encode($cText))
 		. "--{$cAlt}\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . chunk_split(base64_encode($cHtml))
 		. "--{$cAlt}--";
-	@mail($email, '=?UTF-8?B?' . base64_encode($cSubject) . '?=', $cBody, $cHeaders, '-f' . $from);
+	deliver($email, $cc, '=?UTF-8?B?' . base64_encode($cSubject) . '?=', $cHeaders, $cBody, $from);
 }
 reply(200, ['ok' => true]);
