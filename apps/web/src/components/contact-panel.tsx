@@ -34,7 +34,7 @@ export function ContactPanel() {
 			<p className="contact-warning"><PhoneOff size={16} /><span><strong>Please schedule or text before calling.</strong> Unscheduled calls are rejected automatically.</span></p>
 			<ul className="contact-people">{TEAM.map(p => <li key={p.name}>
 				<span className="contact-avatar" aria-hidden="true">{p.name[0]}</span>
-				<div className="contact-who"><strong>{p.name}</strong>{p.phone && <span>{p.phone.display}</span>}<ProfileLinks person={p} /></div>
+				<div className="contact-who"><strong>{p.name}</strong>{p.title && <span className="contact-title">{p.title}</span>}{p.phone && <span>{p.phone.display}</span>}<ProfileLinks person={p} /></div>
 				<div className="contact-actions">
 					{p.phone && <a className="button small" href={`sms:${p.phone.e164}`} aria-label={`Text ${p.name} at ${p.phone.display}`}><MessageSquareText size={15} /> Text</a>}
 					{p.schedule && <Link className="button small outline" to={p.slug === 'amira' ? '/booking' : `/booking?with=${p.slug}`} onClick={() => setOpen(false)} aria-label={`Schedule a call with ${p.name}`}><CalendarCheck size={15} /> Schedule</Link>}

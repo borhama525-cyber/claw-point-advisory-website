@@ -1,5 +1,5 @@
 Claw Point Advisory website
-Version: November 9, 2026 (UPDATE 4b: emails sent through the info@ mailbox)
+Version: November 9, 2026 (UPDATE 5: Amira = Managing Partner; Amira and Adam = founders)
 
 If you can read this page, the new version is uploaded. It includes:
 - Canonical links, www redirect, real 404s, fixed sitemap, business details for Google
@@ -11,3 +11,4 @@ If you can read this page, the new version is uploaded. It includes:
 - Clawdia is quieter: says hello once, reacts when poked or when a deal is sent; no pouncing, no chatter or pop-up promos
 - Website emails are sent from info@clawpoint.capital (DKIM-signed) and still arrive at clawpointadvisory@gmail.com
 - Confirmation email to people who join the network or send a deal; a deal referrer is CC'd
+- Amira Borham shown as Managing Partner; Amira and Adam listed as founders for Google
