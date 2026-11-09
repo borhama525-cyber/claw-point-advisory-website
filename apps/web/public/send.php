@@ -6,6 +6,8 @@
  * To change where emails go, edit TO_EMAIL below.
  */
 const TO_EMAIL = 'clawpointadvisory@gmail.com';
+// Sends from the real Hostinger mailbox on the live domain (DKIM-signed, so it reaches the inbox).
+const FROM_EMAIL = 'info@clawpoint.capital';
 const LEADS_SHEET = 'https://docs.google.com/spreadsheets/d/1Kr1Ejrtb4dO89KP3XjHGKJ9K6R0NsCXw5eLgyH5QzYA/edit';
 const MAX_FILE_BYTES = 5 * 1024 * 1024;   // 5 MB per file
 const MAX_FILES = 11;                     // purchase agreement + up to 10 other documents
@@ -224,9 +226,9 @@ foreach ($rows as $k => $v) {
 $html .= '</table><p style="font-size:12px;color:#55665f;margin-top:18px">Reply to this email to answer the sender directly. <a href="' . LEADS_SHEET . '" style="color:#24533d;font-weight:bold">Open the Website Leads sheet</a>. Sent automatically by the Claw Point Advisory website.</p></div>';
 $text = $intro . "\n\n" . implode("\n", array_map(fn($k, $v) => "{$k}: {$v}", array_keys($rows), $rows)) . "\n\nWebsite Leads sheet: " . LEADS_SHEET;
 
-// From an address on this website's own domain (better delivery); replies go to the visitor.
+// From the domain's own mailbox (better delivery); replies go to the visitor.
 $host = preg_replace('/^www\./i', '', preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? 'localhost'));
-$from = 'no-reply@' . (filter_var('x@' . $host, FILTER_VALIDATE_EMAIL) ? $host : 'localhost');
+$from = str_ends_with(FROM_EMAIL, '@' . $host) ? FROM_EMAIL : 'no-reply@' . (filter_var('x@' . $host, FILTER_VALIDATE_EMAIL) ? $host : 'localhost');
 $boundary = 'cpa_' . bin2hex(random_bytes(12));
 $alt = 'alt_' . bin2hex(random_bytes(12));
 $headers = implode("\r\n", [
@@ -247,4 +249,62 @@ $body .= "--{$boundary}--";
 $encodedSubject = '=?UTF-8?B?' . base64_encode(oneLine($subject)) . '?=';
 $sent = @mail(TO_EMAIL, $encodedSubject, $body, $headers, '-f' . $from);
 if (!$sent) reply(502, ['ok' => false, 'error' => 'We couldn’t send your message right now. Please email clawpointadvisory@gmail.com or try again.']);
+
+// Confirmation email to the person who submitted: network sign-ups and deal requests.
+// A deal's referrer (if one was named) is copied. The wording is fixed; only their first name and
+// a short summary of what they sent appear, so the form can't be used to send arbitrary email.
+// A failed confirmation never fails the submission: the team already has it.
+if ($form === 'deal' || $form === 'network') {
+	$first = mb_substr(oneLine($form === 'deal' ? field('first_name', 60) : explode(' ', $name)[0]), 0, 40);
+	$hi = $first !== '' ? "Hi {$first}," : 'Hi,';
+	$cc = '';
+	if ($form === 'deal') {
+		$refEmail = oneLine(field('referrer_email', 200));
+		if (filter_var($refEmail, FILTER_VALIDATE_EMAIL) && strcasecmp($refEmail, $email) !== 0) $cc = $refEmail;
+		$refName = oneLine(field('referrer_first_name', 60) . ' ' . field('referrer_last_name', 60));
+		$cSubject = "We received your {$type} request · Claw Point Advisory";
+		$cTitle = 'Thanks for sending us your deal.';
+		$cParas = [
+			"Your {$type} funding request reached the Claw Point Advisory team. A real person on our team will review your file and get back to you with questions or next steps.",
+			'Every transaction is reviewed individually. This email confirms we received your request; it is not an approval or a commitment to fund.',
+		];
+		if ($cc !== '') $cParas[] = ($refName !== '' ? $refName : 'The person who referred you') . ' referred this deal and is copied on this email.';
+		$cRows = ['Deal type' => $type, 'Property' => $rows['Property'] ?? '', 'Target close date' => $rows['Target close date'] ?? '', 'Requested funding' => $rows['Requested funding'] ?? ($rows['EMD amount'] ?? '')];
+	} else {
+		$cSubject = 'Welcome to the Claw Point network';
+		$cTitle = 'Thanks for joining the network.';
+		$cParas = [
+			'You’re on the Claw Point Advisory network list. Amira or Adam will reach out by text or email to learn how you work and how we can do deals together.',
+			'In the meantime, you can send us a deal to fund, run the numbers with our free calculators, or book a call any time.',
+		];
+		$cRows = ['Role' => $rows['Role'] ?? '', 'Markets' => $rows['Markets'] ?? ''];
+	}
+	$cRows = array_filter($cRows, fn($v) => trim((string) $v) !== '');
+	$site = 'https://' . $host;
+	$cHtml = '<div style="font-family:Arial,sans-serif;color:#141a17;max-width:560px;font-size:15px;line-height:1.6">'
+		. '<p style="font-size:20px;font-weight:bold;margin:0 0 12px">' . esc($cTitle) . '</p><p>' . esc($hi) . '</p>';
+	foreach ($cParas as $para) $cHtml .= '<p>' . esc($para) . '</p>';
+	if ($cRows) {
+		$cHtml .= '<table style="border-collapse:collapse;width:100%;font-size:14px;margin:6px 0 14px">';
+		foreach ($cRows as $k => $v) $cHtml .= '<tr><td style="padding:6px 12px 6px 0;color:#55665f;white-space:nowrap;vertical-align:top">' . esc($k) . '</td><td style="padding:6px 0;border-bottom:1px solid #e3ece9">' . esc($v) . '</td></tr>';
+		$cHtml .= '</table>';
+	}
+	$cHtml .= '<p>Questions? Just reply to this email, or <a href="' . esc($site) . '/booking/" style="color:#24533d;font-weight:bold">book a call</a>.</p>'
+		. '<p style="margin-top:22px">The Claw Point Advisory team<br><a href="' . esc($site) . '" style="color:#24533d">' . esc($host) . '</a></p></div>';
+	$cText = $cTitle . "\n\n" . $hi . "\n\n" . implode("\n\n", $cParas)
+		. ($cRows ? "\n\n" . implode("\n", array_map(fn($k, $v) => "{$k}: {$v}", array_keys($cRows), $cRows)) : '')
+		. "\n\nQuestions? Just reply to this email, or book a call: {$site}/booking/\n\nThe Claw Point Advisory team\n{$site}";
+	$cAlt = 'alt_' . bin2hex(random_bytes(12));
+	$cHeaders = implode("\r\n", array_filter([
+		'From: Claw Point Advisory <' . $from . '>',
+		'Reply-To: ' . TO_EMAIL,
+		$cc !== '' ? 'Cc: ' . $cc : '',
+		'MIME-Version: 1.0',
+		'Content-Type: multipart/alternative; boundary="' . $cAlt . '"',
+	]));
+	$cBody = "--{$cAlt}\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . chunk_split(base64_encode($cText))
+		. "--{$cAlt}\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . chunk_split(base64_encode($cHtml))
+		. "--{$cAlt}--";
+	@mail($email, '=?UTF-8?B?' . base64_encode($cSubject) . '?=', $cBody, $cHeaders, '-f' . $from);
+}
 reply(200, ['ok' => true]);
