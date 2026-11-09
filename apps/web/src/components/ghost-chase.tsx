@@ -119,7 +119,7 @@ export function GhostChase() {
 		let sq = { x: 1, y: 1 };
 		const ptr = { x: -999, y: -999, t: 0 };
 		let lastPathSeen = false;
-		let lastPath = '', lastScrollY = scrollY, lastScrollT = performance.now(), lastMathAt = 0, lastScrollTalk = 0;
+		let lastPath = '', lastScrollY = scrollY, lastScrollT = performance.now(), lastMathAt = 0;
 
 		// Speech bubbles: one line at a time each, fading out on their own.
 		let kSayUntil = 0;
@@ -157,13 +157,13 @@ export function GhostChase() {
 			if (!el.matches?.('input, textarea, select') || el.closest('.ghost-chase')) return;
 			if (el.closest('.tc-field, .calculator')) return; // calculator inputs get the "math" reaction instead
 			if (mode === 'nap' || mode === 'hiss') return;
-			visitEl = el; setMode('visit', 12000); say(pick(SAY.typing));
+			void el; // Quiet mode: she no longer flies over to forms people are filling in.
 		};
 		const onInput = (e: Event) => {
 			const el = e.target as Element;
 			if (!el.closest?.('.tc-field, .calculator')) return;
 			const t = performance.now(); if (t - lastMathAt < 9000 || mode === 'nap') return;
-			lastMathAt = t; say(pick(SAY.math));
+			lastMathAt = t; // Quiet mode: no comments on calculator numbers.
 		};
 		const onCelebrate = () => { setMode('party', 2600); say(pick(SAY.deal), 3200); };
 		window.addEventListener('pointermove', onPointer, { passive: true });
@@ -203,10 +203,9 @@ export function GhostChase() {
 				const key = lastPath === '/' ? '/' : Object.keys(PAGE).find(p => p !== '/' && lastPath.startsWith(p));
 				const hello = !lastPathSeen && firstVisit(); lastPathSeen = true;
 				if (hello) window.setTimeout(() => say('Hi, I’m Clawdia! Welcome to Claw Point.', 4200), 900);
-				else if (key) window.setTimeout(() => say(pick(PAGE[key])), 900);
 			}
 			const sdt = (t - lastScrollT) / 1000;
-			if (sdt > 0.15) { const speed = Math.abs(scrollY - lastScrollY) / sdt; if (speed > 2400 && t - lastScrollTalk > 12000 && mode !== 'nap') { lastScrollTalk = t; say(pick(SAY.scroll), 1500); } lastScrollY = scrollY; lastScrollT = t; }
+			if (sdt > 0.15) { const speed = Math.abs(scrollY - lastScrollY) / sdt; lastScrollY = scrollY; lastScrollT = t; }
 
 			// Poked by the cursor? (a moving pointer right on top of her)
 			const cx = kp.x + KW / 2, cy = kp.y + KH / 2;
@@ -217,11 +216,10 @@ export function GhostChase() {
 				if (mode === 'hiss') { const a = Math.atan2(cy - ptr.y, cx - ptr.x); kp.vx = Math.cos(a) * 520; kp.vy = Math.sin(a) * 420; setMode('float', rand(5000, 8000)); }
 				else {
 					const r = Math.random();
-					if (r < 0.22) startPounce();
-					else if (r < 0.4) { setMode('walk', 30000); walkDir = kp.x < w / 2 ? 1 : -1; if (Math.random() < 0.5) say(pick(SAY.walk)); }
+					// Quiet mode: no pouncing across the page, no pushing the logo, no chatter or promo pop-ups.
+					if (r < 0.4) { setMode('walk', 30000); walkDir = kp.x < w / 2 ? 1 : -1; }
 					else if (r < 0.58) { napEl = napSpot(); if (napEl) { const rr = napEl.getBoundingClientRect(); napOff = rand(0, Math.max(0, Math.min(rr.width, 420) - KW)); setMode('nap', rand(11000, 17000)); } else setMode('float', 6000); }
-					else if (r < 0.74) setMode('bully', 14000);
-					else { setMode('float', rand(7000, 11000)); if (!nudge() && Math.random() < 0.35) say(pick(SAY.idle)); }
+					else setMode('float', rand(7000, 11000));
 				}
 			}
 
@@ -243,15 +241,14 @@ export function GhostChase() {
 				if ((walkDir > 0 && kp.x > w - KW - 20) || (walkDir < 0 && kp.x < 20)) setMode('float', rand(6000, 9000));
 			} else if (mode === 'nap') {
 				const r = napEl?.isConnected ? napEl.getBoundingClientRect() : null;
-				if (!r || r.top < 90 || r.top > h - 30) { napEl = null; setMode('float', 6000); say('Hmph.'); }
+				if (!r || r.top < 90 || r.top > h - 30) { napEl = null; setMode('float', 6000); }
 				else {
 					const d = seek(r.left + napOff, r.top - KH * 0.92, 360, dt);
 					if (d < 6) {
 						kp.vx = 0; kp.vy = 0; kp.x = r.left + napOff; kp.y = r.top - KH * 0.92; napping = true;
-						if (pose !== 'loaf') say(pick(SAY.napStart), 1600);
-					}
+						}
 					setPose(napping ? 'loaf' : 'head');
-					if (t > modeUntil) { napEl = null; setMode('float', 7000); say(pick(SAY.napWake.slice(1))); }
+					if (t > modeUntil) { napEl = null; setMode('float', 7000); }
 				}
 			} else if (mode === 'visit') {
 				const r = visitEl?.isConnected ? visitEl.getBoundingClientRect() : null;
