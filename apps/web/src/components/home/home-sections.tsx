@@ -36,7 +36,7 @@ export function WhyBento() {
 			<div className="bento-tile"><strong>567</strong><span>Deals completed</span></div>
 			<div className="bento-tile bento-dark"><h3>A person on every file</h3><p>Every request is reviewed by our team, not scored by a form, and you get written terms before anything closes.</p><span className="bento-mark" aria-hidden="true">C</span></div>
 			<div className="bento-tile"><strong>200+</strong><span>Happy borrowers</span></div>
-			<div className="bento-tile"><strong>6</strong><span>Funding structures</span></div>
+			<div className="bento-tile"><strong>4</strong><span>Funding structures</span></div>
 			<div className="bento-tile bento-wide"><h3>The Claw Point standard.</h3><ul>{['Written terms before closing', 'Funds move only through title and escrow', 'Lender and title checked first', 'A real person on every file'].map(t => <li key={t}><Check size={15} />{t}</li>)}</ul></div>
 		</div>
 	</div></section>;
