@@ -10,13 +10,13 @@ export const ADAM_CALENDLY_URL = 'https://calendly.com/cashclawcapital/30min';
 export const TEAM_EMAIL = 'clawpointadvisory@gmail.com';
 export const TEAM = [
 	{
-		name: 'Amira', fullName: 'Amira Borham', title: 'Managing Partner', owner: true, slug: 'amira', phone: { display: '(346) 291-5546', e164: '+13462915546' }, schedule: true, calendly: CALENDLY_URL, length: '1 hour',
+		name: 'Amira', fullName: 'Amira Borham', title: 'Founder & Managing Partner', owner: true, slug: 'amira', phone: { display: '(346) 291-5546', e164: '+13462915546' }, schedule: true, calendly: CALENDLY_URL, length: '1 hour',
 		profiles: [
 			{ name: 'LinkedIn', url: 'https://www.linkedin.com/in/amira-borham-b6219122a/' },
 		],
 	},
 	{
-		name: 'Adam', fullName: 'Adam Weiss', title: '', owner: true, slug: 'adam', phone: undefined as { display: string; e164: string } | undefined, schedule: true, calendly: ADAM_CALENDLY_URL, length: '1 hour',
+		name: 'Adam', fullName: 'Adam Weiss', title: 'Founder & Partner', owner: true, slug: 'adam', phone: undefined as { display: string; e164: string } | undefined, schedule: true, calendly: ADAM_CALENDLY_URL, length: '1 hour',
 		profiles: [
 			{ name: 'LinkedIn', url: 'https://www.linkedin.com/in/adam-j-weiss-6144a51a7/' },
 		],
