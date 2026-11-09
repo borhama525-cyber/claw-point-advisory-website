@@ -1,5 +1,5 @@
 Claw Point Advisory website
-Version: November 9, 2026 (UPDATE 5b: titles only in Google data, not shown on the page)
+Version: November 9, 2026 (UPDATE 5c: 4 funding structures)
 
 If you can read this page, the new version is uploaded. It includes:
 - Canonical links, www redirect, real 404s, fixed sitemap, business details for Google
@@ -12,3 +12,4 @@ If you can read this page, the new version is uploaded. It includes:
 - Website emails are sent from info@clawpoint.capital (DKIM-signed) and still arrive at clawpointadvisory@gmail.com
 - Confirmation email to people who join the network or send a deal; a deal referrer is CC'd
 - Titles on the team cards and for Google: Amira Borham (Founder & Managing Partner), Adam Weiss (Founder & Managing Partner)
+- Homepage: 4 funding structures (Stack, Echo, Double Close, EMD)
