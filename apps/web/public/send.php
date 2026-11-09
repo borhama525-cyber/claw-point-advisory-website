@@ -320,16 +320,45 @@ if ($form === 'deal' || $form === 'network') {
 	}
 	$cRows = array_filter($cRows, fn($v) => trim((string) $v) !== '');
 	$site = 'https://' . $host;
-	$cHtml = '<div style="font-family:Arial,sans-serif;color:#141a17;max-width:560px;font-size:15px;line-height:1.6">'
-		. '<p style="font-size:20px;font-weight:bold;margin:0 0 12px">' . esc($cTitle) . '</p><p>' . esc($hi) . '</p>';
-	foreach ($cParas as $para) $cHtml .= '<p>' . esc($para) . '</p>';
+	// Branded layout: email-safe tables and inline styles (Gmail, Outlook and Apple Mail ignore <style> blocks).
+	$label = $form === 'deal' ? 'DEAL RECEIVED' : 'WELCOME TO THE NETWORK';
+	$font = "font-family:Arial,Helvetica,sans-serif";
+	$cHtml = '<div style="margin:0;padding:0;background:#eef5f3">'
+		. '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef5f3;padding:28px 12px"><tr><td align="center">'
+		. '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #d9e6e2">'
+		// Header: logo + wordmark on brand green
+		. '<tr><td style="background:#163327;padding:22px 28px"><table role="presentation" cellpadding="0" cellspacing="0"><tr>'
+		. '<td style="vertical-align:middle"><img src="' . esc($site) . '/icon-192.png" width="44" height="44" alt="Claw Point" style="display:block;border:0;border-radius:10px"></td>'
+		. '<td style="vertical-align:middle;padding-left:12px;' . $font . ';color:#ffffff"><div style="font-size:20px;font-weight:bold;letter-spacing:-.3px;line-height:1.1">Claw Point</div>'
+		. '<div style="font-size:10px;letter-spacing:3px;color:#dcc64a;margin-top:3px">ADVISORY</div></td></tr></table></td></tr>'
+		// Body
+		. '<tr><td style="padding:30px 28px 8px;' . $font . ';color:#13201a;font-size:15px;line-height:1.65">'
+		. '<div style="font-size:11px;font-weight:bold;letter-spacing:1.6px;color:#24533d;margin-bottom:10px">' . esc($label) . '</div>'
+		. '<div style="font-size:24px;font-weight:bold;line-height:1.25;margin-bottom:16px;color:#13201a">' . esc($cTitle) . '</div>'
+		. '<p style="margin:0 0 14px">' . esc($hi) . '</p>';
+	foreach ($cParas as $para) $cHtml .= '<p style="margin:0 0 14px">' . esc($para) . '</p>';
+	$cHtml .= '</td></tr>';
+	// Summary card
 	if ($cRows) {
-		$cHtml .= '<table style="border-collapse:collapse;width:100%;font-size:14px;margin:6px 0 14px">';
-		foreach ($cRows as $k => $v) $cHtml .= '<tr><td style="padding:6px 12px 6px 0;color:#55665f;white-space:nowrap;vertical-align:top">' . esc($k) . '</td><td style="padding:6px 0;border-bottom:1px solid #e3ece9">' . esc($v) . '</td></tr>';
-		$cHtml .= '</table>';
+		$cHtml .= '<tr><td style="padding:4px 28px 6px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef5f3;border-radius:12px;' . $font . ';font-size:14px">'
+			. '<tr><td colspan="2" style="padding:14px 18px 4px;font-size:11px;font-weight:bold;letter-spacing:1.4px;color:#24533d">' . ($form === 'deal' ? 'YOUR REQUEST' : 'YOUR PROFILE') . '</td></tr>';
+		foreach ($cRows as $k => $v) $cHtml .= '<tr><td style="padding:8px 18px;color:#55665f;white-space:nowrap;vertical-align:top;width:40%">' . esc($k) . '</td><td style="padding:8px 18px;color:#13201a;font-weight:bold">' . esc($v) . '</td></tr>';
+		$cHtml .= '<tr><td colspan="2" style="height:10px;line-height:10px">&nbsp;</td></tr></table></td></tr>';
 	}
-	$cHtml .= '<p>Questions? Just reply to this email, or <a href="' . esc($site) . '/booking/" style="color:#24533d;font-weight:bold">book a call</a>.</p>'
-		. '<p style="margin-top:22px">The Claw Point Advisory team<br><a href="' . esc($site) . '" style="color:#24533d">' . esc($host) . '</a></p></div>';
+	// Buttons
+	$cHtml .= '<tr><td style="padding:22px 28px 6px"><table role="presentation" cellpadding="0" cellspacing="0"><tr>'
+		. '<td style="background:#13201a;border-radius:999px"><a href="' . esc($site) . '/booking/" style="display:inline-block;padding:13px 24px;' . $font . ';font-size:14px;font-weight:bold;color:#ffffff;text-decoration:none">Book a call &rarr;</a></td>'
+		. '<td style="width:10px"></td>'
+		. '<td style="border:1px solid #13201a;border-radius:999px"><a href="' . esc($site) . ($form === 'deal' ? '/funding/' : '/calculators/') . '" style="display:inline-block;padding:12px 22px;' . $font . ';font-size:14px;font-weight:bold;color:#13201a;text-decoration:none">' . ($form === 'deal' ? 'How funding works' : 'Free deal calculators') . '</a></td>'
+		. '</tr></table></td></tr>'
+		// Sign-off
+		. '<tr><td style="padding:22px 28px 28px;' . $font . ';color:#13201a;font-size:15px;line-height:1.6">Questions? Just reply to this email.<br><br><strong>The Claw Point Advisory team</strong></td></tr>'
+		// Footer
+		. '<tr><td style="background:#f6faf8;border-top:1px solid #e3ece9;padding:18px 28px;' . $font . ';font-size:12px;line-height:1.6;color:#55665f">'
+		. 'Claw Point Advisory &middot; Real estate transactional funding<br>'
+		. '<a href="' . esc($site) . '" style="color:#24533d;font-weight:bold;text-decoration:none">' . esc($host) . '</a> &middot; <a href="mailto:' . TO_EMAIL . '" style="color:#24533d;text-decoration:none">' . TO_EMAIL . '</a><br>'
+		. '<span style="color:#8a9a94">Every transaction is reviewed individually. Nothing in this email is an offer or commitment to fund.</span>'
+		. '</td></tr></table></td></tr></table></div>';
 	$cText = $cTitle . "\n\n" . $hi . "\n\n" . implode("\n\n", $cParas)
 		. ($cRows ? "\n\n" . implode("\n", array_map(fn($k, $v) => "{$k}: {$v}", array_keys($cRows), $cRows)) : '')
 		. "\n\nQuestions? Just reply to this email, or book a call: {$site}/booking/\n\nThe Claw Point Advisory team\n{$site}";
