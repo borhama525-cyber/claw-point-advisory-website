@@ -30,6 +30,6 @@ export function Process() {
 				<div className="hiw-card"><span className="hiw-num">{s.number}</span><h3>{s.title}</h3><p>{s.text}</p><span className="hiw-tag">{NEXT[i]}</span></div>
 			</li>; })}
 		</ol>
-		<p className="fine-print">Every transaction is assessed individually. An enquiry or appointment does not guarantee approval or funding.</p>
+		<p className="fine-print">Every transaction is assessed individually. An inquiry or appointment does not guarantee approval or funding.</p>
 	</div></section>;
 }

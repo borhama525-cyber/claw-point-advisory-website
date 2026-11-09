@@ -30,12 +30,12 @@ export function FundingDetails() {
 			<div className="fd-cards">
 				<article className="fd-card">
 					<h3>What it is, and what it isn’t</h3>
-					<div className="fd-compare"><div><strong><Check size={15} /> It is</strong><p>Short-term capital tied to one transaction, with timing and a clear exit at the centre of the review.</p></div><div><strong className="muted">✕ It isn’t</strong><p>A mortgage, renovation loan or long-term investment loan.</p></div></div>
+					<div className="fd-compare"><div><strong><Check size={15} /> It is</strong><p>Short-term capital tied to one transaction, with timing and a clear exit at the center of the review.</p></div><div><strong className="muted">✕ It isn’t</strong><p>A mortgage, renovation loan or long-term investment loan.</p></div></div>
 				</article>
 				<article className="fd-card fd-bring">
-					<h3>What to bring to an enquiry</h3>
+					<h3>What to bring to an inquiry</h3>
 					<ul>{BRING.map(b => <li key={b}><FileText size={15} />{b}</li>)}</ul>
-					<p className="fd-note"><ShieldCheck size={14} />Please don’t send account numbers or confidential identity documents through the enquiry form or chat.</p>
+					<p className="fd-note"><ShieldCheck size={14} />Please don’t send account numbers or confidential identity documents through the inquiry form or chat.</p>
 				</article>
 			</div>
 		</div></section>
