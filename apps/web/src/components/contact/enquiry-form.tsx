@@ -5,6 +5,7 @@ import { sendForm } from '@/lib/send-form';
 import { useFormSubmission } from '@/hooks/use-form-submission';
 import { TEAM, TEAM_EMAIL } from '@/constants/site';
 import { RequestButton } from '@/components/request/request-provider';
+import { ProfileLinks } from '@/components/profile-links';
 import { celebrate } from '@/components/brand-face';
 
 const TOPICS = ['A deal I want funded', 'Which structure fits my deal', 'Loan underwriting question', 'Partnership or referral', 'Something else'];
@@ -36,10 +37,9 @@ export function EnquiryForm() {
 					<h2>Real people, <em>real replies.</em></h2>
 					<ul className="contact-team">{TEAM.map(p => <li key={p.name}>
 						<span className="contact-avatar" aria-hidden="true">{p.name[0]}</span>
-						<div className="contact-who"><strong>{p.name}</strong><span>{p.display}</span></div>
-						<a className="button small" href={`sms:${p.e164}`} aria-label={`Text ${p.name} at ${p.display}`}><MessageSquareText size={15} /> Text</a>
+						<div className="contact-who"><strong>{p.fullName}</strong>{p.phone && <span>{p.phone.display}</span>}<span className="contact-who-actions">{p.phone && <a className="button small" href={`sms:${p.phone.e164}`} aria-label={`Text ${p.name} at ${p.phone.display}`}><MessageSquareText size={15} /> Text</a>}<ProfileLinks person={p} labels /></span></div>
 					</li>)}</ul>
-					<p className="contact-warning"><PhoneOff size={16} /><span><strong>Please text or schedule before calling.</strong> Unscheduled calls are rejected automatically.</span></p>
+					{TEAM.some(p => p.phone) && <p className="contact-warning"><PhoneOff size={16} /><span><strong>Please text or schedule before calling.</strong> Unscheduled calls are rejected automatically.</span></p>}
 					<div className="contact-next"><p className="eyebrow">WHAT HAPPENS NEXT</p>
 						<ol>{NEXT.map(([h, t], i) => <li key={h}><span>{i + 1}</span><div><strong>{h}</strong><p>{t}</p></div></li>)}</ol>
 					</div>
@@ -66,7 +66,7 @@ export function EnquiryForm() {
 						<p className="contact-note">Please don’t include bank details, Social Security numbers or other sensitive information.</p>
 						<label className="check-label"><input name="consent" type="checkbox" value="true" required /> I agree to be contacted about this message. It is kept private.</label>
 						<button className="button" disabled={form.isSubmitting}><Send size={16} /> {form.isSubmitting ? 'Sending…' : 'Send message'}</button>
-						{form.isError && <p role="alert" className="contact-error">We couldn’t send your message. Check your details and try again, or text us.</p>}
+						{form.isError && <p role="alert" className="contact-error">We couldn’t send your message. Check your details and try again, or email clawpointadvisory@gmail.com.</p>}
 						{Object.entries(form.fieldErrors).map(([key, value]) => <p key={key} role="alert" className="contact-error">{key}: {value}</p>)}
 					</>}
 				</form>

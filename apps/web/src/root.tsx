@@ -19,7 +19,11 @@ import { GhostChase } from '@/components/ghost-chase';
 
 export const links: Route.LinksFunction = () => [
 	{ rel: 'stylesheet', href: stylesheet },
-	{ rel: 'icon', href: '/favicon.png', type: 'image/png' },
+	// Site icon (browser tabs and search results). Google needs a square icon at a multiple of 48px.
+	{ rel: 'icon', href: '/favicon.ico', sizes: '48x48' },
+	{ rel: 'icon', href: '/icon.svg', type: 'image/svg+xml' },
+	{ rel: 'icon', href: '/favicon.png', type: 'image/png', sizes: '96x96' },
+	{ rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
 	{ rel: 'preconnect', href: 'https://fonts.googleapis.com' },
 	{
 		rel: 'preconnect',

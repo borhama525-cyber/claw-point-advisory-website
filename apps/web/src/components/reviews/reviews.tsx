@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 import { CheckCircle2, Lock, Send, Star } from 'lucide-react';
 import { sendForm } from '@/lib/send-form';
 import { useFormSubmission } from '@/hooks/use-form-submission';
@@ -24,6 +24,13 @@ function ReviewForm() {
 	const first = (params.get('name') ?? '').slice(0, 60);
 	const shown = hover || rating;
 	const label = useMemo(() => LABELS[shown], [shown]);
+	// Reviews are only for clients who closed a deal: without the after-closing link there's no form.
+	if (!ref && !form.isSuccess) return <div className="contact-form rv-form rv-locked">
+		<Lock size={28} aria-hidden="true" />
+		<h3>Reviews are for our closed deals</h3>
+		<p>This page is for clients who’ve closed a deal with Claw Point. After your closing, we’ll send you a personal link to leave a review.</p>
+		<p>Working on a deal with us now? <Link to="/contact">Get in touch</Link>.</p>
+	</div>;
 	return <form id="leave" className="contact-form rv-form" onSubmit={form.onSubmit}>
 		<input {...form.honeypotProps} />
 		{ref && <input type="hidden" name="ref" value={ref} />}

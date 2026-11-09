@@ -3,13 +3,13 @@ import { Link } from 'react-router';
 import { CalendarCheck, Mail, MessageSquare, MessageSquareText, PhoneOff, X } from 'lucide-react';
 import { TEAM, TEAM_EMAIL } from '@/constants/site';
 import { mailtoHref } from '@/lib/contact-links';
+import { ProfileLinks } from '@/components/profile-links';
 
 const OPEN_EVENT = 'clawpoint:contact';
 /** Opens the floating "Team chat" contact card from anywhere on the site. */
 export const openContactPanel = () => window.dispatchEvent(new Event(OPEN_EVENT));
-const smsHref = (e164: string) => `sms:${e164}`;
 
-/** The floating "Team chat" button and its contact card: email, text Amira or Adam, schedule a call. */
+/** The floating "Team chat" button and its contact card: email, text Amira, both teammates' profiles, schedule a call. */
 export function ContactPanel() {
 	const [open, setOpen] = useState(false);
 	const box = useRef<HTMLDivElement>(null);
@@ -30,13 +30,13 @@ export function ContactPanel() {
 	}, [open]);
 	return <>
 		{open && <div ref={box} className="contact-card" role="dialog" aria-label="Contact the team">
-			<div className="contact-card-head"><div><strong>Talk to the team</strong><span>We reply by text and email</span></div><button type="button" className="dr-close" aria-label="Close" onClick={() => setOpen(false)}><X size={17} /></button></div>
+			<div className="contact-card-head"><div><strong>Talk to the team</strong><span>Text, book a call or send us an email</span></div><button type="button" className="dr-close" aria-label="Close" onClick={() => setOpen(false)}><X size={17} /></button></div>
 			<p className="contact-warning"><PhoneOff size={16} /><span><strong>Please schedule or text before calling.</strong> Unscheduled calls are rejected automatically.</span></p>
 			<ul className="contact-people">{TEAM.map(p => <li key={p.name}>
 				<span className="contact-avatar" aria-hidden="true">{p.name[0]}</span>
-				<div className="contact-who"><strong>{p.name}</strong><span>{p.display}</span></div>
+				<div className="contact-who"><strong>{p.name}</strong>{p.phone && <span>{p.phone.display}</span>}<ProfileLinks person={p} /></div>
 				<div className="contact-actions">
-					<a className="button small" href={smsHref(p.e164)} aria-label={`Text ${p.name} at ${p.display}`}><MessageSquareText size={15} /> Text</a>
+					{p.phone && <a className="button small" href={`sms:${p.phone.e164}`} aria-label={`Text ${p.name} at ${p.phone.display}`}><MessageSquareText size={15} /> Text</a>}
 					{p.schedule && <Link className="button small outline" to={p.slug === 'amira' ? '/booking' : `/booking?with=${p.slug}`} onClick={() => setOpen(false)} aria-label={`Schedule a call with ${p.name}`}><CalendarCheck size={15} /> Schedule</Link>}
 				</div>
 			</li>)}</ul>
