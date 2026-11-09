@@ -1,5 +1,5 @@
 Claw Point Advisory website
-Version: November 9, 2026 (UPDATE 7: newsletter signup)
+Version: November 9, 2026 (UPDATE 8: newsletter welcome email)
 
 If you can read this page, the new version is uploaded. It includes:
 - Canonical links, www redirect, real 404s, fixed sitemap, business details for Google
@@ -14,4 +14,4 @@ If you can read this page, the new version is uploaded. It includes:
 - Titles on the team cards and for Google: Amira Borham (Founder & Managing Partner), Adam Weiss (Founder & Managing Partner)
 - Homepage: 4 funding structures (Stack, Echo, Double Close, EMD)
 - Spelling: "structures" typo fixed; US spelling (inquiry, center, personalized); "click" instead of "tick"
-- Newsletter: new signup card on Home and Learn, powered by Hostinger Reach (sign-ups go to Reach)
+- Newsletter: signup card on Home and Learn; new subscribers get a branded welcome email and are saved to the "Newsletter" tab

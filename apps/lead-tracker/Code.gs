@@ -2,8 +2,9 @@
  * Claw Point website → Deal Flow Lead Tracker.
  *
  * The website (public_html/send.php) posts each submission here:
- *   - funding requests, contact messages, newsletter sign-ups → "Website Leads"
+ *   - funding requests, contact messages → "Website Leads"
  *   - network sign-ups → "Website Network"
+ *   - newsletter sign-ups → "Newsletter"
  *   - private client reviews → "Reviews"
  *
  * Deployed as a web app (Execute as: Me, Who has access: Anyone). It only adds rows, and only
@@ -22,6 +23,8 @@ function doPost(e) {
   try {
     if (p.kind === 'review') {
       write_(ss.getSheetByName('Reviews'), [now, p.name, p.role, p.deal, Number(p.rating) || '', p.review, p.email, false, Boolean(p.ref)]);
+    } else if (p.kind === 'newsletter') {
+      write_(ss.getSheetByName('Newsletter'), [now, 'Subscribed', p.name, p.email, false, '']);
     } else if (p.kind === 'network') {
       write_(ss.getSheetByName('Website Network'), [now, 'New', p.name, p.company, p.email, p.phone, p.role, p.markets, p.assets, p.message, p.website, p.social, '']);
     } else {

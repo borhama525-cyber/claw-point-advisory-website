@@ -168,9 +168,11 @@ if ($form === 'deal') {
 	if ($ref !== '') $intro = 'A client left a private review after their deal closed. It is saved in the Reviews tab and linked to the deal in Website Leads.';
 	$rows = ['Rating' => "{$stars} ({$rating} of 5)", 'Name' => $name, 'Role / company' => oneLine(field('role', 120)), 'Deal type' => oneLine(field('deal', 40)), 'Review' => $review, 'Email' => $email, 'Closed deal ref' => $ref];
 } elseif ($form === 'newsletter') {
+	if (field('consent') !== 'true') reply(422, ['ok' => false, 'error' => 'Please click the consent box.']);
+	$name = oneLine(field('first_name', 60));
 	$subject = "New website lead · Newsletter: {$email}";
-	$intro = 'Someone signed up for updates on the website.';
-	$rows = ['Email' => $email];
+	$intro = 'Someone signed up for updates on the website. They were sent the welcome email.';
+	$rows = ['Name' => $name, 'Email' => $email];
 } else {
 	reply(400, ['ok' => false, 'error' => 'Unknown form.']);
 }
@@ -226,7 +228,7 @@ if ($form === 'deal') {
 $rows = array_filter($rows, fn($v) => trim((string) $v) !== '');
 
 // Save the lead to the Deal Flow Lead Tracker when lead-sheet.php is set up: funding requests, contact
-// messages and newsletter sign-ups go to "Website Leads", network sign-ups to "Website Network", reviews to "Reviews".
+// messages go to "Website Leads", newsletter sign-ups to "Newsletter", network sign-ups to "Website Network", reviews to "Reviews".
 // Runs before the email so a lead is kept even if mail delivery has a problem.
 $sheet = is_file(__DIR__ . '/lead-sheet.php') ? (include __DIR__ . '/lead-sheet.php') : null;
 if (is_array($sheet) && !empty($sheet['url']) && function_exists('curl_init')) {
@@ -234,6 +236,9 @@ if (is_array($sheet) && !empty($sheet['url']) && function_exists('curl_init')) {
 		// Reviews are private: they go to their own tab and are never shown on the site.
 		$lead = ['secret' => $sheet['secret'] ?? '', 'kind' => 'review', 'name' => $rows['Name'], 'email' => $email, 'role' => $rows['Role / company'] ?? '',
 			'deal' => $rows['Deal type'] ?? '', 'rating' => (string) $rating, 'review' => $rows['Review'], 'ref' => $rows['Closed deal ref'] ?? ''];
+	} elseif ($form === 'newsletter') {
+		// Newsletter sign-ups have their own tab ("Newsletter"); source/funding_type are kept so an older tracker script still files them under Website Leads.
+		$lead = ['secret' => $sheet['secret'] ?? '', 'kind' => 'newsletter', 'name' => $rows['Name'] ?? '', 'email' => $email, 'source' => 'Newsletter', 'funding_type' => 'Newsletter'];
 	} elseif ($form === 'network') {
 		// Network sign-ups have their own tab ("Website Network").
 		$lead = ['secret' => $sheet['secret'] ?? '', 'kind' => 'network', 'name' => $rows['Name'] ?? '', 'company' => $rows['Company'] ?? '', 'email' => $email,
@@ -290,11 +295,11 @@ $encodedSubject = '=?UTF-8?B?' . base64_encode(oneLine($subject)) . '?=';
 $sent = deliver(TO_EMAIL, '', $encodedSubject, $headers, $body, $from);
 if (!$sent) reply(502, ['ok' => false, 'error' => 'We couldn’t send your message right now. Please email clawpointadvisory@gmail.com or try again.']);
 
-// Confirmation email to the person who submitted: network sign-ups and deal requests.
+// Confirmation email to the person who submitted: network sign-ups, deal requests and newsletter sign-ups (welcome email).
 // A deal's referrer (if one was named) is copied. The wording is fixed; only their first name and
 // a short summary of what they sent appear, so the form can't be used to send arbitrary email.
 // A failed confirmation never fails the submission: the team already has it.
-if ($form === 'deal' || $form === 'network') {
+if ($form === 'deal' || $form === 'network' || $form === 'newsletter') {
 	$first = mb_substr(oneLine($form === 'deal' ? field('first_name', 60) : explode(' ', $name)[0]), 0, 40);
 	$hi = $first !== '' ? "Hi {$first}," : 'Hi,';
 	$cc = '';
@@ -310,6 +315,15 @@ if ($form === 'deal' || $form === 'network') {
 		];
 		if ($cc !== '') $cParas[] = ($refName !== '' ? $refName : 'The person who referred you') . ' referred this deal and is copied on this email.';
 		$cRows = ['Deal type' => $type, 'Property' => $rows['Property'] ?? '', 'Target close date' => $rows['Target close date'] ?? '', 'Requested funding' => $rows['Requested funding'] ?? ($rows['EMD amount'] ?? '')];
+	} elseif ($form === 'newsletter') {
+		$cSubject = 'Welcome to the Claw Point list';
+		$cTitle = 'Welcome to the Claw Point list.';
+		$cParas = [
+			'Thanks for signing up. Every so often we’ll send you a short, practical tip on transactional funding: EMD, double closes, Echo and Stack. No fluff, just what helps you close.',
+			'Here’s one to start: if a seller wants a bigger earnest money deposit than you’d like to tie up, you don’t have to use your own cash. We can fund the EMD straight to title, and it’s paid back at closing.',
+			'Got a deal on the table? Reply to this email or send it our way any time.',
+		];
+		$cRows = [];
 	} else {
 		$cSubject = 'Welcome to the Claw Point network';
 		$cTitle = 'Thanks for joining the network.';
@@ -322,16 +336,18 @@ if ($form === 'deal' || $form === 'network') {
 	$cRows = array_filter($cRows, fn($v) => trim((string) $v) !== '');
 	$site = 'https://' . $host;
 	// Branded layout: email-safe tables and inline styles (Gmail, Outlook and Apple Mail ignore <style> blocks).
-	$label = $form === 'deal' ? 'DEAL RECEIVED' : 'WELCOME TO THE NETWORK';
+	$label = ['deal' => 'DEAL RECEIVED', 'network' => 'WELCOME TO THE NETWORK', 'newsletter' => 'WELCOME'][$form];
 	$font = "font-family:Arial,Helvetica,sans-serif";
 	$cHtml = '<div style="margin:0;padding:0;background:#eef5f3">'
 		. '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef5f3;padding:28px 12px"><tr><td align="center">'
 		. '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #d9e6e2">'
-		// Header: logo + wordmark on brand green
-		. '<tr><td style="background:#163327;padding:22px 28px"><table role="presentation" cellpadding="0" cellspacing="0"><tr>'
-		. '<td style="vertical-align:middle"><img src="' . esc($site) . '/icon-192.png" width="44" height="44" alt="Claw Point" style="display:block;border:0;border-radius:10px"></td>'
-		. '<td style="vertical-align:middle;padding-left:12px;' . $font . ';color:#ffffff"><div style="font-size:20px;font-weight:bold;letter-spacing:-.3px;line-height:1.1">Claw Point</div>'
-		. '<div style="font-size:10px;letter-spacing:3px;color:#dcc64a;margin-top:3px">ADVISORY</div></td></tr></table></td></tr>'
+		// Header: the animated logo for the newsletter welcome, otherwise logo + wordmark on brand green
+		. ($form === 'newsletter'
+			? '<tr><td style="background:#e3eeec;padding:0;line-height:0"><img src="' . esc($site) . '/email-header.gif" width="600" alt="Claw Point Advisory" style="display:block;width:100%;max-width:600px;height:auto;border:0"></td></tr>'
+			: '<tr><td style="background:#163327;padding:22px 28px"><table role="presentation" cellpadding="0" cellspacing="0"><tr>'
+			. '<td style="vertical-align:middle"><img src="' . esc($site) . '/icon-192.png" width="44" height="44" alt="Claw Point" style="display:block;border:0;border-radius:10px"></td>'
+			. '<td style="vertical-align:middle;padding-left:12px;' . $font . ';color:#ffffff"><div style="font-size:20px;font-weight:bold;letter-spacing:-.3px;line-height:1.1">Claw Point</div>'
+			. '<div style="font-size:10px;letter-spacing:3px;color:#dcc64a;margin-top:3px">ADVISORY</div></td></tr></table></td></tr>')
 		// Body
 		. '<tr><td style="padding:30px 28px 8px;' . $font . ';color:#13201a;font-size:15px;line-height:1.65">'
 		. '<div style="font-size:11px;font-weight:bold;letter-spacing:1.6px;color:#24533d;margin-bottom:10px">' . esc($label) . '</div>'
@@ -348,21 +364,27 @@ if ($form === 'deal' || $form === 'network') {
 	}
 	// Buttons
 	$cHtml .= '<tr><td style="padding:22px 28px 6px"><table role="presentation" cellpadding="0" cellspacing="0"><tr>'
+		. ($form === 'newsletter' ? '<td style="background:#24533d;border-radius:999px"><a href="' . esc($site) . '/funding/" style="display:inline-block;padding:13px 24px;' . $font . ';font-size:14px;font-weight:bold;color:#ffffff;text-decoration:none">Send us your deal &rarr;</a></td><td style="width:10px"></td>' : '')
 		. '<td style="background:#13201a;border-radius:999px"><a href="' . esc($site) . '/booking/" style="display:inline-block;padding:13px 24px;' . $font . ';font-size:14px;font-weight:bold;color:#ffffff;text-decoration:none">Book a call &rarr;</a></td>'
-		. '<td style="width:10px"></td>'
-		. '<td style="border:1px solid #13201a;border-radius:999px"><a href="' . esc($site) . ($form === 'deal' ? '/funding/' : '/calculators/') . '" style="display:inline-block;padding:12px 22px;' . $font . ';font-size:14px;font-weight:bold;color:#13201a;text-decoration:none">' . ($form === 'deal' ? 'How funding works' : 'Free deal calculators') . '</a></td>'
+		. ($form === 'newsletter' ? '' : '<td style="width:10px"></td>'
+		. '<td style="border:1px solid #13201a;border-radius:999px"><a href="' . esc($site) . ($form === 'deal' ? '/funding/' : '/calculators/') . '" style="display:inline-block;padding:12px 22px;' . $font . ';font-size:14px;font-weight:bold;color:#13201a;text-decoration:none">' . ($form === 'deal' ? 'How funding works' : 'Free deal calculators') . '</a></td>')
 		. '</tr></table></td></tr>'
 		// Sign-off
-		. '<tr><td style="padding:22px 28px 28px;' . $font . ';color:#13201a;font-size:15px;line-height:1.6">Questions? Just reply to this email.<br><br><strong>The Claw Point Advisory team</strong></td></tr>'
+		. '<tr><td style="padding:22px 28px 28px;' . $font . ';color:#13201a;font-size:15px;line-height:1.6">'
+		. ($form === 'newsletter' ? 'Talk soon,<br><strong>Amira &amp; Adam</strong><br><span style="font-size:13px;color:#55665f">Founders &amp; Managing Partners, Claw Point Advisory</span>' : 'Questions? Just reply to this email.<br><br><strong>The Claw Point Advisory team</strong>')
+		. '</td></tr>'
 		// Footer
 		. '<tr><td style="background:#f6faf8;border-top:1px solid #e3ece9;padding:18px 28px;' . $font . ';font-size:12px;line-height:1.6;color:#55665f">'
 		. 'Claw Point Advisory &middot; Real estate transactional funding<br>'
 		. '<a href="' . esc($site) . '" style="color:#24533d;font-weight:bold;text-decoration:none">' . esc($host) . '</a> &middot; <a href="mailto:' . TO_EMAIL . '" style="color:#24533d;text-decoration:none">' . TO_EMAIL . '</a><br>'
+		. ($form === 'newsletter' ? '<span style="color:#8a9a94">You’re getting this because you signed up at ' . esc($host) . '. Not for you? Reply “unsubscribe” and we’ll take you off the list.</span><br>' : '')
 		. '<span style="color:#8a9a94">Every transaction is reviewed individually. Nothing in this email is an offer or commitment to fund.</span>'
 		. '</td></tr></table></td></tr></table></div>';
 	$cText = $cTitle . "\n\n" . $hi . "\n\n" . implode("\n\n", $cParas)
 		. ($cRows ? "\n\n" . implode("\n", array_map(fn($k, $v) => "{$k}: {$v}", array_keys($cRows), $cRows)) : '')
-		. "\n\nQuestions? Just reply to this email, or book a call: {$site}/booking/\n\nThe Claw Point Advisory team\n{$site}";
+		. ($form === 'newsletter'
+			? "\n\nSend us your deal: {$site}/funding/\nBook a call: {$site}/booking/\n\nTalk soon,\nAmira & Adam\nFounders & Managing Partners, Claw Point Advisory\n{$site}\n\nNot for you? Reply \"unsubscribe\" and we'll take you off the list."
+			: "\n\nQuestions? Just reply to this email, or book a call: {$site}/booking/\n\nThe Claw Point Advisory team\n{$site}");
 	$cAlt = 'alt_' . bin2hex(random_bytes(12));
 	$cHeaders = implode("\r\n", array_filter([
 		'From: Claw Point Advisory <' . $from . '>',

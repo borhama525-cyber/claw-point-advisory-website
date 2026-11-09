@@ -1,20 +1,10 @@
-import { useEffect } from 'react';
-import { BellRing, Check } from 'lucide-react';
+import { ArrowRight, BellRing, Check, MailCheck } from 'lucide-react';
+import { sendForm } from '@/lib/send-form';
+import { useFormSubmission } from '@/hooks/use-form-submission';
 
-/** Hostinger Reach signup form ("Website newsletter"). Sign-ups go straight into the Reach audience. */
-const REACH_FORM_ID = 'f582869f-b6df-4a6e-abd1-a91d7e68467e';
-const REACH_SCRIPT = 'https://cdn-reach.hostinger.com/js/embed.js';
-
+/** Newsletter sign-up: saved to the Website Leads tab, and send.php emails the subscriber a welcome email. */
 export function Newsletter(){
-	// Reach's script fills every [data-reach-form] placeholder when it runs, so it is re-run each time this
-	// section mounts (moving between Home and Learn mounts a fresh placeholder).
-	useEffect(() => {
-		const script = document.createElement('script');
-		script.src = REACH_SCRIPT;
-		script.async = true;
-		document.body.appendChild(script);
-		return () => script.remove();
-	}, []);
+	const form=useFormSubmission({submit:(_v,data)=>sendForm('newsletter', data)});
 	return <section className="newsletter">
 		<div className="newsletter-copy">
 			<p className="eyebrow">STAY IN THE KNOW</p>
@@ -27,8 +17,17 @@ export function Newsletter(){
 			</ul>
 		</div>
 		<div className="newsletter-card">
-			<p className="newsletter-card-title"><BellRing size={18}/>Join the Claw Point list</p>
-			<div className="reach-form" data-reach-form={REACH_FORM_ID}/>
+			{form.isSuccess
+				? <div className="newsletter-done" role="status"><MailCheck size={30}/><p className="newsletter-card-title">You’re on the list.</p><p>Check your inbox: a welcome email from Amira &amp; Adam is on its way.</p></div>
+				: <form onSubmit={form.onSubmit} className="newsletter-form">
+					<p className="newsletter-card-title"><BellRing size={18}/>Join the Claw Point list</p>
+					<input {...form.honeypotProps}/>
+					<label>First name <span>(optional)</span><input name="first_name" autoComplete="given-name" placeholder="Your first name"/></label>
+					<label>Email address<input name="email" type="email" required autoComplete="email" placeholder="you@company.com"/></label>
+					<label className="check-label"><input type="checkbox" name="consent" value="true" required/> I agree to receive email updates from Claw Point Advisory. My details stay private.</label>
+					<button className="button" disabled={form.isSubmitting}>{form.isSubmitting?'Signing you up…':<>Sign up <ArrowRight size={16}/></>}</button>
+					{form.isError&&<p role="alert">Could not save your sign-up. Please try again.</p>}
+				</form>}
 		</div>
 	</section>;
 }
