@@ -16,7 +16,7 @@ export const TEAM = [
 		],
 	},
 	{
-		name: 'Adam', fullName: 'Adam Weiss', title: 'Founder & Partner', owner: true, slug: 'adam', phone: undefined as { display: string; e164: string } | undefined, schedule: true, calendly: ADAM_CALENDLY_URL, length: '1 hour',
+		name: 'Adam', fullName: 'Adam Weiss', title: 'Founder & Managing Partner', owner: true, slug: 'adam', phone: undefined as { display: string; e164: string } | undefined, schedule: true, calendly: ADAM_CALENDLY_URL, length: '1 hour',
 		profiles: [
 			{ name: 'LinkedIn', url: 'https://www.linkedin.com/in/adam-j-weiss-6144a51a7/' },
 		],
