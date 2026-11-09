@@ -1,7 +1,15 @@
 /** The live domain. Canonical links, og:url and structured data use it, because the static build has no request to read it from. */
 export const SITE_ORIGIN = 'https://clawpoint.capital';
-/** Official social profiles: listed in the structured data (`sameAs`) so search engines tie them to this site. */
+/** Business pages for Claw Point itself (listed as the business's `sameAs`). Add company pages here when they exist. */
 export const SOCIAL_LINKS: { name: string; url: string }[] = [];
+/** The founder and her personal profiles: shown in the footer and listed as the business's `founder` for search engines. */
+export const FOUNDER = {
+	name: 'Amira Borham',
+	profiles: [
+		{ name: 'Facebook', url: 'https://www.facebook.com/amira.borham.780643' },
+		{ name: 'LinkedIn', url: 'https://www.linkedin.com/in/amira-borham-b6219122a/' },
+	],
+};
 /** Calendly events the booking page embeds, one per teammate. Change them here to switch meeting types. */
 export const CALENDLY_URL = 'https://calendly.com/clawpointadvisory/schedule-with-amira';
 export const ADAM_CALENDLY_URL = 'https://calendly.com/cashclawcapital/30min';

@@ -1,5 +1,5 @@
 Claw Point Advisory website
-Version: November 9, 2026 (SEO update)
+Version: November 9, 2026 (SEO update + social links)
 
 If you can read this page, the new version is uploaded. It includes:
 - Canonical links on every page (tells Google the official address)
@@ -8,3 +8,4 @@ If you can read this page, the new version is uploaded. It includes:
 - Sitemap lists each page's final address
 - Full business details for Google (structured data)
 - Blog post titles include "Claw Point Advisory"
+- Facebook and LinkedIn icons in the footer (Amira Borham, founder)
