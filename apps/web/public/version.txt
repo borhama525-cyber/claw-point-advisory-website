@@ -1,5 +1,5 @@
 Claw Point Advisory website
-Version: November 9, 2026 (UPDATE 8: newsletter welcome email)
+Version: November 10, 2026 (UPDATE 9: network welcome refresh + tips opt-in)
 
 If you can read this page, the new version is uploaded. It includes:
 - Canonical links, www redirect, real 404s, fixed sitemap, business details for Google
@@ -15,3 +15,4 @@ If you can read this page, the new version is uploaded. It includes:
 - Homepage: 4 funding structures (Stack, Echo, Double Close, EMD)
 - Spelling: "structures" typo fixed; US spelling (inquiry, center, personalized); "click" instead of "tick"
 - Newsletter: signup card on Home and Learn; new subscribers get a branded welcome email and are saved to the "Newsletter" tab
+- Network form: optional "Also send me funding tips" box (adds them to the Newsletter tab); refreshed network welcome email with the animated logo

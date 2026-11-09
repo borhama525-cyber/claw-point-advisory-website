@@ -133,6 +133,7 @@ export function NetworkForm() {
 					<label>LinkedIn or Instagram <span>(optional)</span><input name="social" maxLength={200} placeholder="Profile link or @handle" /></label>
 				</div>
 				<label className="check-label"><input name="consent" type="checkbox" value="true" required /> I agree to be contacted about networking and deals. My details are kept private.</label>
+				<label className="check-label"><input name="newsletter" type="checkbox" value="true" /> Also send me funding tips &amp; tricks by email, every two weeks. <span>(optional, unsubscribe anytime)</span></label>
 				<button className="button network-submit" disabled={form.isSubmitting}><Send size={16} /> {form.isSubmitting ? 'Sending…' : 'Join the network'}</button>
 				{form.isError && <p role="alert" className="contact-error">We couldn’t send your details. Check them and try again, or email clawpointadvisory@gmail.com.</p>}
 			</>}

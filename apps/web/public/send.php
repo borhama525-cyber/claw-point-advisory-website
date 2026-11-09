@@ -152,7 +152,8 @@ if ($form === 'deal') {
 	$intro = 'Someone joined the network list on the website.';
 	$rows = ['Role' => implode(', ', $roles), 'Name' => $name, 'Company' => oneLine(field('company', 200)), 'Email' => $email, 'Phone' => field('phone', 60),
 		'Markets' => oneLine(field('markets', 300)), 'Asset types' => implode(', ', $list('assets', ['Single family', 'Multifamily', 'Commercial', 'Industrial', 'Land'])),
-		'How they want to work with us' => field('message', 3000), 'Website' => oneLine(field('website', 200)), 'LinkedIn / Instagram' => oneLine(field('social', 200))];
+		'How they want to work with us' => field('message', 3000), 'Website' => oneLine(field('website', 200)), 'LinkedIn / Instagram' => oneLine(field('social', 200)),
+		'Funding tips email' => field('newsletter') === 'true' ? 'Yes, added to the Newsletter list' : ''];
 } elseif ($form === 'review') {
 	$name = oneLine(field('name', 120));
 	$review = field('review', 2000);
@@ -261,6 +262,11 @@ if (is_array($sheet) && !empty($sheet['url']) && function_exists('curl_init')) {
 	curl_setopt_array($ch, [CURLOPT_POST => true, CURLOPT_POSTFIELDS => http_build_query($lead), CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_FOLLOWLOCATION => false, CURLOPT_CONNECTTIMEOUT => 4, CURLOPT_TIMEOUT => 8]);
 	curl_exec($ch);
+	// A network member who ticked "Also send me funding tips" also goes on the Newsletter tab.
+	if ($form === 'network' && field('newsletter') === 'true') {
+		curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(['secret' => $sheet['secret'] ?? '', 'kind' => 'newsletter', 'name' => explode(' ', $rows['Name'] ?? '')[0], 'email' => $email, 'source' => 'Newsletter', 'funding_type' => 'Newsletter']));
+		curl_exec($ch);
+	}
 }
 
 $html = '<div style="font-family:Arial,sans-serif;color:#141a17;max-width:620px"><p style="font-size:15px">' . esc($intro) . '</p><table style="border-collapse:collapse;width:100%;font-size:14px">';
@@ -326,11 +332,13 @@ if ($form === 'deal' || $form === 'network' || $form === 'newsletter') {
 		$cRows = [];
 	} else {
 		$cSubject = 'Welcome to the Claw Point network';
-		$cTitle = 'Thanks for joining the network.';
+		$cTitle = 'Welcome to the Claw Point network.';
 		$cParas = [
-			'You’re on the Claw Point Advisory network list. Amira or Adam will reach out by text or email to learn how you work and how we can do deals together.',
-			'In the meantime, you can send us a deal to fund, run the numbers with our free calculators, or book a call any time.',
+			'Thanks for joining. We work with title companies, lenders, wholesalers, investors and agents all over the US, and we’re glad to have you in the mix.',
+			'One of us will reach out by text or email soon to learn how you work and where we can help each other close more deals.',
+			'In the meantime, send us a deal to fund, run the numbers with our free calculators, or book a quick call any time.',
 		];
+		if (field('newsletter') === 'true') $cParas[] = 'You’re also on our funding tips list, so every couple of weeks you’ll get one short, practical tip from us. You can unsubscribe any time.';
 		$cRows = ['Role' => $rows['Role'] ?? '', 'Markets' => $rows['Markets'] ?? ''];
 	}
 	$cRows = array_filter($cRows, fn($v) => trim((string) $v) !== '');
@@ -341,8 +349,8 @@ if ($form === 'deal' || $form === 'network' || $form === 'newsletter') {
 	$cHtml = '<div style="margin:0;padding:0;background:#eef5f3">'
 		. '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef5f3;padding:28px 12px"><tr><td align="center">'
 		. '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #d9e6e2">'
-		// Header: the animated logo for the newsletter welcome, otherwise logo + wordmark on brand green
-		. ($form === 'newsletter'
+		// Header: the animated logo for the newsletter and network welcomes, otherwise logo + wordmark on brand green
+		. ($form !== 'deal'
 			? '<tr><td style="background:#e3eeec;padding:0;line-height:0"><img src="' . esc($site) . '/email-header.gif" width="600" alt="Claw Point Advisory" style="display:block;width:100%;max-width:600px;height:auto;border:0"></td></tr>'
 			: '<tr><td style="background:#163327;padding:22px 28px"><table role="presentation" cellpadding="0" cellspacing="0"><tr>'
 			. '<td style="vertical-align:middle"><img src="' . esc($site) . '/icon-192.png" width="44" height="44" alt="Claw Point" style="display:block;border:0;border-radius:10px"></td>'
@@ -371,7 +379,7 @@ if ($form === 'deal' || $form === 'network' || $form === 'newsletter') {
 		. '</tr></table></td></tr>'
 		// Sign-off
 		. '<tr><td style="padding:22px 28px 28px;' . $font . ';color:#13201a;font-size:15px;line-height:1.6">'
-		. ($form === 'newsletter' ? 'Talk soon,<br><strong>Amira &amp; Adam</strong><br><span style="font-size:13px;color:#55665f">Founders &amp; Managing Partners, Claw Point Advisory</span>' : 'Questions? Just reply to this email.<br><br><strong>The Claw Point Advisory team</strong>')
+		. ($form !== 'deal' ? 'Talk soon,<br><strong>Amira &amp; Adam</strong><br><span style="font-size:13px;color:#55665f">Founders &amp; Managing Partners, Claw Point Advisory</span>' : 'Questions? Just reply to this email.<br><br><strong>The Claw Point Advisory team</strong>')
 		. '</td></tr>'
 		// Footer
 		. '<tr><td style="background:#f6faf8;border-top:1px solid #e3ece9;padding:18px 28px;' . $font . ';font-size:12px;line-height:1.6;color:#55665f">'
@@ -382,7 +390,7 @@ if ($form === 'deal' || $form === 'network' || $form === 'newsletter') {
 		. '</td></tr></table></td></tr></table></div>';
 	$cText = $cTitle . "\n\n" . $hi . "\n\n" . implode("\n\n", $cParas)
 		. ($cRows ? "\n\n" . implode("\n", array_map(fn($k, $v) => "{$k}: {$v}", array_keys($cRows), $cRows)) : '')
-		. ($form === 'newsletter'
+		. ($form !== 'deal'
 			? "\n\nSend us your deal: {$site}/funding/\nBook a call: {$site}/booking/\n\nTalk soon,\nAmira & Adam\nFounders & Managing Partners, Claw Point Advisory\n{$site}\n\nNot for you? Reply \"unsubscribe\" and we'll take you off the list."
 			: "\n\nQuestions? Just reply to this email, or book a call: {$site}/booking/\n\nThe Claw Point Advisory team\n{$site}");
 	$cAlt = 'alt_' . bin2hex(random_bytes(12));
