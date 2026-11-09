@@ -1,11 +1,10 @@
 Claw Point Advisory website
-Version: November 9, 2026 (FINAL: SEO + Amira & Adam social links)
+Version: November 9, 2026 (UPDATE 2: new icon, blog design, team & reviews)
 
 If you can read this page, the new version is uploaded. It includes:
-- Canonical links on every page (tells Google the official address)
-- www.clawpoint.capital now redirects to clawpoint.capital
-- Mistyped addresses return a real "404 not found"
-- Sitemap lists each page's final address
-- Full business details for Google (structured data)
-- Blog post titles include "Claw Point Advisory"
-- Facebook and LinkedIn icons in the footer for Amira Borham and Adam Weiss (founders)
+- Canonical links, www redirect, real 404s, fixed sitemap, business details for Google
+- New site icon (the green Claw Point logo) for browser tabs and Google results
+- Redesigned blog articles (header, easier reading, "Get funded" box, Keep reading)
+- Team: Amira's Google Voice number on the Contact page and Team chat only
+- LinkedIn for Amira Borham and Adam Weiss (Facebook removed)
+- "Leave a review" removed from the footer; the review page only works from the after-closing link

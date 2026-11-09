@@ -32,7 +32,7 @@ if (field('company_website') !== '') reply(200, ['ok' => true]);
 $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 $bucket = sys_get_temp_dir() . '/cpa_form_' . hash('sha256', $ip . date('YmdH'));
 $count = is_file($bucket) ? (int) file_get_contents($bucket) : 0;
-if ($count >= MAX_PER_HOUR) reply(429, ['ok' => false, 'error' => 'Too many submissions. Please try again later, or text us.']);
+if ($count >= MAX_PER_HOUR) reply(429, ['ok' => false, 'error' => 'Too many submissions. Please try again later, or email clawpointadvisory@gmail.com.']);
 @file_put_contents($bucket, (string) ($count + 1), LOCK_EX);
 
 $form = field('form', 20);
@@ -127,6 +127,8 @@ if ($form === 'deal') {
 	$subject = "New website review · {$stars} from {$name}";
 	$intro = 'A client left a private review on the website. It is saved in the Reviews tab of the sheet and is not shown on the site.';
 	$ref = preg_replace('/[^a-z0-9]/i', '', field('ref', 16));
+	// Only clients with an after-closing review link (which carries the deal's code) can leave a review.
+	if ($ref === '') reply(403, ['ok' => false, 'error' => 'Reviews can only be left from the link we send after your closing.']);
 	if ($ref !== '') $intro = 'A client left a private review after their deal closed. It is saved in the Reviews tab and linked to the deal in Website Leads.';
 	$rows = ['Rating' => "{$stars} ({$rating} of 5)", 'Name' => $name, 'Role / company' => oneLine(field('role', 120)), 'Deal type' => oneLine(field('deal', 40)), 'Review' => $review, 'Email' => $email, 'Closed deal ref' => $ref];
 } elseif ($form === 'newsletter') {
@@ -244,5 +246,5 @@ $body .= "--{$boundary}--";
 
 $encodedSubject = '=?UTF-8?B?' . base64_encode(oneLine($subject)) . '?=';
 $sent = @mail(TO_EMAIL, $encodedSubject, $body, $headers, '-f' . $from);
-if (!$sent) reply(502, ['ok' => false, 'error' => 'We couldn’t send your message right now. Please text us or try again.']);
+if (!$sent) reply(502, ['ok' => false, 'error' => 'We couldn’t send your message right now. Please email clawpointadvisory@gmail.com or try again.']);
 reply(200, ['ok' => true]);
