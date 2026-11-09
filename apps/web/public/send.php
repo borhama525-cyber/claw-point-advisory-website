@@ -29,14 +29,14 @@ function money(string $v): string { $n = (float) preg_replace('/[^0-9.]/', '', $
  * DKIM-signed and lands in the inbox); otherwise falls back to PHP mail(). smtp-settings.php is created on
  * the server only (never in the code repository) and returns ['host', 'port', 'user', 'pass'].
  */
-function deliver(string $to, string $cc, string $subject, string $headers, string $body, string $from): bool {
+function deliver(string $to, string $cc, string $subject, string $headers, string $body, string $from, string $bcc = ''): bool {
 	$smtp = is_file(__DIR__ . '/smtp-settings.php') ? (include __DIR__ . '/smtp-settings.php') : null;
 	if (!is_array($smtp) || empty($smtp['user']) || empty($smtp['pass']) || $smtp['pass'] === 'PUT-PASSWORD-HERE') {
-		return @mail($to, $subject, $body, ($cc !== '' ? "Cc: {$cc}\r\n" : '') . $headers, '-f' . $from);
+		return @mail($to, $subject, $body, ($cc !== '' ? "Cc: {$cc}\r\n" : '') . ($bcc !== '' ? "Bcc: {$bcc}\r\n" : '') . $headers, '-f' . $from);
 	}
 	$target = str_contains($smtp['host'] ?? '', '://') ? $smtp['host'] : 'ssl://' . ($smtp['host'] ?? 'smtp.hostinger.com') . ':' . (int) ($smtp['port'] ?? 465); // a full URL (e.g. tcp://127.0.0.1:2525) is for local testing
 	$fp = @stream_socket_client($target, $errno, $errstr, 10);
-	if (!$fp) return @mail($to, $subject, $body, ($cc !== '' ? "Cc: {$cc}\r\n" : '') . $headers, '-f' . $from);
+	if (!$fp) return @mail($to, $subject, $body, ($cc !== '' ? "Cc: {$cc}\r\n" : '') . ($bcc !== '' ? "Bcc: {$bcc}\r\n" : '') . $headers, '-f' . $from);
 	stream_set_timeout($fp, 10);
 	$read = function () use ($fp): string { $out = ''; while (($line = fgets($fp, 515)) !== false) { $out .= $line; if (isset($line[3]) && $line[3] === ' ') break; } return $out; };
 	$cmd = function (string $c, array $ok) use ($fp, $read): bool { fwrite($fp, $c . "\r\n"); return in_array((int) substr($read(), 0, 3), $ok, true); };
@@ -46,6 +46,7 @@ function deliver(string $to, string $cc, string $subject, string $headers, strin
 		&& $cmd('MAIL FROM:<' . $smtp['user'] . '>', [250])
 		&& $cmd('RCPT TO:<' . $to . '>', [250, 251])
 		&& ($cc === '' || $cmd('RCPT TO:<' . $cc . '>', [250, 251]))
+		&& ($bcc === '' || $cmd('RCPT TO:<' . $bcc . '>', [250, 251])) // hidden copy: a recipient, but never in the headers
 		&& $cmd('DATA', [354]);
 	if ($ok) {
 		$msg = 'To: ' . $to . "\r\n" . ($cc !== '' ? 'Cc: ' . $cc . "\r\n" : '') . 'Subject: ' . $subject . "\r\n" . 'Date: ' . date('r') . "\r\n"
@@ -54,7 +55,7 @@ function deliver(string $to, string $cc, string $subject, string $headers, strin
 	}
 	$cmd('QUIT', [221]); fclose($fp);
 	// Wrong password or mailbox trouble: still deliver the old way rather than lose the message.
-	return $ok ?: @mail($to, $subject, $body, ($cc !== '' ? "Cc: {$cc}\r\n" : '') . $headers, '-f' . $from);
+	return $ok ?: @mail($to, $subject, $body, ($cc !== '' ? "Cc: {$cc}\r\n" : '') . ($bcc !== '' ? "Bcc: {$bcc}\r\n" : '') . $headers, '-f' . $from);
 }
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') reply(405, ['ok' => false, 'error' => 'Use POST.']);
@@ -372,6 +373,7 @@ if ($form === 'deal' || $form === 'network') {
 	$cBody = "--{$cAlt}\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . chunk_split(base64_encode($cText))
 		. "--{$cAlt}\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . chunk_split(base64_encode($cHtml))
 		. "--{$cAlt}--";
-	deliver($email, $cc, '=?UTF-8?B?' . base64_encode($cSubject) . '?=', $cHeaders, $cBody, $from);
+	// The team gets a hidden copy (Bcc) of exactly what the client and referrer received.
+	deliver($email, $cc, '=?UTF-8?B?' . base64_encode($cSubject) . '?=', $cHeaders, $cBody, $from, TO_EMAIL);
 }
 reply(200, ['ok' => true]);
