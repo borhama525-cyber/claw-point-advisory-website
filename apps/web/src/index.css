@@ -1072,4 +1072,3 @@ h1 em,h2 em{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-
 .contact-team .contact-who{display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-width:0}.contact-team .profile-link{min-height:34px!important;padding:6px 12px!important;font-size:12.5px!important}
 .contact-who-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .rv-locked{align-items:flex-start;text-align:left;gap:6px}.rv-locked svg{color:var(--leaf)}.rv-locked h3{margin:6px 0 4px}.rv-locked a{color:var(--leaf);font-weight:700;text-decoration:underline}
-.contact-title{font-size:12px!important;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--leaf)!important}

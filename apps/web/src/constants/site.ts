@@ -6,7 +6,7 @@ export const SOCIAL_LINKS: { name: string; url: string }[] = [];
 /** Calendly events the booking page embeds, one per teammate. Change them here to switch meeting types. */
 export const CALENDLY_URL = 'https://calendly.com/clawpointadvisory/schedule-with-amira';
 export const ADAM_CALENDLY_URL = 'https://calendly.com/cashclawcapital/30min';
-/** The team: names, titles, booking links and social profiles (both are founders; Amira is Managing Partner), shown in the Team chat card, footer and contact page. Only Amira's number (Google Voice) is public. */
+/** The team: names, booking links and social profiles; titles are only in the structured data (not shown on the page), shown in the Team chat card, footer and contact page. Only Amira's number (Google Voice) is public. */
 export const TEAM_EMAIL = 'clawpointadvisory@gmail.com';
 export const TEAM = [
 	{

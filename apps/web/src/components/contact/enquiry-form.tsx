@@ -37,7 +37,7 @@ export function EnquiryForm() {
 					<h2>Real people, <em>real replies.</em></h2>
 					<ul className="contact-team">{TEAM.map(p => <li key={p.name}>
 						<span className="contact-avatar" aria-hidden="true">{p.name[0]}</span>
-						<div className="contact-who"><strong>{p.fullName}</strong>{p.title && <span className="contact-title">{p.title}</span>}{p.phone && <span>{p.phone.display}</span>}<span className="contact-who-actions">{p.phone && <a className="button small" href={`sms:${p.phone.e164}`} aria-label={`Text ${p.name} at ${p.phone.display}`}><MessageSquareText size={15} /> Text</a>}<ProfileLinks person={p} labels /></span></div>
+						<div className="contact-who"><strong>{p.fullName}</strong>{p.phone && <span>{p.phone.display}</span>}<span className="contact-who-actions">{p.phone && <a className="button small" href={`sms:${p.phone.e164}`} aria-label={`Text ${p.name} at ${p.phone.display}`}><MessageSquareText size={15} /> Text</a>}<ProfileLinks person={p} labels /></span></div>
 					</li>)}</ul>
 					{TEAM.some(p => p.phone) && <p className="contact-warning"><PhoneOff size={16} /><span><strong>Please text or schedule before calling.</strong> Unscheduled calls are rejected automatically.</span></p>}
 					<div className="contact-next"><p className="eyebrow">WHAT HAPPENS NEXT</p>
