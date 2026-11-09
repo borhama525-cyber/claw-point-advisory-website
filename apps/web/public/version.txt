@@ -1,5 +1,5 @@
 Claw Point Advisory website
-Version: November 9, 2026 (UPDATE 4: confirmation emails, sent from info@clawpoint.capital)
+Version: November 9, 2026 (UPDATE 4b: emails sent through the info@ mailbox)
 
 If you can read this page, the new version is uploaded. It includes:
 - Canonical links, www redirect, real 404s, fixed sitemap, business details for Google

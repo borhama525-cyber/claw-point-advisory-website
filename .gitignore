@@ -8,3 +8,4 @@ dist/
 *.log
 .claude/
 apps/web/public/lead-sheet.php
+apps/web/public/smtp-settings.php

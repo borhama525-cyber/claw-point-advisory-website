@@ -26,7 +26,7 @@ RewriteRule ^llms\.txt$ llms.php [L]
 ErrorDocument 404 /__spa-fallback.html
 
 # Hide the helper and private settings files
-<FilesMatch "^(site-origin|lead-sheet)\.php$">
+<FilesMatch "^(site-origin|lead-sheet|smtp-settings)\.php$">
 	Require all denied
 </FilesMatch>
 
