@@ -31,7 +31,7 @@ function money(string $v): string { $n = (float) preg_replace('/[^0-9.]/', '', $
  */
 function deliver(string $to, string $cc, string $subject, string $headers, string $body, string $from): bool {
 	$smtp = is_file(__DIR__ . '/smtp-settings.php') ? (include __DIR__ . '/smtp-settings.php') : null;
-	if (!is_array($smtp) || empty($smtp['user']) || empty($smtp['pass'])) {
+	if (!is_array($smtp) || empty($smtp['user']) || empty($smtp['pass']) || $smtp['pass'] === 'PUT-PASSWORD-HERE') {
 		return @mail($to, $subject, $body, ($cc !== '' ? "Cc: {$cc}\r\n" : '') . $headers, '-f' . $from);
 	}
 	$target = str_contains($smtp['host'] ?? '', '://') ? $smtp['host'] : 'ssl://' . ($smtp['host'] ?? 'smtp.hostinger.com') . ':' . (int) ($smtp['port'] ?? 465); // a full URL (e.g. tcp://127.0.0.1:2525) is for local testing
@@ -53,7 +53,8 @@ function deliver(string $to, string $cc, string $subject, string $headers, strin
 		$ok = $cmd(preg_replace('/^\./m', '..', str_replace(["\r\n", "\r", "\n"], ["\n", "\n", "\r\n"], $msg)) . "\r\n.", [250]);
 	}
 	$cmd('QUIT', [221]); fclose($fp);
-	return $ok;
+	// Wrong password or mailbox trouble: still deliver the old way rather than lose the message.
+	return $ok ?: @mail($to, $subject, $body, ($cc !== '' ? "Cc: {$cc}\r\n" : '') . $headers, '-f' . $from);
 }
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') reply(405, ['ok' => false, 'error' => 'Use POST.']);
