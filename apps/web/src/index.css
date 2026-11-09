@@ -1072,3 +1072,19 @@ h1 em,h2 em{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-
 .contact-team .contact-who{display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-width:0}.contact-team .profile-link{min-height:34px!important;padding:6px 12px!important;font-size:12.5px!important}
 .contact-who-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .rv-locked{align-items:flex-start;text-align:left;gap:6px}.rv-locked svg{color:var(--leaf)}.rv-locked h3{margin:6px 0 4px}.rv-locked a{color:var(--leaf);font-weight:700;text-decoration:underline}
+/* Newsletter: Reach signup form in a soft card that fades in once the form loads */
+.newsletter{align-items:center}
+.newsletter-copy h2{margin-bottom:14px}
+.newsletter-copy>p:not(.eyebrow){font-size:16px;color:var(--quiet);max-width:440px;margin-bottom:22px}
+.newsletter-perks{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.newsletter-perks li{display:flex;align-items:center;gap:10px;font-size:14.5px;color:var(--ink)}
+.newsletter-perks svg{color:#fff;background:var(--leaf);border-radius:50%;padding:3px;width:20px;height:20px;flex-shrink:0}
+.newsletter-card{background:#fff;border:1px solid #d9e6e2;border-radius:18px;padding:26px 28px 14px;box-shadow:0 18px 50px -20px #13201a40;max-width:520px;width:100%;justify-self:end;transition:transform .3s ease,box-shadow .3s ease}
+.newsletter-card:hover{transform:translateY(-3px);box-shadow:0 24px 60px -22px #13201a55}
+.newsletter-card-title{display:flex;align-items:center;gap:10px;font-family:'Instrument Serif',Georgia,serif;font-size:26px;font-weight:400;margin:0 0 6px;color:var(--ink)}
+.newsletter-card-title svg{color:var(--leaf)}
+.reach-form{min-height:330px}
+.reach-form iframe{display:block;width:100%;border:0;animation:reach-fade .6s ease-out both}
+@keyframes reach-fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(max-width:767px){.newsletter-card{justify-self:stretch;padding:22px 18px 10px}.reach-form{min-height:360px}}
+@media(prefers-reduced-motion:reduce){.reach-form iframe{animation:none}.newsletter-card,.newsletter-card:hover{transition:none;transform:none}}
