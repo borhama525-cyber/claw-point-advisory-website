@@ -351,7 +351,7 @@ if ($form === 'deal' || $form === 'network' || $form === 'newsletter') {
 		. '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #d9e6e2">'
 		// Header: the animated logo for the newsletter and network welcomes, otherwise logo + wordmark on brand green
 		. ($form !== 'deal'
-			? '<tr><td style="background:#e3eeec;padding:0;line-height:0"><img src="' . esc($site) . '/email-header.gif" width="600" alt="Claw Point Advisory" style="display:block;width:100%;max-width:600px;height:auto;border:0"></td></tr>'
+			? '<tr><td style="background:#e3eeec;padding:0;line-height:0"><img src="' . esc($site) . '/email-header-eyes.gif" width="600" alt="Claw Point Advisory" style="display:block;width:100%;max-width:600px;height:auto;border:0"></td></tr>'
 			: '<tr><td style="background:#163327;padding:22px 28px"><table role="presentation" cellpadding="0" cellspacing="0"><tr>'
 			. '<td style="vertical-align:middle"><img src="' . esc($site) . '/icon-192.png" width="44" height="44" alt="Claw Point" style="display:block;border:0;border-radius:10px"></td>'
 			. '<td style="vertical-align:middle;padding-left:12px;' . $font . ';color:#ffffff"><div style="font-size:20px;font-weight:bold;letter-spacing:-.3px;line-height:1.1">Claw Point</div>'
@@ -379,7 +379,7 @@ if ($form === 'deal' || $form === 'network' || $form === 'newsletter') {
 		. '</tr></table></td></tr>'
 		// Sign-off
 		. '<tr><td style="padding:22px 28px 28px;' . $font . ';color:#13201a;font-size:15px;line-height:1.6">'
-		. ($form !== 'deal' ? 'Talk soon,<br><strong>Amira &amp; Adam</strong><br><span style="font-size:13px;color:#55665f">Founders &amp; Managing Partners, Claw Point Advisory</span>' : 'Questions? Just reply to this email.<br><br><strong>The Claw Point Advisory team</strong>')
+		. ($form !== 'deal' ? 'Talk soon,<br><strong>Amira &amp; Adam</strong><br><span style="font-size:13px;color:#55665f">Claw Point Advisory</span>' : 'Questions? Just reply to this email.<br><br><strong>The Claw Point Advisory team</strong>')
 		. '</td></tr>'
 		// Footer
 		. '<tr><td style="background:#f6faf8;border-top:1px solid #e3ece9;padding:18px 28px;' . $font . ';font-size:12px;line-height:1.6;color:#55665f">'
@@ -391,7 +391,7 @@ if ($form === 'deal' || $form === 'network' || $form === 'newsletter') {
 	$cText = $cTitle . "\n\n" . $hi . "\n\n" . implode("\n\n", $cParas)
 		. ($cRows ? "\n\n" . implode("\n", array_map(fn($k, $v) => "{$k}: {$v}", array_keys($cRows), $cRows)) : '')
 		. ($form !== 'deal'
-			? "\n\nSend us your deal: {$site}/funding/\nBook a call: {$site}/booking/\n\nTalk soon,\nAmira & Adam\nFounders & Managing Partners, Claw Point Advisory\n{$site}\n\nNot for you? Reply \"unsubscribe\" and we'll take you off the list."
+			? "\n\nSend us your deal: {$site}/funding/\nBook a call: {$site}/booking/\n\nTalk soon,\nAmira & Adam\nClaw Point Advisory\n{$site}\n\nNot for you? Reply \"unsubscribe\" and we'll take you off the list."
 			: "\n\nQuestions? Just reply to this email, or book a call: {$site}/booking/\n\nThe Claw Point Advisory team\n{$site}");
 	$cAlt = 'alt_' . bin2hex(random_bytes(12));
 	$cHeaders = implode("\r\n", array_filter([
