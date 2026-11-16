@@ -269,6 +269,31 @@ if (is_array($sheet) && !empty($sheet['url']) && function_exists('curl_init')) {
 	}
 }
 
+// Hand the lead to the Claw CRM when crm-settings.php is set up on the server (returns ['url' => 'https://…', 'key' => '…']).
+// Reviews stay private and are not sent. The CRM creates a funding request only for deal forms; everyone else
+// becomes a network contact flagged "needs a reply". A CRM outage never fails the submission.
+$crm = is_file(__DIR__ . '/crm-settings.php') ? (include __DIR__ . '/crm-settings.php') : null;
+if (is_array($crm) && !empty($crm['url']) && !empty($crm['key']) && $form !== 'review' && function_exists('curl_init')) {
+	$num = fn(string $k) => (string) ((float) preg_replace('/[^0-9.]/', '', field($k)) ?: '');
+	$extra = array_filter(['Role' => $rows['Role'] ?? '', 'Markets' => $rows['Markets'] ?? '', 'Assets' => $rows['Asset types'] ?? '', 'Website' => $rows['Website'] ?? '',
+		'Social' => $rows['LinkedIn / Instagram'] ?? '', 'Title' => $rows['Title company'] ?? '', 'Escrow' => $rows['Escrow agent'] ?? '', 'Role on PSA' => $rows['Role on PSA'] ?? '',
+		'Inspection' => $rows['Inspection period'] ?? '', 'Close date' => $rows['Target close date'] ?? '', 'Purchase price' => $form === 'deal' ? money(field('purchase_price')) : '',
+		'Referred by' => trim(($rows['Referred by'] ?? '') . ' ' . ($rows['Referrer email'] ?? ''))], fn($v) => trim((string) $v) !== '');
+	$payload = [
+		'name' => $rows['Borrower'] ?? $rows['Name'] ?? explode('@', $email)[0], 'email' => $email, 'phone' => $rows['Phone'] ?? '', 'company' => $rows['Company'] ?? '',
+		'source' => ['deal' => 'Website · Deal request', 'enquiry' => 'Website · Contact form', 'network' => 'Website · Network', 'newsletter' => 'Website · Newsletter'][$form] ?? 'Website',
+		'fundingType' => $form === 'deal' ? ($rows['Deal type'] ?? 'Funding') : '',
+		'amount' => $form === 'deal' ? $num('requested_funding') : '', 'property' => $form === 'deal' ? ($rows['Property'] ?? '') : '',
+		'subject' => oneLine($subject), 'foundIn' => 'Website form', 'date' => date('Y-m-d'),
+		'message' => trim(implode("\n", array_merge([$rows['Description'] ?? $rows['Message'] ?? $rows['How they want to work with us'] ?? ($form === 'newsletter' ? 'Newsletter sign-up' : '')],
+			array_map(fn($k, $v) => "{$k}: {$v}", array_keys($extra), $extra)))),
+	];
+	$ch = curl_init(rtrim($crm['url'], '/') . '/api/intake');
+	curl_setopt_array($ch, [CURLOPT_POST => true, CURLOPT_POSTFIELDS => json_encode($payload), CURLOPT_RETURNTRANSFER => true, CURLOPT_FOLLOWLOCATION => false,
+		CURLOPT_HTTPHEADER => ['Content-Type: application/json', 'x-intake-key: ' . $crm['key']], CURLOPT_CONNECTTIMEOUT => 4, CURLOPT_TIMEOUT => 8]);
+	curl_exec($ch); curl_close($ch);
+}
+
 $html = '<div style="font-family:Arial,sans-serif;color:#141a17;max-width:620px"><p style="font-size:15px">' . esc($intro) . '</p><table style="border-collapse:collapse;width:100%;font-size:14px">';
 foreach ($rows as $k => $v) {
 	$cell = ($k === 'Email' || $k === 'Referrer email') ? '<a href="mailto:' . esc($v) . '">' . esc($v) . '</a>' : nl2br(esc($v));

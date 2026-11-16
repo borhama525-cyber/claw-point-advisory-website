@@ -9,3 +9,4 @@ dist/
 .claude/
 apps/web/public/lead-sheet.php
 apps/web/public/smtp-settings.php
+apps/web/public/crm-settings.php
