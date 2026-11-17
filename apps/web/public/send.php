@@ -272,8 +272,13 @@ if (is_array($sheet) && !empty($sheet['url']) && function_exists('curl_init')) {
 // Hand the lead to the Claw CRM when crm-settings.php is set up on the server (returns ['url' => 'https://…', 'key' => '…']).
 // Reviews stay private and are not sent. The CRM creates a funding request only for deal forms; everyone else
 // becomes a network contact flagged "needs a reply". A CRM outage never fails the submission.
+// Without crm-settings.php (or with a placeholder key) the lead is handed over by "claim": it is written to a one-time file
+// in /crm-outbox/, the CRM is told the link, fetches it from this domain (which proves it came from us) and the file is deleted.
 $crm = is_file(__DIR__ . '/crm-settings.php') ? (include __DIR__ . '/crm-settings.php') : null;
-if (is_array($crm) && !empty($crm['url']) && !empty($crm['key']) && $form !== 'review' && function_exists('curl_init')) {
+if (!is_array($crm)) $crm = [];
+if (empty($crm['url'])) $crm['url'] = 'https://claw-crm.netlify.app';
+if (!empty($crm['key']) && preg_match('/^(PUT-|PASTE-)/', $crm['key'])) $crm['key'] = '';
+if (!empty($crm['url']) && $form !== 'review' && function_exists('curl_init')) {
 	$num = fn(string $k) => (string) ((float) preg_replace('/[^0-9.]/', '', field($k)) ?: '');
 	$extra = array_filter(['Role' => $rows['Role'] ?? '', 'Markets' => $rows['Markets'] ?? '', 'Assets' => $rows['Asset types'] ?? '', 'Website' => $rows['Website'] ?? '',
 		'Social' => $rows['LinkedIn / Instagram'] ?? '', 'Title' => $rows['Title company'] ?? '', 'Escrow' => $rows['Escrow agent'] ?? '', 'Role on PSA' => $rows['Role on PSA'] ?? '',
@@ -289,9 +294,24 @@ if (is_array($crm) && !empty($crm['url']) && !empty($crm['key']) && $form !== 'r
 			array_map(fn($k, $v) => "{$k}: {$v}", array_keys($extra), $extra)))),
 	];
 	$ch = curl_init(rtrim($crm['url'], '/') . '/api/intake');
-	curl_setopt_array($ch, [CURLOPT_POST => true, CURLOPT_POSTFIELDS => json_encode($payload), CURLOPT_RETURNTRANSFER => true, CURLOPT_FOLLOWLOCATION => false,
-		CURLOPT_HTTPHEADER => ['Content-Type: application/json', 'x-intake-key: ' . $crm['key']], CURLOPT_CONNECTTIMEOUT => 4, CURLOPT_TIMEOUT => 8]);
+	$claimFile = null;
+	if (!empty($crm['key'])) {
+		$body = json_encode($payload); $hdr = ['Content-Type: application/json', 'x-intake-key: ' . $crm['key']];
+	} else {
+		$outDir = __DIR__ . '/crm-outbox';
+		if (!is_dir($outDir)) { @mkdir($outDir, 0755); @file_put_contents($outDir . '/index.html', ''); }
+		$nonce = bin2hex(random_bytes(24));
+		$claimFile = $outDir . '/' . $nonce . '.json';
+		@file_put_contents($claimFile, json_encode($payload));
+		$site = 'https://' . (preg_replace('/[^A-Za-z0-9.-]/', '', $_SERVER['HTTP_HOST'] ?? '') ?: 'clawpoint.capital');
+		$body = json_encode(['claim' => $site . '/crm-outbox/' . $nonce . '.json']); $hdr = ['Content-Type: application/json'];
+	}
+	curl_setopt_array($ch, [CURLOPT_POST => true, CURLOPT_POSTFIELDS => $body, CURLOPT_RETURNTRANSFER => true, CURLOPT_FOLLOWLOCATION => false,
+		CURLOPT_HTTPHEADER => $hdr, CURLOPT_CONNECTTIMEOUT => 4, CURLOPT_TIMEOUT => 10]);
 	curl_exec($ch); curl_close($ch);
+	if ($claimFile) @unlink($claimFile); // the CRM has read it (or never will); nothing stays on disk
+	// Sweep anything older than 10 minutes in case a request died mid-way.
+	if (!empty($outDir) && is_dir($outDir)) foreach (glob($outDir . '/*.json') ?: [] as $old) if (filemtime($old) < time() - 600) @unlink($old);
 }
 
 $html = '<div style="font-family:Arial,sans-serif;color:#141a17;max-width:620px"><p style="font-size:15px">' . esc($intro) . '</p><table style="border-collapse:collapse;width:100%;font-size:14px">';
